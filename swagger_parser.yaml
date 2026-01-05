@@ -1,0 +1,27 @@
+swagger_parser:
+  squash_clients: true
+  output_directory: lib/
+  language: dart
+  json_serializer: dart_mappable
+  default_content_type: "application/json"
+  extras_parameter_by_default: false
+  dio_options_parameter_by_default: false
+  root_client: true
+  root_client_name: MTNMomoClient
+  export_file: true
+  # put_in_folder: false
+  # put_clients_in_folder: false
+  merge_clients: true
+  client_postfix: null
+  path_method_name: false
+  enums_to_json: false
+  enums_parent_prefix: true
+  unknown_enum_value: true
+  mark_files_as_generated: true
+  original_http_response: false
+  schemes:
+    - schema_path: schemes/collection.json
+      name: Collection
+
+    - schema_path: schemes/sandbox-provisioning-api.json
+      name: SandboxProvisioning  

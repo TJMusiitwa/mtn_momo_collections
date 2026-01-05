@@ -1,0 +1,249 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Sandbox User Provisioning",
+        "version": "1.0",
+        "description": "Sandbox User Provisioning "
+    },
+    "host": "sandbox.momodeveloper.mtn.com",
+    "schemes": [
+        "https"
+    ],
+    "securityDefinitions": {
+        "apiKeyHeader": {
+            "type": "apiKey",
+            "name": "Ocp-Apim-Subscription-Key",
+            "in": "header"
+        },
+        "apiKeyQuery": {
+            "type": "apiKey",
+            "name": "subscription-key",
+            "in": "query"
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ],
+    "paths": {
+        "/v1_0/apiuser": {
+            "post": {
+                "description": "Used to create an API user in the sandbox target environment.",
+                "operationId": "post-v1_0-apiuser",
+                "summary": "/apiuser - POST",
+                "parameters": [
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "header",
+                        "description": "Format - UUID. Recource ID for the API user to be created. UUID version 4 is required.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "apiUser",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/ApiUser"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "ReferenceId already in use"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "409": {
+                        "description": "Conflict, duplicated reference id",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "ReferenceId already in use": {
+                                "code": "RESOURCE_ALREADY_EXIST",
+                                "message": "Duplicated reference id. Creation of resource failed."
+                            },
+                            "application/json": {
+                                "code": "RESOURCE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error. Check log for information."
+                    }
+                }
+            }
+        },
+        "/v1_0/apiuser/{X-Reference-Id}/apikey": {
+            "post": {
+                "description": "Used to create an API key for an API user in the sandbox target environment.",
+                "operationId": "post-v1_0-apiuser-apikey",
+                "summary": "/v1_0/apiuser/{X-Reference-Id}/apikey - POST",
+                "parameters": [
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "path",
+                        "description": "Format - UUID. Recource ID for the API user to be created. UUID version 4 is required.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "Requested resource was not found"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ApiUserKeyResult"
+                        },
+                        "examples": {
+                            "application/json": "{\r\n  \"apiKey\": \"string\"\r\n}"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "404": {
+                        "description": "Not found, reference id not found or closed in sandbox",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Requested resource was not found": "{\r\n  \"code\": \"RESOURCE_NOT_FOUND\",\r\n  \"message\": \"Requested resource was not found.\"\r\n}",
+                            "application/json": "{\r\n  \"code\": \"RESOURCE_NOT_FOUND\",\r\n  \"message\": \"string\"\r\n}"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error. Check log for information."
+                    }
+                }
+            }
+        },
+        "/v1_0/apiuser/{X-Reference-Id}": {
+            "get": {
+                "description": "Used to get API user information.",
+                "operationId": "get-v1_0-apiuser",
+                "summary": "/v1_0/apiuser/{X-Reference-Id} - GET",
+                "parameters": [
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "path",
+                        "description": "Format - UUID. Recource ID for the API user to be created. UUID version 4 is required.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "Requested resource was not found"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "404": {
+                        "description": "Not found, reference id not found or closed in sandbox",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Requested resource was not found": "{\r\n  \"code\": \"RESOURCE_NOT_FOUND\",\r\n  \"message\": \"Requested resource was not found.\"\r\n}"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error. Check log for information."
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ApiUser": {
+            "type": "object",
+            "description": "The create API user information",
+            "properties": {
+                "providerCallbackHost": {
+                    "type": "string",
+                    "description": "The provider callback host"
+                }
+            },
+            "example": "{\r\n       providerCallbackHost: \"string\"\r\n}"
+        },
+        "ApiUserResult": {
+            "type": "object",
+            "description": "The API user information",
+            "properties": {
+                "providerCallbackHost": {
+                    "type": "string",
+                    "description": "The provider callback host"
+                },
+                "paymentServerUrl": {
+                    "$ref": "#/definitions/PaymentServerUrl"
+                },
+                "targetEnvironment": {
+                    "$ref": "#/definitions/TargetEnvironment"
+                }
+            }
+        },
+        "ApiUserKeyResult": {
+            "type": "object",
+            "properties": {
+                "apiKey": {
+                    "type": "string",
+                    "description": "The created API user key"
+                }
+            }
+        },
+        "PaymentServerUrl": {
+            "type": "object",
+            "properties": {
+                "apiKey": {
+                    "type": "string",
+                    "description": "The payment server URL"
+                }
+            }
+        },
+        "TargetEnvironment": {
+            "type": "object",
+            "properties": {
+                "apiKey": {
+                    "type": "string",
+                    "description": "The target environment"
+                }
+            }
+        },
+        "ErrorReason": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "enum": [
+                        "RESOURCE_NOT_FOUND",
+                        "RESOURCE_ALREADY_EXIST"
+                    ]
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "tags": []
+}

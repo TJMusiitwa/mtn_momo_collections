@@ -1,0 +1,6 @@
+{
+    "files.exclude": {
+        "**/lib/models/*.mapper.dart": true,
+        "**/lib/client/*.g.dart": true,
+    }
+}
