@@ -14,7 +14,7 @@ import 'package:uuid/uuid.dart';
 /// To run this example, you need to provide your Ocp-Apim-Subscription-Key.
 Future<void> main() async {
   // --- Configuration ---
-  // Replace with your actual subscription key
+  // Replace with your actual subscription key (this subscription key is an example and will not work)
   const subscriptionKey = '336fc06958ad400c9be4e1944fb9fe33';
   final xReferenceId = const Uuid().v4();
   const baseUrl = 'https://sandbox.momodeveloper.mtn.com';
