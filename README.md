@@ -181,10 +181,10 @@ try {
 final referenceUuid = 'a9b8c7d6-e5f4-3a2b-1c0d-9e8f7a6b5c4d'; // Unique UUID v4
 final requestToPayBody = RequestToPay(
   amount: '5000',
-  currency: 'UGX',
+  currency: 'EUR',
   externalId: 'PAY_INV_88764',
-  payer: Payer(
-    partyIdType: 'MSISDN',
+  payer: const Party(
+    partyIdType: PartyPartyIdType.msisdn,
     partyId: '256772123456',
   ),
   payerMessage: 'Premium Subscription Renewal',
@@ -222,10 +222,10 @@ Safely pay out money from your merchant account directly into a recipient's mobi
 final transferUuid = 'f8e7d6c5-b4a3-2b1a-0f9e-8d7c6b5a4f3e'; // Unique UUID v4
 final transferBody = Transfer(
   amount: '12000',
-  currency: 'UGX',
+  currency: 'EUR',
   externalId: 'DISB_SAL_4431',
-  payee: Payee(
-    partyIdType: 'MSISDN',
+  payee: const Party(
+    partyIdType: PartyPartyIdType.msisdn,
     partyId: '256772987654',
   ),
   payerMessage: 'Monthly Salary Disbursement',
@@ -233,8 +233,7 @@ final transferBody = Transfer(
 );
 
 try {
-  final disbursementsClient = DisbursementsClient(dioClient);
-  await disbursementsClient.transfer(
+  await momo.disbursements.transfer(
     xReferenceId: transferUuid,
     transfer: transferBody,
   );
@@ -245,7 +244,7 @@ try {
 
 // 2. Fetch disbursement transfer status
 try {
-  final status = await disbursementsClient.getTransferStatus(
+  final status = await momo.disbursements.getTransferStatus(
     referenceId: transferUuid,
   );
   print('Disbursement Status: ${status.status}');
@@ -253,6 +252,21 @@ try {
   print('Disbursement check failed: $e');
 }
 ```
+
+---
+
+## 📂 Standalone Modular Examples Suite
+
+We have created individual standalone example files for each core integration scenario in the [example/](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/) directory. You can run them directly from the CLI to quickly test your integration:
+
+*   [sandbox_provisioning_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/sandbox_provisioning_example.dart) — Provision Sandbox API User and generate API key.
+*   [collections_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/collections_example.dart) — Initiate payment, poll transaction status, check collections balance.
+*   [disbursements_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/disbursements_example.dart) — Check recipient status, trigger transfer, check disbursements balance.
+*   [resilient_error_handling_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/resilient_error_handling_example.dart) — Handle specific exceptions and map transaction failure error codes.
+*   [thread_safety_deduplication_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/thread_safety_deduplication_example.dart) — Parallel asynchronous request safety and token deduplication.
+
+See the [example/README.md](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/README.md) for detailed configuration and execution commands.
+
 
 ---
 
