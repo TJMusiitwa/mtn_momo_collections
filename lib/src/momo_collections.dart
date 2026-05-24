@@ -49,6 +49,7 @@ class MomoCollections {
   CollectionClient get collection => _collectionClient;
   DisbursementsClient get disbursements => _disbursementsClient;
   SandboxProvisioningClient get sandbox => _sandboxProvisioningClient;
+  Dio get dio => _dio;
 
   Future<String?>? _tokenFetchFuture;
 
