@@ -1,0 +1,2074 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Disbursements",
+        "version": "1.0",
+        "description": "Automatically deposit funds to multiple users"
+    },
+    "host": "sandbox.momodeveloper.mtn.com",
+    "basePath": "/disbursement",
+    "schemes": [
+        "https"
+    ],
+    "securityDefinitions": {
+        "apiKeyHeader": {
+            "type": "apiKey",
+            "name": "Ocp-Apim-Subscription-Key",
+            "in": "header"
+        },
+        "apiKeyQuery": {
+            "type": "apiKey",
+            "name": "subscription-key",
+            "in": "query"
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ],
+    "paths": {
+        "/v1_0/account/balance": {
+            "get": {
+                "description": "Get the balance of own account.",
+                "operationId": "GetAccountBalance",
+                "summary": "GetAccountBalance",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "Incorrect target environment"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "schema": {
+                            "$ref": "#/definitions/Balance"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "availableBalance": "string",
+                                "currency": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "500": {
+                        "description": "Internal error. The returned response contains details.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect target environment": {
+                                "code": "NOT_ALLOWED_TARGET_ENVIRONMENT",
+                                "message": "Access to target environment is forbidden."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/active": {
+            "get": {
+                "description": "Operation is used  to check if an account holder is registered and active in the system.",
+                "operationId": "ValidateAccountHolderStatus",
+                "summary": "ValidateAccountHolderStatus",
+                "parameters": [
+                    {
+                        "name": "accountHolderId",
+                        "in": "path",
+                        "description": "The AccountHolder number. Validated according to the AccountHolderID type. <br> MSISDN - Mobile Number validated according to ITU-T E.164. Validated with IsMSISDN<br> EMAIL - Validated to be a valid e-mail format. Validated with IsEmail",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "accountHolderIdType",
+                        "in": "path",
+                        "description": "Specifies the type of the AccountHolderID. Allowed values [msisdn, email]",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "Incorrect target environment"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok. True if account holder is registered and active, false if the account holder is not active or not found found"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "500": {
+                        "description": "Internal error. The returned response contains details.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect target environment": {
+                                "code": "NOT_ALLOWED_TARGET_ENVIRONMENT",
+                                "message": "Access to target environment is forbidden."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/transfer/{referenceId}": {
+            "get": {
+                "description": "This operation is used to get the status of a transfer. X-Reference-Id that was passed in the post is used as reference to the request.",
+                "operationId": "GetTransferStatus",
+                "summary": "GetTransferStatus",
+                "parameters": [
+                    {
+                        "name": "referenceId",
+                        "in": "path",
+                        "description": "UUID of transaction to get result. Reference id  used when creating the Transfer.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "Successful transfer",
+                    "Payer limit breached",
+                    "API user insufficient balance",
+                    "application/json",
+                    "Transfer not found",
+                    "Unspecified internal error"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. Note that a failed transfer will be returned with this status too. The 'status' of the TransferResult can be used to determine the outcome of the request. The 'reason' field can be used to retrieve a cause in case of failure.",
+                        "schema": {
+                            "$ref": "#/definitions/TransferResult"
+                        },
+                        "examples": {
+                            "Successful transfer": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "financialTransactionId": 363440463,
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "SUCCESSFUL"
+                            },
+                            "Payer limit breached": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "FAILED",
+                                "reason": {
+                                    "code": "PAYER_LIMIT_REACHED",
+                                    "message": "The payer's limit has been breached."
+                                }
+                            },
+                            "API user insufficient balance": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "FAILED",
+                                "reason": {
+                                    "code": "NOT_ENOUGH_FUNDS",
+                                    "message": "The payer does not have enough funds."
+                                }
+                            },
+                            "application/json": {
+                                "amount": "string",
+                                "currency": "string",
+                                "financialTransactionId": "string",
+                                "externalId": "string",
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": "string"
+                                },
+                                "payerMessage": "string",
+                                "payeeNote": "string",
+                                "status": "PENDING",
+                                "reason": {
+                                    "code": "PAYEE_NOT_FOUND",
+                                    "message": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. an incorrectly formatted reference id was provided."
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Transfer not found": {
+                                "code": "RESOURCE_NOT_FOUND",
+                                "message": "Requested resource was not found."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error. Note that if the retreieved transfer has failed, it will not cause this status to be returned. This status is only returned if the GET request itself fails.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Unspecified internal error": {
+                                "code": "INTERNAL_PROCESSING_ERROR",
+                                "message": "An internal error occurred while processing."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo": {
+            "get": {
+                "description": "This operation returns personal information of the account holder. The operation does not need any consent by the account holder.",
+                "operationId": "GetBasicUserinfo",
+                "summary": "GetBasicUserinfo",
+                "parameters": [
+                    {
+                        "name": "accountHolderIdType",
+                        "in": "path",
+                        "description": "Type of account holder identity passed in accountHolderId path param.Possible values:MSISDN Email AliasID (account ID)",
+                        "required": true,
+                        "type": "string",
+                        "default": "MSISDN",
+                        "enum": [
+                            "MSISDN",
+                            "email",
+                            "alias",
+                            "id"
+                        ]
+                    },
+                    {
+                        "name": "accountHolderId",
+                        "in": "path",
+                        "description": "string",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/BasicUserInfoJsonResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "given_name": "string",
+                                "family_name": "string",
+                                "birthdate": "string",
+                                "locale": "string",
+                                "gender": "string",
+                                "status": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/TokenPost401ApplicationJsonResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "error": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error"
+                    }
+                }
+            }
+        },
+        "/v1_0/bc-authorize": {
+            "post": {
+                "description": "This operation is used to claim a consent by the account holder for the requested scopes.",
+                "operationId": "bc-authorize",
+                "summary": "bc-authorize",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Basic authentication header containing API user ID and API key. Should be sent in as B64 encoded.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Callback-Url",
+                        "in": "header",
+                        "description": "URL to the server where the callback should be sent.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "scope",
+                        "in": "formData",
+                        "type": "string"
+                    },
+                    {
+                        "name": "login_hint",
+                        "in": "formData",
+                        "type": "string"
+                    },
+                    {
+                        "name": "access_type",
+                        "in": "formData",
+                        "type": "string",
+                        "enum": [
+                            "online",
+                            "offline"
+                        ]
+                    },
+                    {
+                        "name": "consent_valid_in",
+                        "in": "formData",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "client_notification_token",
+                        "in": "formData",
+                        "type": "string"
+                    },
+                    {
+                        "name": "scope_instruction",
+                        "in": "formData",
+                        "type": "string"
+                    }
+                ],
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/bcauthorizeResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "auth_req_id": "string",
+                                "interval": 0,
+                                "expires_in": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/account/balance/{currency}": {
+            "get": {
+                "description": "Get the balance of own account. Currency parameter passed in GET",
+                "operationId": "GetAccountBalanceInSpecificCurrency",
+                "summary": "GetAccountBalanceInSpecificCurrency",
+                "parameters": [
+                    {
+                        "name": "currency",
+                        "in": "path",
+                        "description": "Should be in ISO4217 Currency",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "Incorrect target environment"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "schema": {
+                            "$ref": "#/definitions/Balance"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "availableBalance": "string",
+                                "currency": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "500": {
+                        "description": "Internal error. The returned response contains details.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect target environment": {
+                                "code": "NOT_ALLOWED_TARGET_ENVIRONMENT",
+                                "message": "Access to target environment is forbidden."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/deposit": {
+            "post": {
+                "description": "deposit operation is used to deposit an amount from the owner’s account to a payee account.<br> Status of the transaction can be validated by using the GET /deposit/\\{referenceId\\}",
+                "operationId": "Deposit-V1",
+                "summary": "Deposit-V1",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Callback-Url",
+                        "in": "header",
+                        "description": "(POST Method)URL to the server where the callback should be sent.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "header",
+                        "description": "Format - UUID. Recource ID of the created ‘request-to-pay’ transaction. This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "transfer",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Transfer"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "ReferenceId already in use",
+                    "Incorrect currency for target environment"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "409": {
+                        "description": "Conflict, duplicated reference id",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "ReferenceId already in use": {
+                                "code": "RESOURCE_ALREADY_EXIST",
+                                "message": "Duplicated reference id. Creation of resource failed."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect currency for target environment": {
+                                "code": "INVALID_CURRENCY",
+                                "message": "Currency not supported."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v2_0/deposit": {
+            "post": {
+                "description": "deposit operation is used to deposit an amount from the owner’s account to a payee account.<br> Status of the transaction can be validated by using the GET /deposit/\\{referenceId\\}",
+                "operationId": "Deposit-V2",
+                "summary": "Deposit-V2",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Callback-Url",
+                        "in": "header",
+                        "description": "(PUT Method)URL to the server where the callback should be sent.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "header",
+                        "description": "Format - UUID. Recource ID of the created ‘request-to-pay’ transaction. This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "transfer",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Transfer"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "ReferenceId already in use",
+                    "Incorrect currency for target environment"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "409": {
+                        "description": "Conflict, duplicated reference id",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "ReferenceId already in use": {
+                                "code": "RESOURCE_ALREADY_EXIST",
+                                "message": "Duplicated reference id. Creation of resource failed."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect currency for target environment": {
+                                "code": "INVALID_CURRENCY",
+                                "message": "Currency not supported."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/deposit/{referenceId}": {
+            "get": {
+                "description": "This operation is used to get the status of a deposit. X-Reference-Id that was passed in the post is used as reference to the request.",
+                "operationId": "GetDepositStatus",
+                "summary": "GetDepositStatus",
+                "parameters": [
+                    {
+                        "name": "referenceId",
+                        "in": "path",
+                        "description": "UUID of transaction to get result. Reference id  used when creating the Deposit.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "Successful transfer",
+                    "Payer limit breached",
+                    "API user insufficient balance",
+                    "application/json",
+                    "Transfer not found",
+                    "Unspecified internal error"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. Note that a failed transfer will be returned with this status too. The 'status' of the TransferResult can be used to determine the outcome of the request. The 'reason' field can be used to retrieve a cause in case of failure.",
+                        "schema": {
+                            "$ref": "#/definitions/TransferResult"
+                        },
+                        "examples": {
+                            "Successful transfer": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "financialTransactionId": 363440463,
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "SUCCESSFUL"
+                            },
+                            "Payer limit breached": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "FAILED",
+                                "reason": {
+                                    "code": "PAYER_LIMIT_REACHED",
+                                    "message": "The payer's limit has been breached."
+                                }
+                            },
+                            "API user insufficient balance": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "FAILED",
+                                "reason": {
+                                    "code": "NOT_ENOUGH_FUNDS",
+                                    "message": "The payer does not have enough funds."
+                                }
+                            },
+                            "application/json": {
+                                "amount": "string",
+                                "currency": "string",
+                                "financialTransactionId": "string",
+                                "externalId": "string",
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": "string"
+                                },
+                                "payerMessage": "string",
+                                "payeeNote": "string",
+                                "status": "PENDING",
+                                "reason": {
+                                    "code": "PAYEE_NOT_FOUND",
+                                    "message": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. an incorrectly formatted reference id was provided."
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Transfer not found": {
+                                "code": "RESOURCE_NOT_FOUND",
+                                "message": "Requested resource was not found."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error. Note that if the retreieved transfer has failed, it will not cause this status to be returned. This status is only returned if the GET request itself fails.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Unspecified internal error": {
+                                "code": "INTERNAL_PROCESSING_ERROR",
+                                "message": "An internal error occurred while processing."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/refund": {
+            "post": {
+                "description": "refund operation is used to refund an amount from the owner’s account to a payee account.<br> Status of the transaction can be validated by using the GET /refund/\\{referenceId\\}",
+                "operationId": "Refund-V1",
+                "summary": "Refund-V1",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Callback-Url",
+                        "in": "header",
+                        "description": "(POST Method)URL to the server where the callback should be sent.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "header",
+                        "description": "Format - UUID.  This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "refund",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Refund"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "ReferenceId already in use",
+                    "Incorrect currency for target environment"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "409": {
+                        "description": "Conflict, duplicated reference id",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "ReferenceId already in use": {
+                                "code": "RESOURCE_ALREADY_EXIST",
+                                "message": "Duplicated reference id. Creation of resource failed."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect currency for target environment": {
+                                "code": "INVALID_CURRENCY",
+                                "message": "Currency not supported."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v2_0/refund": {
+            "post": {
+                "description": "refund operation is used to refund an amount from the owner’s account to a payee account.<br> Status of the transaction can be validated by using the GET /refund/\\{referenceId\\}",
+                "operationId": "Refund-V2",
+                "summary": "Refund-V2",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Callback-Url",
+                        "in": "header",
+                        "description": "(PUT Method)URL to the server where the callback should be sent.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "header",
+                        "description": "Format - UUID.  This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "refund",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Refund"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "ReferenceId already in use",
+                    "Incorrect currency for target environment"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "409": {
+                        "description": "Conflict, duplicated reference id",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "ReferenceId already in use": {
+                                "code": "RESOURCE_ALREADY_EXIST",
+                                "message": "Duplicated reference id. Creation of resource failed."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect currency for target environment": {
+                                "code": "INVALID_CURRENCY",
+                                "message": "Currency not supported."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1_0/refund/{referenceId}": {
+            "get": {
+                "description": "This operation is used to get the status of a refund. X-Reference-Id that was passed in the post is used as reference to the request.",
+                "operationId": "GetRefundStatus",
+                "summary": "GetRefundStatus",
+                "parameters": [
+                    {
+                        "name": "referenceId",
+                        "in": "path",
+                        "description": "UUID of transaction to get result. Reference id  used when creating the Refund.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "Successful transfer",
+                    "Payer limit breached",
+                    "API user insufficient balance",
+                    "application/json",
+                    "Transfer not found",
+                    "Unspecified internal error"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. Note that a failed transfer will be returned with this status too. The 'status' of the RefundResult can be used to determine the outcome of the request. The 'reason' field can be used to retrieve a cause in case of failure.",
+                        "schema": {
+                            "$ref": "#/definitions/RefundResult"
+                        },
+                        "examples": {
+                            "Successful transfer": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "financialTransactionId": 363440463,
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "SUCCESSFUL"
+                            },
+                            "Payer limit breached": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "FAILED",
+                                "reason": {
+                                    "code": "PAYER_LIMIT_REACHED",
+                                    "message": "The payer's limit has been breached."
+                                }
+                            },
+                            "API user insufficient balance": {
+                                "amount": 100,
+                                "currency": "UGX",
+                                "externalId": 83453,
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": 4609274685
+                                },
+                                "status": "FAILED",
+                                "reason": {
+                                    "code": "NOT_ENOUGH_FUNDS",
+                                    "message": "The payer does not have enough funds."
+                                }
+                            },
+                            "application/json": {
+                                "amount": "string",
+                                "currency": "string",
+                                "financialTransactionId": "string",
+                                "externalId": "string",
+                                "payee": {
+                                    "partyIdType": "MSISDN",
+                                    "partyId": "string"
+                                },
+                                "payerMessage": "string",
+                                "payeeNote": "string",
+                                "status": "PENDING",
+                                "reason": {
+                                    "code": "PAYEE_NOT_FOUND",
+                                    "message": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. an incorrectly formatted reference id was provided."
+                    },
+                    "404": {
+                        "description": "Resource not found.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Transfer not found": {
+                                "code": "RESOURCE_NOT_FOUND",
+                                "message": "Requested resource was not found."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error. Note that if the retreieved transfer has failed, it will not cause this status to be returned. This status is only returned if the GET request itself fails.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Unspecified internal error": {
+                                "code": "INTERNAL_PROCESSING_ERROR",
+                                "message": "An internal error occurred while processing."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth2/token/": {
+            "post": {
+                "description": "This operation is used to claim a consent by the account holder for the requested scopes.",
+                "operationId": "CreateOauth2Token",
+                "summary": "CreateOauth2Token",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Basic authentication header containing API user ID and API key. Should be sent in as B64 encoded.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "grant_type",
+                        "in": "formData",
+                        "type": "string"
+                    },
+                    {
+                        "name": "auth_req_id",
+                        "in": "formData",
+                        "type": "string"
+                    },
+                    {
+                        "name": "refresh_token",
+                        "in": "formData",
+                        "type": "string"
+                    }
+                ],
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/oauth2TokenResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "access_token": "string",
+                                "token_type": "string",
+                                "expires_in": 0,
+                                "scope": "string",
+                                "refresh_token": "string",
+                                "refresh_token_expired_in": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth2/v1_0/userinfo": {
+            "get": {
+                "description": "This operation is used to claim a consent by the account holder for the requested scopes.",
+                "operationId": "GetUserInfoWithConsent",
+                "summary": "GetUserInfoWithConsent",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Token. Replace with a valid oauth2 token received from oauth2 token endpoint in Wallet Platform.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/consentkycResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "sub": "string",
+                                "name": "string",
+                                "given_name": "string",
+                                "family_name": "string",
+                                "middle_name": "string",
+                                "email": "string",
+                                "email_verified": true,
+                                "gender": "string",
+                                "locale": "string",
+                                "phone_number": "string",
+                                "phone_number_verified": true,
+                                "address": "string",
+                                "updated_at": 0,
+                                "status": "string",
+                                "birthdate": "string",
+                                "credit_score": "string",
+                                "active": true,
+                                "country_of_birth": "string",
+                                "region_of_birth": "string",
+                                "city_of_birth": "string",
+                                "occupation": "string",
+                                "employer_name": "string",
+                                "identification_type": "string",
+                                "identification_value": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/token/": {
+            "post": {
+                "description": "This operation is used to create an access token which can then be used to authorize and authenticate towards the other end-points of the API.",
+                "operationId": "CreateAccessToken",
+                "summary": "CreateAccessToken",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Basic authentication header containing API user ID and API key. Should be sent in as B64 encoded.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TokenPost200ApplicationJsonResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "access_token": "string",
+                                "token_type": "string",
+                                "expires_in": 0
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/TokenPost401ApplicationJsonResponse"
+                        },
+                        "examples": {
+                            "application/json": {
+                                "error": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error"
+                    }
+                }
+            }
+        },
+        "/v1_0/transfer": {
+            "post": {
+                "description": "Transfer operation is used to transfer an amount from the own account to a payee account.<br> Status of the transaction can validated by using the GET /transfer/\\{referenceId\\}",
+                "operationId": "Transfer",
+                "summary": "Transfer",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Callback-Url",
+                        "in": "header",
+                        "description": "URL to the server where the callback should be sent.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Reference-Id",
+                        "in": "header",
+                        "description": "Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "X-Target-Environment",
+                        "in": "header",
+                        "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "transfer",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Transfer"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "ReferenceId already in use",
+                    "Incorrect currency for target environment"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid data was sent in the request."
+                    },
+                    "409": {
+                        "description": "Conflict, duplicated reference id",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "ReferenceId already in use": {
+                                "code": "RESOURCE_ALREADY_EXIST",
+                                "message": "Duplicated reference id. Creation of resource failed."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error.",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorReason"
+                        },
+                        "examples": {
+                            "Incorrect currency for target environment": {
+                                "code": "INVALID_CURRENCY",
+                                "message": "Currency not supported."
+                            },
+                            "application/json": {
+                                "code": "PAYEE_NOT_FOUND",
+                                "message": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "bcauthorize": {
+            "type": "object",
+            "properties": {
+                "scope": {
+                    "description": "Space separated list of scopes.",
+                    "type": "string"
+                },
+                "login_hint": {
+                    "description": "The identity of the account holder.",
+                    "type": "string"
+                },
+                "access_type": {
+                    "description": "Value either online, or offline.",
+                    "enum": [
+                        "online",
+                        "offline"
+                    ],
+                    "type": "string"
+                },
+                "consent_valid_in": {
+                    "description": "The validity time of the consent in secondsThis parameter can only be used together with access type offline.",
+                    "type": "integer"
+                },
+                "client_notification_token": {
+                    "description": "This token is required when the client is using Ping or Push mode.",
+                    "type": "string"
+                },
+                "scope_instruction": {
+                    "description": "Base64 encoded Instrcution of the financial transaction.",
+                    "type": "string"
+                }
+            }
+        },
+        "bcauthorizeResponse": {
+            "type": "object",
+            "properties": {
+                "auth_req_id": {
+                    "description": "Authentication request ID as an UUID.",
+                    "type": "string"
+                },
+                "interval": {
+                    "description": "Indicates how long time the client should wait between retries towards the endpoint /oauth2/token.",
+                    "type": "number"
+                },
+                "expires_in": {
+                    "description": "Shows when the authentication request ID expires, in seconds.",
+                    "type": "number"
+                }
+            }
+        },
+        "BasicUserInfoJsonResponse": {
+            "type": "object",
+            "properties": {
+                "given_name": {
+                    "description": "Given name(s) or first name(s) of the End-User. Note that in some cultures, people can have multiple given names; all can be present, with the names being separated by space characters.",
+                    "type": "string"
+                },
+                "family_name": {
+                    "description": "Surname(s) or last name(s) of the End-User. Note that in some cultures, people can have multiple family names or no family name; all can be present, with the names being separated by space characters.",
+                    "type": "string"
+                },
+                "birthdate": {
+                    "description": "Account holder birth date.",
+                    "type": "string"
+                },
+                "locale": {
+                    "description": "End-User's locale, represented as a  BCP47 [RFC5646] language tag. This is typically an  ISO 639-1 Alpha-2 [ISO639�|�1] language code in lowercase and an  ISO 3166-1 Alpha-2 [ISO3166�|�1] country code in uppercase, separated by a dash. For example,  en-US or  fr-CA. As a compatibility note, some implementations have used an underscore as the separator rather than a dash, for example,  en_US; Relying Parties may choose to accept this locale syntax as well.",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "End-User's gender. Values defined by this specification are female and male. Other values may be used when neither of the defined values are applicable.",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Accountholder status.",
+                    "type": "string"
+                }
+            }
+        },
+        "TokenPost200ApplicationJsonResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "A JWT token which can be used to authrize against the other API end-points. The format of the token follows the JWT standard format (see jwt.io for an example). This is the token that should be sent in in the Authorization header when calling the other API end-points.",
+                    "type": "string"
+                },
+                "token_type": {
+                    "description": "The token type.",
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "The validity time in seconds of the token.",
+                    "type": "integer"
+                }
+            }
+        },
+        "oauth2TokenRequest": {
+            "type": "object",
+            "properties": {
+                "grant_type": {
+                    "description": "Value ca be either \"urn:openid:params:grant-type:ciba\" or refresh_token",
+                    "type": "string"
+                },
+                "auth_req_id": {
+                    "description": "Authentication request ID.Value is only mandatory if grant_type is \"urn:openid:params:grant-type:ciba\"",
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "description": "UUID.Refresh token retrieved from oauth2 token endpoint for consents with grant_type offline. This parameter is only valid if grant_type is refresh_token.",
+                    "type": "string"
+                }
+            }
+        },
+        "oauth2TokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "Oauth2 JWT access token.The generated token is valid 3600 seconds as default.",
+                    "type": "string"
+                },
+                "token_type": {
+                    "description": "Value is Bearer",
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "Shows when the authentication request ID expires, in seconds.",
+                    "type": "number"
+                },
+                "scope": {
+                    "description": "List of scopes that belongs to the authentication request ID.",
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "description": "UUID of the refresh_token",
+                    "type": "string"
+                },
+                "refresh_token_expired_in": {
+                    "description": "The time in seconds until the consent can no longer be refreshed. Based on the default value for consent validity, or the value set to parameter consent_valid_in sent in the bc-authorize request.",
+                    "type": "integer"
+                }
+            }
+        },
+        "consentkycResponse": {
+            "type": "object",
+            "properties": {
+                "sub": {
+                    "description": "Subject - Identifier for the End-User at the Issuer.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "End-User's full name in displayable form including all name parts.",
+                    "type": "string"
+                },
+                "given_name": {
+                    "description": "Given name(s) or first name(s) of the End-User.",
+                    "type": "string"
+                },
+                "family_name": {
+                    "description": "Surname(s) or last name(s) of the End-User.",
+                    "type": "string"
+                },
+                "middle_name": {
+                    "description": "Middle name(s) of the End-User.",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "End-User's preferred e-mail address. Its value MUST conform to the  RFC 5322 [RFC5322] address specification syntax.",
+                    "type": "string"
+                },
+                "email_verified": {
+                    "description": "The response value is True if the End-User's e-mail address has been verified;otherwise false.",
+                    "type": "boolean"
+                },
+                "gender": {
+                    "description": "End-User's gender.",
+                    "type": "string"
+                },
+                "locale": {
+                    "description": "Preffered language.",
+                    "type": "string"
+                },
+                "phone_number": {
+                    "description": "End-User's preferred telephone number",
+                    "type": "string"
+                },
+                "phone_number_verified": {
+                    "description": "The response value is True if the End-User's phone number has been verified; otherwise false.",
+                    "type": "boolean"
+                },
+                "address": {
+                    "description": "User Address",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "The time the End-User's information was last updated.",
+                    "type": "number"
+                },
+                "status": {
+                    "description": "Account holder status.",
+                    "type": "string"
+                },
+                "birthdate": {
+                    "description": "The birth date of the account holder.",
+                    "type": "string"
+                },
+                "credit_score": {
+                    "description": "The credit score of the account holder.",
+                    "type": "string"
+                },
+                "active": {
+                    "description": "The status of the account holder.",
+                    "type": "boolean"
+                },
+                "country_of_birth": {
+                    "description": "Account holder country of birth.",
+                    "type": "string"
+                },
+                "region_of_birth": {
+                    "description": "The birth region of the account holder.",
+                    "type": "string"
+                },
+                "city_of_birth": {
+                    "description": "The city of birth for the account holder.",
+                    "type": "string"
+                },
+                "occupation": {
+                    "description": "Occupation of the account holder.",
+                    "type": "string"
+                },
+                "employer_name": {
+                    "description": "The name of the employer.",
+                    "type": "string"
+                },
+                "identification_type": {
+                    "description": "Type of identification.The first non-expired identification is always chosen.",
+                    "type": "string"
+                },
+                "identification_value": {
+                    "description": "The value of the identification.",
+                    "type": "string"
+                }
+            }
+        },
+        "address": {
+            "type": "object",
+            "properties": {
+                "formatted": {
+                    "description": "Full mailing address, formatted for display or use on a mailing label. This field may contain multiple lines, separated by newlines.",
+                    "type": "string"
+                },
+                "street_address": {
+                    "description": "Full street address component, which may include house number, street name, Post Office Box, and multi-line extended street address information.",
+                    "type": "string"
+                },
+                "locality": {
+                    "description": "City or locality component.",
+                    "type": "string"
+                },
+                "region": {
+                    "description": "State, province, prefecture, or region component.",
+                    "type": "string"
+                },
+                "postal_code": {
+                    "description": "Zip code or postal code component.",
+                    "type": "string"
+                },
+                "country": {
+                    "description": "Country name component.",
+                    "type": "string"
+                }
+            }
+        },
+        "TokenPost401ApplicationJsonResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "An error code.",
+                    "type": "string"
+                }
+            }
+        },
+        "Balance": {
+            "description": "The available balance of the account",
+            "type": "object",
+            "properties": {
+                "availableBalance": {
+                    "description": "The available balance of the account",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                }
+            }
+        },
+        "Party": {
+            "description": "Party identifies a account holder in the wallet platform. Party consists of two parameters, type and partyId. Each type have its own validation of the partyId<br> MSISDN - Mobile Number validated according to ITU-T E.164. Validated with IsMSISDN<br> EMAIL - Validated to be a valid e-mail format. Validated with IsEmail<br> PARTY_CODE - UUID of the party. Validated with IsUuid",
+            "type": "object",
+            "properties": {
+                "partyIdType": {
+                    "enum": [
+                        "MSISDN",
+                        "EMAIL",
+                        "PARTY_CODE"
+                    ],
+                    "type": "string"
+                },
+                "partyId": {
+                    "type": "string"
+                }
+            }
+        },
+        "PreApproval": {
+            "type": "object",
+            "properties": {
+                "payer": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerCurrency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "payerMessage": {
+                    "description": "The mesage that is shown to the approver.",
+                    "type": "string"
+                },
+                "validityTime": {
+                    "description": "The request validity time of the pre-approval",
+                    "type": "integer"
+                }
+            }
+        },
+        "PreApprovalResult": {
+            "type": "object",
+            "properties": {
+                "payer": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerCurrency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "payerMessage": {
+                    "description": "The mesage that is shown to the approver.",
+                    "type": "string"
+                },
+                "validityTime": {
+                    "description": "The request validity time of the pre-approval",
+                    "type": "integer"
+                },
+                "status": {
+                    "enum": [
+                        "PENDING",
+                        "SUCCESSFUL",
+                        "FAILED"
+                    ],
+                    "type": "string"
+                },
+                "reason": {
+                    "$ref": "#/definitions/ErrorReason"
+                }
+            }
+        },
+        "RequestToPay": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount that will be debited from the payer account.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "externalId": {
+                    "description": "External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.",
+                    "type": "string"
+                },
+                "payer": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerMessage": {
+                    "description": "Message that will be written in the payer transaction history message field.",
+                    "type": "string"
+                },
+                "payeeNote": {
+                    "description": "Message that will be written in the payee transaction history note field.",
+                    "type": "string"
+                }
+            }
+        },
+        "RequestToPayResult": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount that will be debited from the payer account.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "financialTransactionId": {
+                    "description": "Financial transactionIdd from mobile money manager.<br> Used to connect to the specific financial transaction made in the account",
+                    "type": "string"
+                },
+                "externalId": {
+                    "description": "External id provided in the creation of the requestToPay transaction.",
+                    "type": "string"
+                },
+                "payer": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerMessage": {
+                    "description": "Message that will be written in the payer transaction history message field.",
+                    "type": "string"
+                },
+                "payeeNote": {
+                    "description": "Message that will be written in the payee transaction history note field.",
+                    "type": "string"
+                },
+                "status": {
+                    "enum": [
+                        "PENDING",
+                        "SUCCESSFUL",
+                        "FAILED"
+                    ],
+                    "type": "string"
+                },
+                "reason": {
+                    "$ref": "#/definitions/ErrorReason"
+                }
+            }
+        },
+        "Transfer": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount that will be debited from the payer account.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "externalId": {
+                    "description": "External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.",
+                    "type": "string"
+                },
+                "payee": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerMessage": {
+                    "description": "Message that will be written in the payer transaction history message field.",
+                    "type": "string"
+                },
+                "payeeNote": {
+                    "description": "Message that will be written in the payee transaction history note field.",
+                    "type": "string"
+                }
+            },
+            "example": {
+                "amount": "string",
+                "currency": "string",
+                "externalId": "string",
+                "payee": {
+                    "partyIdType": "MSISDN",
+                    "partyId": "string"
+                },
+                "payerMessage": "string",
+                "payeeNote": "string"
+            }
+        },
+        "TransferResult": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount that will be debited from the payer account.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "financialTransactionId": {
+                    "description": "Financial transactionIdd from mobile money manager.<br> Used to connect to the specific financial transaction made in the account",
+                    "type": "string"
+                },
+                "externalId": {
+                    "description": "External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.",
+                    "type": "string"
+                },
+                "payee": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerMessage": {
+                    "description": "Message that will be written in the payer transaction history message field.",
+                    "type": "string"
+                },
+                "payeeNote": {
+                    "description": "Message that will be written in the payee transaction history note field.",
+                    "type": "string"
+                },
+                "status": {
+                    "enum": [
+                        "PENDING",
+                        "SUCCESSFUL",
+                        "FAILED"
+                    ],
+                    "type": "string"
+                },
+                "reason": {
+                    "$ref": "#/definitions/ErrorReason"
+                }
+            }
+        },
+        "deliverynotification": {
+            "type": "object",
+            "properties": {
+                "notificationMessage": {
+                    "type": "string"
+                }
+            }
+        },
+        "Refund": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount that will be debited from the payer account.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "externalId": {
+                    "description": "External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.",
+                    "type": "string"
+                },
+                "payerMessage": {
+                    "description": "Message that will be written in the payer transaction history message field.",
+                    "type": "string"
+                },
+                "payeeNote": {
+                    "description": "Message that will be written in the payee transaction history note field.",
+                    "type": "string"
+                },
+                "referenceIdToRefund": {
+                    "description": "Format - UUID. Recource ID of the created refund transaction. This ID is used, for example, validating the status of the‘ ’transaction generated using UUID version 4.",
+                    "type": "string"
+                }
+            },
+            "example": {
+                "amount": "string",
+                "currency": "string",
+                "externalId": "string",
+                "payerMessage": "string",
+                "payeeNote": "string",
+                "referenceIdToRefund": "UUID-REQUEST-TO-PAY"
+            }
+        },
+        "RefundResult": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount that will be debited from the payer account.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "ISO4217 Currency",
+                    "type": "string"
+                },
+                "financialTransactionId": {
+                    "description": "Financial transactionIdd from mobile money manager.<br> Used to connect to the specific financial transaction made in the account",
+                    "type": "string"
+                },
+                "externalId": {
+                    "description": "External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.",
+                    "type": "string"
+                },
+                "payee": {
+                    "$ref": "#/definitions/Party"
+                },
+                "payerMessage": {
+                    "description": "Message that will be written in the payer transaction history message field.",
+                    "type": "string"
+                },
+                "payeeNote": {
+                    "description": "Message that will be written in the payee transaction history note field.",
+                    "type": "string"
+                },
+                "status": {
+                    "enum": [
+                        "PENDING",
+                        "SUCCESSFUL",
+                        "FAILED"
+                    ],
+                    "type": "string"
+                },
+                "reason": {
+                    "$ref": "#/definitions/ErrorReason"
+                }
+            }
+        },
+        "ErrorReason": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "enum": [
+                        "PAYEE_NOT_FOUND",
+                        "PAYER_NOT_FOUND",
+                        "NOT_ALLOWED",
+                        "NOT_ALLOWED_TARGET_ENVIRONMENT",
+                        "INVALID_CALLBACK_URL_HOST",
+                        "INVALID_CURRENCY",
+                        "SERVICE_UNAVAILABLE",
+                        "INTERNAL_PROCESSING_ERROR",
+                        "NOT_ENOUGH_FUNDS",
+                        "PAYER_LIMIT_REACHED",
+                        "PAYEE_NOT_ALLOWED_TO_RECEIVE",
+                        "PAYMENT_NOT_APPROVED",
+                        "RESOURCE_NOT_FOUND",
+                        "APPROVAL_REJECTED",
+                        "EXPIRED",
+                        "TRANSACTION_CANCELED",
+                        "RESOURCE_ALREADY_EXIST"
+                    ],
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "BooleanResult": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+    "tags": []
+}

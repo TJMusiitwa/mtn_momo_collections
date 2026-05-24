@@ -1,16 +1,14 @@
 swagger_parser:
-  squash_clients: true
-  output_directory: lib/
+  output_directory: lib/src/generated
   language: dart
   json_serializer: dart_mappable
   default_content_type: "application/json"
   extras_parameter_by_default: false
   dio_options_parameter_by_default: false
-  root_client: true
+  root_client: false
   root_client_name: MTNMomoClient
-  export_file: true
-  # put_in_folder: false
-  # put_clients_in_folder: false
+  export_file: false
+  put_clients_in_folder: true
   merge_clients: true
   client_postfix: null
   path_method_name: false
@@ -22,6 +20,9 @@ swagger_parser:
   schemes:
     - schema_path: schemes/collection.json
       name: Collection
+
+    - schema_path: schemes/disbursement.json
+      name: Disbursements
 
     - schema_path: schemes/sandbox-provisioning-api.json
       name: SandboxProvisioning  
