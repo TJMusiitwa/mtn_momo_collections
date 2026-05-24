@@ -8,18 +8,19 @@ part 'error_reason_code.mapper.dart';
 
 @MappableEnum(defaultValue: ErrorReasonCode.unknown)
 enum ErrorReasonCode {
-  @MappableValue('RESOURCE_NOT_FOUND') 
+  @MappableValue('RESOURCE_NOT_FOUND')
   resourceNotFound,
 
-  @MappableValue('RESOURCE_ALREADY_EXIST') 
+  @MappableValue('RESOURCE_ALREADY_EXIST')
   resourceAlreadyExist,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<ErrorReasonCode> get $valuesDefined => values.where((value) => value != ErrorReasonCode.unknown).toList();
+  static List<ErrorReasonCode> get $valuesDefined =>
+      values.where((value) => value != ErrorReasonCode.unknown).toList();
 }

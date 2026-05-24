@@ -8,18 +8,19 @@ part 'access_type.mapper.dart';
 
 @MappableEnum(defaultValue: AccessType.unknown)
 enum AccessType {
-  @MappableValue('online') 
+  @MappableValue('online')
   online,
 
-  @MappableValue('offline') 
+  @MappableValue('offline')
   offline,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<AccessType> get $valuesDefined => values.where((value) => value != AccessType.unknown).toList();
+  static List<AccessType> get $valuesDefined =>
+      values.where((value) => value != AccessType.unknown).toList();
 }

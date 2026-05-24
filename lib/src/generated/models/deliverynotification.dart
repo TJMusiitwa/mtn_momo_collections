@@ -8,13 +8,10 @@ part 'deliverynotification.mapper.dart';
 
 @MappableClass()
 class Deliverynotification with DeliverynotificationMappable {
-  const Deliverynotification({
-    this.notificationMessage,
-  });
+  const Deliverynotification({this.notificationMessage});
   final String? notificationMessage;
 
-
-  static Deliverynotification fromJson(Map<String, dynamic> json) => DeliverynotificationMapper.ensureInitialized().decodeMap<Deliverynotification>(json);
-
+  static Deliverynotification fromJson(Map<String, dynamic> json) =>
+      DeliverynotificationMapper.ensureInitialized()
+          .decodeMap<Deliverynotification>(json);
 }
-

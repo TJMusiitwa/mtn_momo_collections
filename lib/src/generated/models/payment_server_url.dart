@@ -8,14 +8,13 @@ part 'payment_server_url.mapper.dart';
 
 @MappableClass()
 class PaymentServerUrl with PaymentServerUrlMappable {
-  const PaymentServerUrl({
-    this.apiKey,
-  });
+  const PaymentServerUrl({this.apiKey});
+
   /// The payment server URL
   final String? apiKey;
 
-
-  static PaymentServerUrl fromJson(Map<String, dynamic> json) => PaymentServerUrlMapper.ensureInitialized().decodeMap<PaymentServerUrl>(json);
-
+  static PaymentServerUrl fromJson(Map<String, dynamic> json) =>
+      PaymentServerUrlMapper.ensureInitialized().decodeMap<PaymentServerUrl>(
+        json,
+      );
 }
-

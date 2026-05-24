@@ -15,17 +15,18 @@ class AuthorizeBody with AuthorizeBodyMappable {
     required this.scope,
     required this.accessType,
   });
+
   /// The identity of the account holder. Typically prefixed with 'ID:' followed by the MSISDN and type.
   @MappableField(key: 'login_hint')
   final String loginHint;
+
   /// A space separated list of scopes
   final String scope;
+
   /// Indicates the type of access required
   @MappableField(key: 'access_type')
   final AccessType accessType;
 
-
-  static AuthorizeBody fromJson(Map<String, dynamic> json) => AuthorizeBodyMapper.ensureInitialized().decodeMap<AuthorizeBody>(json);
-
+  static AuthorizeBody fromJson(Map<String, dynamic> json) =>
+      AuthorizeBodyMapper.ensureInitialized().decodeMap<AuthorizeBody>(json);
 }
-

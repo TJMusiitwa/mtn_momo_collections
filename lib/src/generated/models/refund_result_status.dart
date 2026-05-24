@@ -8,21 +8,22 @@ part 'refund_result_status.mapper.dart';
 
 @MappableEnum(defaultValue: RefundResultStatus.unknown)
 enum RefundResultStatus {
-  @MappableValue('PENDING') 
+  @MappableValue('PENDING')
   pending,
 
-  @MappableValue('SUCCESSFUL') 
+  @MappableValue('SUCCESSFUL')
   successful,
 
-  @MappableValue('FAILED') 
+  @MappableValue('FAILED')
   failed,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<RefundResultStatus> get $valuesDefined => values.where((value) => value != RefundResultStatus.unknown).toList();
+  static List<RefundResultStatus> get $valuesDefined =>
+      values.where((value) => value != RefundResultStatus.unknown).toList();
 }
