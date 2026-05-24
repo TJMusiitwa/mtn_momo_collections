@@ -23,7 +23,8 @@ part 'disbursements_client.g.dart';
 
 @RestApi()
 abstract class DisbursementsClient {
-  factory DisbursementsClient(Dio dio, {String? baseUrl}) = _DisbursementsClient;
+  factory DisbursementsClient(Dio dio, {String? baseUrl}) =
+      _DisbursementsClient;
 
   /// GetAccountBalance.
   ///
@@ -84,12 +85,15 @@ abstract class DisbursementsClient {
   /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
   ///
   /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
-  @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo')
+  @GET(
+    '/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo',
+  )
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
     @Path('accountHolderId') required String accountHolderId,
     @Header('Authorization') String? authorization,
     @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Path('accountHolderIdType') required AccountHolderIdType accountHolderIdType,
+    @Path('accountHolderIdType')
+    required AccountHolderIdType accountHolderIdType,
   });
 
   /// bc-authorize.

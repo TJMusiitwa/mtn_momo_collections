@@ -12,7 +12,8 @@ part 'sandbox_provisioning_client.g.dart';
 
 @RestApi()
 abstract class SandboxProvisioningClient {
-  factory SandboxProvisioningClient(Dio dio, {String? baseUrl}) = _SandboxProvisioningClient;
+  factory SandboxProvisioningClient(Dio dio, {String? baseUrl}) =
+      _SandboxProvisioningClient;
 
   /// /apiuser - POST.
   ///

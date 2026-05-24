@@ -139,9 +139,12 @@ abstract class CollectionClient {
   /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
   ///
   /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
-  @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo')
+  @GET(
+    '/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo',
+  )
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
-    @Path('accountHolderIdType') required AccountHolderIdType accountHolderIdType,
+    @Path('accountHolderIdType')
+    required AccountHolderIdType accountHolderIdType,
     @Path('accountHolderId') required String accountHolderId,
     @Header('Authorization') String? authorization,
     @Header('X-Target-Environment') String? xTargetEnvironment,
@@ -441,7 +444,8 @@ abstract class CollectionClient {
     @Path('accountHolderId') required String accountHolderId,
     @Header('Authorization') String? authorization,
     @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Path('accountHolderIdType') required AccountHolderIdType2 accountHolderIdType,
+    @Path('accountHolderIdType')
+    required AccountHolderIdType2 accountHolderIdType,
   });
 
   /// CancelPreApproval.
