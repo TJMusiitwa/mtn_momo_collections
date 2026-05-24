@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 
+import '../exceptions.dart';
 import '../token_manager.dart';
 
 class MomoInterceptor extends Interceptor {
@@ -67,5 +68,11 @@ class MomoInterceptor extends Interceptor {
     }
 
     return handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final mappedException = mapDioException(err);
+    handler.reject(mappedException);
   }
 }

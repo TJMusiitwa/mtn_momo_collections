@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:mtn_momo_collections/mtn_momo_client.dart';
+import 'package:mtn_momo_collections/mtn_momo_collections.dart';
 import 'package:test/test.dart';
 
 void main() {
