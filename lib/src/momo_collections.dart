@@ -48,18 +48,31 @@ class MomoCollections {
   CollectionClient get collection => _collectionClient;
   SandboxProvisioningClient get sandbox => _sandboxProvisioningClient;
 
+  Future<String?>? _tokenFetchFuture;
+
   Future<String?> _fetchToken() async {
-    try {
-      final basicAuth = 'Basic ${base64Encode(utf8.encode('$userId:$apiKey'))}';
-      final response = await _collectionClient.createAccessToken(
-        authorization: basicAuth,
-      );
-      _tokenManager.setToken(response);
-      return response.accessToken;
-    } catch (e) {
-      // If token fetch fails, we can't do much. The interceptor will reject the original request.
-      _logger.e('Error fetching token', error: e);
-      return null;
+    if (_tokenFetchFuture != null) {
+      return _tokenFetchFuture;
     }
+
+    _tokenFetchFuture = () async {
+      try {
+        final basicAuth =
+            'Basic ${base64Encode(utf8.encode('$userId:$apiKey'))}';
+        final response = await _collectionClient.createAccessToken(
+          authorization: basicAuth,
+        );
+        _tokenManager.setToken(response);
+        return response.accessToken;
+      } catch (e) {
+        // If token fetch fails, we can't do much. The interceptor will reject the original request.
+        _logger.e('Error fetching token', error: e);
+        return null;
+      } finally {
+        _tokenFetchFuture = null;
+      }
+    }();
+
+    return _tokenFetchFuture;
   }
 }
