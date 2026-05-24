@@ -18,19 +18,19 @@ graph TD
     Client[Developer Code] -->|Interacts with| MC[MomoCollections Wrapper]
     MC -->|Exposes sub-clients| MMC[MtnMomoClient Coordinator]
     
-    subgraph Retrofit Clients
+    subgraph retrofit ["Retrofit Clients"]
         MMC --> CC[CollectionClient]
         MMC --> DC[DisbursementsClient]
         MMC --> SC[SandboxProvisioningClient]
     end
     
-    subgraph Resiliency & Auth
+    subgraph resiliency ["Resiliency & Auth"]
         CC & DC & SC -.->|Applies| MI[MomoInterceptor]
         MI -->|Caches / Validates| TM[TokenManager]
         MI -->|Deduplicates authentication requests| TFF[_tokenFetchFuture]
     end
     
-    subgraph Error Handling
+    subgraph errors ["Error Handling"]
         DioEx[DioException] -->|Mapped by| MEx[mapDioException]
         MEx -->|Produces| MtnEx[MtnMomoException Hierarchy]
     end

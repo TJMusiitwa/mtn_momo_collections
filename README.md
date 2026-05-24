@@ -18,19 +18,19 @@ This SDK is engineered with a layered, modular architecture. Rather than writing
 
 ```mermaid
 graph TD
-    subgraph Core Package APIs
+    subgraph core ["Core Package APIs"]
         MMC[MomoCollections Wrapper] --> |High-Level Orchestration| MC[MtnMomoClient Coordinator]
         MI[MomoInterceptor] --> |Auth & Header Injection| MMC
         TM[TokenManager] --> |Thread-Safe Token Caching| MI
     end
 
-    subgraph Generated Clients (Retrofit & dart_mappable)
+    subgraph gen ["Generated Clients (Retrofit & dart_mappable)"]
         MC --> CC[CollectionClient]
         MC --> DC[DisbursementsClient]
         MC --> SC[SandboxProvisioningClient]
     end
 
-    subgraph Error Handling
+    subgraph err ["Error Handling"]
         ME[mapDioException] --> MME[MtnMomoException Hierarchy]
         MME --> MTE[MtnMomoTransactionException with Error Codes]
     end
