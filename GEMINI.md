@@ -1,45 +1,147 @@
-# Project Overview
+# MTN Mobile Money Collections & Disbursements SDK (Dart/Flutter)
 
-This is a Flutter package that provides a client for the MTN Mobile Money Collections API. It allows developers to integrate MTN Mobile Money payments into their Dart applications. The package supports core functionalities such as sandbox provisioning, account balance checks, payment requests, and transaction status verification.
+## Architectural Design Reference
 
-**Key Technologies:**
+This document provides a highly technical, deep-dive reference of the internals of the `mtn_momo_collections` package, outlining how components integrate, code-generation rules, custom class patterns, and testing conventions.
 
-*   **Dart:** The primary programming language.
-*   **Flutter:** The UI toolkit for building natively compiled applications for mobile, web, and desktop from a single codebase.
-*   **Dio:** A powerful HTTP client for Dart, which is used to make requests to the MTN Mobile Money API.
-*   **Retrofit:** A type-safe HTTP client for Dart and Flutter, used to generate the API client from a specification.
-*   **dart_mappable:** A library for object-to-JSON mapping.
+---
 
-**Architecture:**
+## 🏗 High-Level Architecture
 
-The package follows a client-server architecture. The `MtnMomoClient` class is the main entry point for interacting with the API. It provides access to two clients:
+The codebase is split into three main logical layers:
+1. **Raw API Layer (Generated)**: Type-safe REST clients generated using `retrofit` and serialized via `dart_mappable`.
+2. **Plumbing & Resiliency Layer (Manual)**: Custom Interceptors (`MomoInterceptor`), Token Management (`TokenManager`), and Request Deduplication.
+3. **High-Level Coordinator & Wrapper Layer (Manual)**: Standard `MtnMomoClient` coordinator and unified wrapper `MomoCollections`.
 
-*   `CollectionClient`: This client handles all the operations related to collections, such as requesting payments, checking account balances, and validating account holders.
-*   `SandboxProvisioningClient`: This client is used for creating and managing sandbox environments for testing purposes.
+```mermaid
+graph TD
+    Client[Developer Code] -->|Interacts with| MC[MomoCollections Wrapper]
+    MC -->|Exposes sub-clients| MMC[MtnMomoClient Coordinator]
+    
+    subgraph Retrofit Clients
+        MMC --> CC[CollectionClient]
+        MMC --> DC[DisbursementsClient]
+        MMC --> SC[SandboxProvisioningClient]
+    end
+    
+    subgraph Resiliency & Auth
+        CC & DC & SC -.->|Applies| MI[MomoInterceptor]
+        MI -->|Caches / Validates| TM[TokenManager]
+        MI -->|Deduplicates authentication requests| TFF[_tokenFetchFuture]
+    end
+    
+    subgraph Error Handling
+        DioEx[DioException] -->|Mapped by| MEx[mapDioException]
+        MEx -->|Produces| MtnEx[MtnMomoException Hierarchy]
+    end
+```
 
-The API clients are generated using `retrofit` and `swagger_parser` from a Swagger/OpenAPI specification. The data models are generated using `dart_mappable`.
+---
 
-# Building and Running
+## 🛠 Code Generation Architecture
 
-**Building:**
+The project relies on [swagger_parser](https://pub.dev/packages/swagger_parser) to generate clean Retrofit clients and models from raw JSON specifications located inside `./schemes/`.
 
-To build the project, run the following command:
+### Configuration Details (`swagger_parser.yaml`)
+* **Output Path**: Generated files reside inside `lib/src/generated/` to isolate them from manual SDK enhancements.
+* **JSON Serializer**: `dart_mappable` is used exclusively. Avoid using standard `json_serializable` as `dart_ mappable` provides superior polymorphism support, type safety, and clean builder methods.
+* **Root Client**: Set to `false` (we compose our own unified `MtnMomoClient` manually in `lib/src/generated/mtn_momo_client.dart`).
+* **Optional Headers**: Transaction reference IDs and authentication headers are configured as optional in the OpenAPI JSON schemas, enabling a clean developer experience when utilizing `MomoCollections` (where the interceptor injects authentication and reference UUIDs automatically).
 
+### Code Generation Pipeline
+To compile changes to schemas, run the following pipeline:
 ```bash
 flutter pub get
-flutter pub run build_runner build
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
-**Testing:**
+---
 
-To run the tests, use the following command:
+## 🛡 Network Resiliency & Token Lifecycle
 
-```bash
-flutter test
+A key engineering requirement of this SDK is shielding the developer from handling OAuth2 token validation, caching, and refresh logic.
+
+### 1. Interceptor-Based Injection (`MomoInterceptor`)
+The `MomoInterceptor` (located in `lib/src/interceptors/momo_interceptor.dart`) listens to outbound network requests for Collections and Disbursements APIs and:
+* Automatically appends the `Ocp-Apim-Subscription-Key`.
+* Automatically appends the `X-Target-Environment` (defaults to `sandbox`).
+* Inspects if the target endpoint requires OAuth2 protection. If it does, it checks the local cache in `TokenManager`. If the token is expired or absent, it triggers the registered token fetch callback.
+
+### 2. Thread-Safe Token Fetch Deduplication
+To prevent simultaneous parallel API calls from initiating multiple concurrent authentication requests, the high-level client implements token fetch deduplication:
+```dart
+Future<String?>? _tokenFetchFuture;
+
+Future<String?> _fetchToken() async {
+  if (_tokenFetchFuture != null) {
+    return _tokenFetchFuture; // Wait on the active request
+  }
+
+  _tokenFetchFuture = () async {
+    try {
+      final basicAuth = 'Basic ${base64Encode(utf8.encode('$userId:$apiKey'))}';
+      final response = await _collectionClient.createAccessToken(
+        authorization: basicAuth,
+      );
+      _tokenManager.setToken(response);
+      return response.accessToken;
+    } catch (e) {
+      _logger.e('Error fetching token', error: e);
+      return null;
+    } finally {
+      _tokenFetchFuture = null; // Clean up future reference
+    }
+  }();
+
+  return _tokenFetchFuture;
+}
 ```
 
-# Development Conventions
+---
 
-*   **Coding Style:** The project follows the official Dart style guide.
-*   **Testing:** The project uses the `flutter_test` package for testing. All new features should be accompanied by corresponding tests.
-*   **Contributions:** Contributions are welcome. Please open an issue to discuss any major changes before submitting a pull request.
+## 🔒 Custom SDK Exception Hierarchy
+
+MTN Mobile Money API errors range from standard network issues to highly structured transaction-level business failures. Rather than leaving developers to inspect raw status codes or map response fields manually, the SDK sifts all outbound `DioException` states through `mapDioException()` inside `lib/src/exceptions.dart`.
+
+### Custom Exception Map
+
+```
+DioException
+ └── MtnMomoException (Base class)
+      ├── MtnMomoNetworkException       (Handshake timeouts, DNS failures)
+      ├── MtnMomoAuthException          (HTTP 401: Invalid subscription key / API User / API Key)
+      ├── MtnMomoForbiddenException     (HTTP 403: Originating IP is not whitelisted)
+      ├── MtnMomoNotFoundException      (HTTP 404: Transaction/Pre-Approval ID not found)
+      ├── MtnMomoConflictException      (HTTP 409: Reference UUID already utilized)
+      ├── MtnMomoServerException        (HTTP 500/503: MoMo platform infrastructure failures)
+      └── MtnMomoTransactionException   (HTTP 400/500 with native business logic failure codes)
+```
+
+### Business Logic Error Verification (`MtnMomoErrorCode`)
+`MtnMomoTransactionException` wraps a parsed `MtnMomoErrorCode` enum. This represents standard error codes documented on the official portal, such as:
+* `PAYER_LIMIT_REACHED`: Payer wallet exceeds maximum limits.
+* `NOT_ENOUGH_FUNDS`: Insufficient customer funds to cover transaction.
+* `APPROVAL_REJECTED`: Customer rejected the USSD PIN request.
+* `PAYER_NOT_FOUND`: Target MSISDN is invalid or unregistered.
+
+---
+
+## 🧪 Testing Guidelines
+
+Testing is treated as a P0 requirement for ensuring zero regression in API schemas and exceptional client instantiation stability.
+
+### Test Directory Layout
+* `test/exceptions_test.dart`: Validates full coverage of raw Dio JSON responses mapped into correct sub-classes of `MtnMomoException` and verifies error code parsing accuracy.
+* `test/mtn_momo_collections_test.dart`: Validates coordinator construction, sub-client provisioning, and barrel file export integrity.
+* `test/manual_sandbox_test.dart`: An execution script allowing automated validation against a live sandboxed endpoint (validates programmatic user creation, API key retrieval, and balance check).
+
+### Execution Commands
+* **Run entire unit suite**:
+  ```bash
+  flutter test
+  ```
+* **Run manual sandbox validation**:
+  Ensure a valid `subscriptionKey` is defined in `test/manual_sandbox_test.dart`, then execute:
+  ```bash
+  dart test/manual_sandbox_test.dart
+  ```

@@ -1,160 +1,346 @@
-## MTN MOMO COLLECTIONS
+# MTN Mobile Money (MoMo) SDK for Dart & Flutter
 
-[![Dart](https://img.shields.io/badge/Dart-3.0+-blue.svg)](https://dart.dev)
+[![Pub Version](https://img.shields.io/pub/v/mtn_momo_collections?logo=dart&color=005A9C)](https://pub.dev)
+[![Dart SDK](https://img.shields.io/badge/Dart-3.0+-blue.svg?logo=dart)](https://dart.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.10+-02569B.svg?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A Dart package for integrating with MTN Mobile Money Collections API, enabling seamless mobile money transactions across African markets.
+An elegant, type-safe, and robust Dart & Flutter SDK for integrating with the **MTN Mobile Money (MoMo) API**. This package supports sandboxed and production environments across all active African markets (e.g., Uganda, Ghana, Cameroon, Côte d'Ivoire, Zambia).
 
-**Disclaimer:** This is an unofficial package. It is not affiliated with, endorsed by, or in any way officially connected with MTN Group or any of its subsidiaries. This package is provided as-is, and the developers are not responsible for any issues that may arise from its use.
+> [!WARNING]
+> This is an unofficial community package. It is not affiliated with, endorsed by, or officially connected to MTN Group or any of its subsidiaries.
 
-## Features
+---
 
-🌍 **Multi-Country Support** - Operates in all MTN Mobile Money markets including Uganda, Ghana, Cameroon, and more
+## Architecture Overview
 
-🛠 **Core Functionalities**:
-- Sandbox environment provisioning
-- Account balance checks
-- Payment request initiation
-- Transaction status verification
-- Account holder validation
-- Collections operations management
+This SDK is engineered with a layered, modular architecture. Rather than writing fragile manual HTTP wrappers, the entire API layer is generated from MTN's OpenAPI specifications, ensuring full coverage, strict compliance, and future-proof extensibility.
 
-🔒 **Security**:
-- Automatic header validation
-- Secure token handling
-- Encrypted communication
-- Error handling for API limitations
+```mermaid
+graph TD
+    subgraph Core Package APIs
+        MMC[MomoCollections Wrapper] --> |High-Level Orchestration| MC[MtnMomoClient Coordinator]
+        MI[MomoInterceptor] --> |Auth & Header Injection| MMC
+        TM[TokenManager] --> |Thread-Safe Token Caching| MI
+    end
 
-⚡ **Efficiency**:
-- Pre-built API models
-- Automatic request retries
-- Rate limiting handling
-- Comprehensive logging
+    subgraph Generated Clients (Retrofit & dart_mappable)
+        MC --> CC[CollectionClient]
+        MC --> DC[DisbursementsClient]
+        MC --> SC[SandboxProvisioningClient]
+    end
+
+    subgraph Error Handling
+        ME[mapDioException] --> MME[MtnMomoException Hierarchy]
+        MME --> MTE[MtnMomoTransactionException with Error Codes]
+    end
+
+    CC & DC & SC -.-> |HTTP Requests via Dio| MTN[MTN MoMo Gateway]
+```
+
+### Highlights
+* **Unified Client Coordinator (`MtnMomoClient`)**: A single entry point providing access to generated clients: `CollectionClient`, `DisbursementsClient`, and `SandboxProvisioningClient`.
+* **Advanced High-Level Wrapper (`MomoCollections`)**: Handles tedious authentication plumbing automatically.
+* **Automated OAuth2 Token Lifecycle**: Built-in token caching, lifecycle validation, and lazy auto-refresh.
+* **Concurrent Token Deduplication**: Concurrent API requests seamlessly await a single ongoing token generation process, preventing race conditions or redundant token creation hits.
+* **Rich Native Exception Hierarchy**: Maps complex raw HTTP & MTN errors into distinct Dart Exceptions (`MtnMomoNetworkException`, `MtnMomoAuthException`, `MtnMomoTransactionException`, etc.).
+
+---
 
 ## Getting Started
 
-### Prerequisites
-- Dart 3.0+ or Flutter 3.10+
-- MTN Developer Account ([Sign up](https://momodeveloper.mtn.com))
-- Valid API subscription key
-
 ### Installation
-Add to your `pubspec.yaml`:
+
+Add the package to your `pubspec.yaml`:
+
 ```yaml
 dependencies:
-  mtn_momo_collections: ^0.1.0
-  dio: ^5.0.0
+  mtn_momo_collections: ^0.0.1
+  dio: ^5.9.0
 ```
 
-## Usage
+Run pub get:
+```bash
+flutter pub get
+```
 
-### Initialization
+---
+
+## 🛠 Complete Sandbox Walkthrough
+
+Integrating with MTN MoMo Sandbox requires provisioning a dynamic API User and requesting an API Key before initializing transaction calls. Here is the full programmatic walkthrough:
+
 ```dart
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
 import 'package:mtn_momo_collections/mtn_momo_collections.dart';
 
-final dio = Dio(BaseOptions(
+final logger = Logger();
+
+void main() async {
+  const baseUrl = 'https://sandbox.momodeveloper.mtn.com';
+  // Retrieve subscription key from momodeveloper.mtn.com
+  const subscriptionKey = 'YOUR_OCP_APIM_SUBSCRIPTION_KEY'; 
+
+  // Initialize the baseline Dio client
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      headers: {
+        'Ocp-Apim-Subscription-Key': subscriptionKey,
+        'Content-Type': 'application/json',
+      },
+    ),
+  );
+
+  // 1. Instantiate the Sandbox User Provisioning API Client
+  final sandboxProvisioner = SandboxProvisioningClient(dio);
+  final userUuid = const Uuid().v4();
+
+  logger.i('Creating Sandboxed API User: $userUuid');
+  try {
+    await sandboxProvisioner.postV10Apiuser(
+      xReferenceId: userUuid,
+      apiUser: ApiUser(providerCallbackHost: 'your-callback-domain.com'),
+    );
+    logger.i('API User created successfully.');
+  } catch (e) {
+    logger.e('Failed to create API User', error: e);
+    return;
+  }
+
+  // Allow the sandbox database to propagate the newly created user
+  await Future.delayed(const Duration(seconds: 2));
+
+  // 2. Request an API Key associated with the newly created API User
+  logger.i('Requesting Sandbox API Key...');
+  String? apiKey;
+  try {
+    final result = await sandboxProvisioner.postV10ApiuserApikey(
+      xReferenceId: userUuid,
+    );
+    apiKey = result.apiKey;
+    logger.i('Sandbox API Key acquired: $apiKey');
+  } catch (e) {
+    logger.e('Failed to acquire API Key', error: e);
+    return;
+  }
+
+  if (apiKey == null) return;
+
+  // 3. Initialize the production-ready MomoCollections client
+  final momo = MomoCollections(
+    baseUrl: baseUrl,
+    subscriptionKey: subscriptionKey,
+    userId: userUuid,
+    apiKey: apiKey,
+    targetEnvironment: 'sandbox',
+  );
+
+  // 4. Perform transaction operations (the Token is automatically fetched on the fly!)
+  logger.i('Fetching Account Balance...');
+  try {
+    final balance = await momo.collection.getAccountBalance();
+    logger.i('Current Balance: ${balance.availableBalance} ${balance.currency}');
+  } catch (e) {
+    logger.e('Operation failed', error: e);
+  }
+}
+```
+
+---
+
+## ⚡ Core Integration Scenarios
+
+### Collections API
+
+Initiate collections payments from customer wallets to your merchant account.
+
+```dart
+// Initialize the client
+final momo = MomoCollections(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
-  headers: {
-    'Ocp-Apim-Subscription-Key': 'YOUR_SUBSCRIPTION_KEY',
-  },
-));
+  subscriptionKey: 'YOUR_SUBSCRIPTION_KEY',
+  userId: 'YOUR_PROVISIONED_USER_ID',
+  apiKey: 'YOUR_PROVISIONED_API_KEY',
+);
 
-final collectionsClient = CollectionClient(dio);
-```
-
-### Check Account Balance
-```dart
+// 1. Validate customer account holder status
 try {
-  final balance = await collectionsClient.getAccountBalance(
-    authorization: 'Bearer YOUR_ACCESS_TOKEN',
-    xTargetEnvironment: 'sandbox',
+  await momo.collection.validateAccountHolderStatus(
+    accountHolderId: '256772123456',
+    accountHolderIdType: 'msisdn',
   );
-  print('Available Balance: ${balance.availableBalance}');
-} catch (e) {
-  print('Balance check failed: ${e.toString()}');
+  print('Account holder is active and verified.');
+} on MtnMomoTransactionException catch (e) {
+  print('Account holder validation failed: ${e.errorCode.description}');
 }
-```
 
-### Create Payment Request
-```dart
-final paymentRequest = RequestToPay(
-  amount: '1500',
+// 2. Request customer payment (Push USSD)
+final referenceUuid = 'a9b8c7d6-e5f4-3a2b-1c0d-9e8f7a6b5c4d'; // Unique UUID v4
+final requestToPayBody = RequestToPay(
+  amount: '5000',
   currency: 'UGX',
-  externalId: 'TX_${DateTime.now().millisecondsSinceEpoch}',
+  externalId: 'PAY_INV_88764',
   payer: Payer(
     partyIdType: 'MSISDN',
     partyId: '256772123456',
   ),
-  payerMessage: 'School Fees Payment',
-  payeeNote: 'Thank you for your payment',
+  payerMessage: 'Premium Subscription Renewal',
+  payeeNote: 'Thank you for choosing Antigravity Solutions',
 );
 
-await collectionsClient.requesttoPay(
-  authorization: 'Bearer YOUR_ACCESS_TOKEN',
-  xReferenceId: 'UNIQUE_REFERENCE_ID',
-  xTargetEnvironment: 'sandbox',
-  requestToPay: paymentRequest,
-);
-```
-
-### Validate Account Holder
-```dart
-final isValid = await collectionsClient.validateAccountHolderStatus(
-  accountHolderId: '256772123456',
-  accountHolderIdType: 'msisdn',
-  authorization: 'Bearer YOUR_ACCESS_TOKEN',
-  xTargetEnvironment: 'sandbox',
-);
-
-print('Account validation result: ${isValid ? "Valid" : "Invalid"}');
-```
-
-### Check Account Balance
-```dart
 try {
-  final balance = await collectionsClient.getAccountBalance(
-    authorization: 'Bearer YOUR_ACCESS_TOKEN',
-    xTargetEnvironment: 'sandbox',
+  await momo.collection.requesttoPay(
+    xReferenceId: referenceUuid,
+    requestToPay: requestToPayBody,
   );
-  print('Available Balance: ${balance.availableBalance}');
+  print('Payment request dispatched to customer handset.');
 } catch (e) {
-  print('Balance check failed: ${e.toString()}');
+  print('Payment initialization error: $e');
+}
+
+// 3. Poll transaction status
+try {
+  final status = await momo.collection.requesttoPayTransactionStatus(
+    referenceId: referenceUuid,
+  );
+  print('Transaction Status: ${status.status}');
+  print('Reason Code: ${status.reason?.code}');
+} catch (e) {
+  print('Status check failed: $e');
 }
 ```
 
-### Create Payment Request
+### Disbursements API
+
+Safely pay out money from your merchant account directly into a recipient's mobile wallet.
+
 ```dart
-final paymentRequest = RequestToPay(
-  amount: '1500',
+// 1. Initialize Transfer
+final transferUuid = 'f8e7d6c5-b4a3-2b1a-0f9e-8d7c6b5a4f3e'; // Unique UUID v4
+final transferBody = Transfer(
+  amount: '12000',
   currency: 'UGX',
-  externalId: 'TX_${DateTime.now().millisecondsSinceEpoch}',
-  payer: Payer(
+  externalId: 'DISB_SAL_4431',
+  payee: Payee(
     partyIdType: 'MSISDN',
-    partyId: '256772123456',
+    partyId: '256772987654',
   ),
-  payerMessage: 'School Fees Payment',
-  payeeNote: 'Thank you for your payment',
+  payerMessage: 'Monthly Salary Disbursement',
+  payeeNote: 'Salary processed successfully',
 );
 
-await collectionsClient.requesttoPay(
-  authorization: 'Bearer YOUR_ACCESS_TOKEN',
-  xReferenceId: 'UNIQUE_REFERENCE_ID',
-  xTargetEnvironment: 'sandbox',
-  requestToPay: paymentRequest,
-);
+try {
+  final disbursementsClient = DisbursementsClient(dioClient);
+  await disbursementsClient.transfer(
+    xReferenceId: transferUuid,
+    transfer: transferBody,
+  );
+  print('Disbursement transfer initialized.');
+} catch (e) {
+  print('Disbursement initialization failed: $e');
+}
+
+// 2. Fetch disbursement transfer status
+try {
+  final status = await disbursementsClient.getTransferStatus(
+    referenceId: transferUuid,
+  );
+  print('Disbursement Status: ${status.status}');
+} catch (e) {
+  print('Disbursement check failed: $e');
+}
 ```
 
-## Configuration
-### Environment Setup
-1. Obtain credentials from [MTN Developer Portal](https://momodeveloper.mtn.com)
-2. Choose target country environment
-3. Set appropriate base URLs:
-   - Sandbox: `https://sandbox.momodeveloper.mtn.com`
-   - Production: `https://momodeveloper.mtn.com`
+---
 
-## Additional Resources
+## 🔒 Advanced Resilient Exception Handling
 
-- [MTN API Documentation](https://momodeveloper.mtn.com/api-documentation)
-- [Sandbox Guide](https://momodeveloper.mtn.com/api-documentation/getting-started)
-- [Error Codes Reference](https://momodeveloper.mtn.com/api-documentation/common-error)   
+Dio errors are often flat, structured strings. The SDK intercepts errors and wraps them into distinct custom `MtnMomoException` types to allow clean, idiomatic catch flows:
+
+```dart
+try {
+  final balance = await momo.collection.getAccountBalance();
+} on MtnMomoNetworkException {
+  print('Unable to reach the server. Please verify your connection.');
+} on MtnMomoAuthException catch (e) {
+  print('Authentication Error (HTTP 401): ${e.message} - ${e.details}');
+} on MtnMomoForbiddenException {
+  print('Forbidden (HTTP 403): Ensure your server IP is whitelisted on the portal.');
+} on MtnMomoNotFoundException {
+  print('Resource not found (HTTP 404).');
+} on MtnMomoConflictException {
+  print('Conflict (HTTP 409): This reference UUID has already been utilized.');
+} on MtnMomoTransactionException catch (e) {
+  // Access rich mapped enum values from official MTN documentation
+  print('Transaction Business Logic Error Code: ${e.errorCode.code}');
+  print('Error Description: ${e.errorCode.description}');
+  
+  switch(e.errorCode) {
+    case MtnMomoErrorCode.payerLimitReached:
+      print('The customer has reached their daily wallet limits.');
+      break;
+    case MtnMomoErrorCode.notEnoughFunds:
+      print('The customer\'s account has insufficient funds.');
+      break;
+    case MtnMomoErrorCode.approvalRejected:
+      print('The customer rejected the payment prompt.');
+      break;
+    default:
+      print('Unhandled transaction failure.');
+  }
+} on MtnMomoServerException {
+  print('MTN Server is experiencing technical difficulties.');
+} catch (e) {
+  print('Unexpected non-SDK error: $e');
+}
+```
+
+### Supported Transaction Error Enums (`MtnMomoErrorCode`)
+
+| Error Code Enum | Raw API Value | Official Description |
+| :--- | :--- | :--- |
+| `payeeNotFound` | `PAYEE_NOT_FOUND` | Recipient MSISDN is invalid or unregistered. |
+| `payerNotFound` | `PAYER_NOT_FOUND` | Sender MSISDN does not exist or is invalid. |
+| `invalidCallbackUrlHost` | `INVALID_CALLBACK_URL_HOST` | Callback URL host must be a domain name, not an IP. |
+| `invalidReferenceId` | `INVALID_REFERENCE_ID` | Reference ID (UUID v4) is invalid or malformed. |
+| `resourceNotFound` | `RESOURCE_NOT_FOUND` | The specified transaction or reference cannot be located. |
+| `resourceAlreadyExist` | `RESOURCE_ALREADY_EXIST` | Duplicate reference ID supplied. |
+| `payerLimitReached` | `PAYER_LIMIT_REACHED` | Daily/Monthly wallet limits hit by customer. |
+| `approvalRejected` | `APPROVAL_REJECTED` | User manually cancelled prompt or timed out. |
+| `notEnoughFunds` | `NOT_ENOUGH_FUNDS` | Wallet has insufficient balance. |
+| `senderAccountNotActive` | `SENDER_ACCOUNT_NOT_ACTIVE` | Payer's wallet is frozen or inactive. |
+| `internalProcessingError` | `INTERNAL_PROCESSING_ERROR` | Core processing engine error. |
+| `couldNotPerformTransaction`| `COULD_NOT_PERFORM_TRANSACTION` | System failure to complete transaction. |
+| `forbiddenIp` | `FORBIDDEN_IP` | Source server IP is blocked. |
+| `accessDenied` | `ACCESS_DENIED` | Invalid subscription key or products. |
+
+---
+
+## 🛠 Development & Code Generation
+
+If you modify the Swagger specifications under the `schemes/` directory, you must run code generation:
+
+1. **Model Parsing**:
+   Modify models or schemas in `schemes/` (e.g. `collection.json`, `disbursement.json`, `sandbox-provisioning-api.json`).
+   
+2. **Build Generated Files**:
+   Execute the Dart compiler code generator:
+   ```bash
+   flutter pub get
+   flutter pub run build_runner build --delete-conflicting-outputs
+   ```
+
+3. **Running SDK Tests**:
+   Run the regression test suite:
+   ```bash
+   flutter test
+   ```
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
