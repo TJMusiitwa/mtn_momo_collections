@@ -41,14 +41,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -115,14 +115,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -168,14 +168,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -321,14 +321,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -379,14 +379,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Basic authentication header containing API user ID and API key. Should be sent in as B64 encoded.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -470,14 +470,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -530,7 +530,7 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -543,14 +543,14 @@
                         "name": "X-Reference-Id",
                         "in": "header",
                         "description": "Format - UUID. Recource ID of the created ‘request-to-pay’ transaction. This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -621,7 +621,7 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -634,14 +634,14 @@
                         "name": "X-Reference-Id",
                         "in": "header",
                         "description": "Format - UUID. Recource ID of the created ‘request-to-pay’ transaction. This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -719,14 +719,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -851,7 +851,7 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -864,14 +864,14 @@
                         "name": "X-Reference-Id",
                         "in": "header",
                         "description": "Format - UUID.  This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -942,7 +942,7 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -955,14 +955,14 @@
                         "name": "X-Reference-Id",
                         "in": "header",
                         "description": "Format - UUID.  This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -1040,14 +1040,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -1179,7 +1179,7 @@
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -1234,14 +1234,14 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Token. Replace with a valid oauth2 token received from oauth2 token endpoint in Wallet Platform.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -1344,7 +1344,7 @@
                         "name": "Authorization",
                         "in": "header",
                         "description": "Bearer Authentication Token generated using CreateAccessToken API Call",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
@@ -1357,14 +1357,14 @@
                         "name": "X-Reference-Id",
                         "in": "header",
                         "description": "Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "X-Target-Environment",
                         "in": "header",
                         "description": "The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
