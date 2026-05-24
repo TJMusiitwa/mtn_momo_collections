@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:mtn_momo_collections/clients/collection_client.dart';
-import 'package:mtn_momo_collections/clients/sandbox_provisioning_client.dart';
+import 'package:mtn_momo_collections/src/generated/export.dart';
 import 'package:mtn_momo_collections/src/interceptors/momo_interceptor.dart';
 import 'package:mtn_momo_collections/src/token_manager.dart';
 

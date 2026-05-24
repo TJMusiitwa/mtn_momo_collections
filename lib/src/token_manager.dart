@@ -1,4 +1,4 @@
-import 'package:mtn_momo_collections/models/token_post200_application_json_response.dart';
+import 'package:mtn_momo_collections/src/generated/export.dart';
 
 class TokenManager {
   TokenPost200ApplicationJsonResponse? _token;

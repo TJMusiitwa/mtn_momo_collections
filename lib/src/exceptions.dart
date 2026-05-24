@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:mtn_momo_collections/models/error_reason.dart';
-import 'package:mtn_momo_collections/models/token_post401_application_json_response.dart';
+import 'package:mtn_momo_collections/src/generated/export.dart';
 
 /// Sane representation of MTN MoMo API error codes based on official documentation:
 /// https://momodeveloper.mtn.com/api-documentation/common-error
