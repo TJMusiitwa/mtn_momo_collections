@@ -10,13 +10,10 @@ topics:
 
 environment:
   sdk: '>=3.10.4 <4.0.0'
-  flutter: ">=3.0.0"
 
 dependencies:
   dart_mappable: ^4.8.0
   dio: ^5.9.0
-  flutter:
-    sdk: flutter
   logger: ^2.6.2
   retrofit: ^4.9.2
   uuid: ^4.5.3
