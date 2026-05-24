@@ -15,6 +15,7 @@ class MomoCollections {
 
   late final Dio _dio;
   late final CollectionClient _collectionClient;
+  late final DisbursementsClient _disbursementsClient;
   late final SandboxProvisioningClient _sandboxProvisioningClient;
   final TokenManager _tokenManager = TokenManager();
   final Logger _logger = Logger();
@@ -38,6 +39,7 @@ class MomoCollections {
     );
 
     _collectionClient = CollectionClient(_dio, baseUrl: baseUrl);
+    _disbursementsClient = DisbursementsClient(_dio, baseUrl: baseUrl);
     _sandboxProvisioningClient = SandboxProvisioningClient(
       _dio,
       baseUrl: baseUrl,
@@ -45,6 +47,7 @@ class MomoCollections {
   }
 
   CollectionClient get collection => _collectionClient;
+  DisbursementsClient get disbursements => _disbursementsClient;
   SandboxProvisioningClient get sandbox => _sandboxProvisioningClient;
 
   Future<String?>? _tokenFetchFuture;
