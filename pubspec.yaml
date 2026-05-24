@@ -8,22 +8,21 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
-  dart_mappable: ^4.6.1
+  dart_mappable: ^4.8.0
   dio: ^5.9.0
   flutter:
     sdk: flutter
   logger: ^2.6.2
-  retrofit: ^4.7.2
-  uuid: ^4.5.2
+  retrofit: ^4.9.2
+  uuid: ^4.5.3
 
 dev_dependencies:
-  build_runner: ^2.8.0
-  dart_mappable_builder: ^4.6.1
-  flutter_lints: ^6.0.0
-  flutter_test:
-    sdk: flutter
-  retrofit_generator: ^10.0.5
-  swagger_parser: ^1.30.0
+  build_runner: ^2.15.0
+  dart_mappable_builder: ^4.8.0
+  lints: ^6.1.0  
+  retrofit_generator: ^10.2.6
+  swagger_parser: ^1.43.1
+  test: ^1.31.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
