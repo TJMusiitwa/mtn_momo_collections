@@ -92,7 +92,7 @@ void main() async {
     // X-Reference-Id and Authorization are injected automatically by the MomoInterceptor!
     await momo.disbursements.transfer(
       xReferenceId: referenceId,
-      transfer: transferBody,
+      body: transferBody,
     );
     _logger.i('   ✓ Transfer initiated successfully on the gateway.');
 

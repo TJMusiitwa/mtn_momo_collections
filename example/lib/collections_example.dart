@@ -90,7 +90,7 @@ void main() async {
     // X-Reference-Id and Authorization are injected automatically by the MomoInterceptor!
     await momo.collection.requesttoPay(
       xReferenceId: referenceId,
-      requestToPay: request,
+      body: request,
     );
     _logger.i('   ✓ Request to pay sent to customer handset successfully.');
 

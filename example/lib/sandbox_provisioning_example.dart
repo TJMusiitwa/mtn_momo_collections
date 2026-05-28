@@ -65,7 +65,7 @@ void main() async {
 
     await sandboxProvisioner.postV10Apiuser(
       xReferenceId: userUuid,
-      apiUser: const ApiUser(
+      body: const ApiUser(
         providerCallbackHost: 'callbacks.my-awesome-app.com',
       ),
     );

@@ -242,7 +242,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
 
       await provisioner.postV10Apiuser(
         xReferenceId: generatedUserId,
-        apiUser: const ApiUser(
+        body: const ApiUser(
           providerCallbackHost: 'callbacks.playground-app.com',
         ),
       );
@@ -347,7 +347,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
 
       await _momo!.collection.requesttoPay(
         xReferenceId: referenceId,
-        requestToPay: requestBody,
+        body: requestBody,
       );
       _logTerminal(
           'Collections: ✓ Request to pay sent to handset. Polling active status...');
@@ -478,7 +478,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
 
       await _momo!.disbursements.transfer(
         xReferenceId: referenceId,
-        transfer: transferBody,
+        body: transferBody,
       );
       _logTerminal(
           'Disbursements: ✓ Transfer posted on gateway. Polling status...');
