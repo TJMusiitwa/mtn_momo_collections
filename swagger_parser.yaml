@@ -17,6 +17,9 @@ swagger_parser:
   unknown_enum_value: true
   mark_files_as_generated: true
   original_http_response: false
+  skipped_parameters:
+    - Authorization
+    - X-Target-Environment
   schemes:
     - schema_path: schemes/collection.json
       name: Collection
