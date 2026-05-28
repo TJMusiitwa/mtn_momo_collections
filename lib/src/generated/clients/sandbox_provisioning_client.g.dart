@@ -22,14 +22,14 @@ class _SandboxProvisioningClient implements SandboxProvisioningClient {
   @override
   Future<void> postV10Apiuser({
     required String xReferenceId,
-    ApiUser? apiUser,
+    ApiUser? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{r'X-Reference-Id': xReferenceId};
     _headers.removeWhere((k, v) => v == null);
-    final _data = apiUser;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(

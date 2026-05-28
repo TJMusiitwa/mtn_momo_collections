@@ -17,15 +17,15 @@ class PaymentResult with PaymentResultMappable {
     this.financialTransactionId,
     this.reason,
   });
-
   /// The reference id for this Payment.
   final String? referenceId;
   final PaymentResultStatus? status;
-
   /// A transaction id associated with this payment.
   final String? financialTransactionId;
   final ErrorReason? reason;
 
-  static PaymentResult fromJson(Map<String, dynamic> json) =>
-      PaymentResultMapper.ensureInitialized().decodeMap<PaymentResult>(json);
+
+  static PaymentResult fromJson(Map<String, dynamic> json) => PaymentResultMapper.ensureInitialized().decodeMap<PaymentResult>(json);
+
 }
+

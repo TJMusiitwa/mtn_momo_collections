@@ -8,23 +8,21 @@ part 'pre_approval_details_frequency.mapper.dart';
 
 @MappableEnum(defaultValue: PreApprovalDetailsFrequency.unknown)
 enum PreApprovalDetailsFrequency {
-  @MappableValue('DAILY')
+  @MappableValue('DAILY') 
   daily,
 
-  @MappableValue('MONTHLY')
+  @MappableValue('MONTHLY') 
   monthly,
 
-  @MappableValue('WEEKLY')
+  @MappableValue('WEEKLY') 
   weekly,
 
-  @MappableValue('unknown')
+  @MappableValue('unknown') 
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<PreApprovalDetailsFrequency> get $valuesDefined => values
-      .where((value) => value != PreApprovalDetailsFrequency.unknown)
-      .toList();
+  static List<PreApprovalDetailsFrequency> get $valuesDefined => values.where((value) => value != PreApprovalDetailsFrequency.unknown).toList();
 }

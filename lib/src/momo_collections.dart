@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:mtn_momo_collections/src/generated/export.dart';
@@ -33,6 +31,8 @@ class MomoCollections {
       MomoInterceptor(
         subscriptionKey: subscriptionKey,
         targetEnvironment: targetEnvironment,
+        userId: userId,
+        apiKey: apiKey,
         tokenManager: _tokenManager,
         onTokenExpired: _fetchToken,
       ),
@@ -60,11 +60,7 @@ class MomoCollections {
 
     _tokenFetchFuture = () async {
       try {
-        final basicAuth =
-            'Basic ${base64Encode(utf8.encode('$userId:$apiKey'))}';
-        final response = await _collectionClient.createAccessToken(
-          authorization: basicAuth,
-        );
+        final response = await _collectionClient.createAccessToken();
         _tokenManager.setToken(response);
         return response.accessToken;
       } catch (e) {

@@ -2,13 +2,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, unused_import, invalid_annotation_target, unnecessary_import
 
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/account_holder_id_type.dart';
 import '../models/account_holder_id_type2.dart';
-import '../models/authorize_body.dart';
 import '../models/balance.dart';
 import '../models/basic_user_info_json_response.dart';
 import '../models/bcauthorize_response.dart';
@@ -35,15 +33,8 @@ abstract class CollectionClient {
   /// GetAccountBalance.
   ///
   /// Get the balance of own account.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v1_0/account/balance')
-  Future<Balance> getAccountBalance({
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-  });
+  Future<Balance> getAccountBalance();
 
   /// ValidateAccountHolderStatus.
   ///
@@ -52,16 +43,10 @@ abstract class CollectionClient {
   /// [accountHolderId] - The AccountHolder number. Validated according to the AccountHolder ID type (case Sensitive). <br> msisdn - Mobile Number validated according to ITU-T E.164. Validated with IsMSISDN<br> email - Validated to be a valid e-mail format. Validated with IsEmail.
   ///
   /// [accountHolderIdType] - Specifies the type of the AccountHolder ID. Allowed values [msisdn, email].  <br> accountHolderId should explicitly be in small letters.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/active')
   Future<void> validateAccountHolderStatus({
     @Path('accountHolderId') required String accountHolderId,
     @Path('accountHolderIdType') required String accountHolderIdType,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// RequesttoPay.
@@ -69,20 +54,14 @@ abstract class CollectionClient {
   /// This operation is used to request a payment from a consumer (Payer). The payer will be asked to authorize the payment. The transaction will be executed once the payer has authorized the payment. The requesttopay will be in status PENDING until the transaction is authorized or declined by the payer or it is timed out by the system. .
   ///  Status of the transaction can be validated by using the GET /requesttopay/\<resourceId\>.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
   /// [xCallbackUrl] - URL to the server where the callback should be sent.
   ///
   /// [xReferenceId] - Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example, validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @POST('/v1_0/requesttopay')
   Future<void> requesttoPay({
-    @Header('Authorization') String? authorization,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Header('X-Reference-Id') String? xReferenceId,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() RequestToPay? requestToPay,
+    @Body() RequestToPay? body,
   });
 
   /// RequesttoPayTransactionStatus.
@@ -90,33 +69,21 @@ abstract class CollectionClient {
   /// This operation is used to get the status of a request to pay. X-Reference-Id that was passed in the post is used as reference to the request.
   ///
   /// [referenceId] - UUID of transaction to get result. Reference id  used when creating the request to pay.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v1_0/requesttopay/{referenceId}')
   Future<RequestToPayResult> requesttoPayTransactionStatus({
     @Path('referenceId') required String referenceId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// bc-authorize.
   ///
   /// This operation is used to claim a consent by the account holder for the requested scopes.
   ///
-  /// [authorization] - Bearer Token. Replace with a valid oauth2 token received from oauth2 token endpoint in Wallet Platform.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
-  ///
   /// [xCallbackUrl] - URL to the server where the callback should be sent.
   @FormUrlEncoded()
   @POST('/v1_0/bc-authorize')
   Future<BcauthorizeResponse> bcAuthorize({
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Body() AuthorizeBody? authorizeBody,
+    @Body() dynamic body,
   });
 
   /// GetBasicUserinfo.
@@ -135,19 +102,10 @@ abstract class CollectionClient {
   /// ID (account ID).
   ///
   /// [accountHolderId] - ID of the account holder.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
-  @GET(
-    '/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo',
-  )
+  @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo')
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
-    @Path('accountHolderIdType')
-    required AccountHolderIdType accountHolderIdType,
+    @Path('accountHolderIdType') required AccountHolderIdType accountHolderIdType,
     @Path('accountHolderId') required String accountHolderId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// RequesttoPayDeliveryNotification.
@@ -159,18 +117,12 @@ abstract class CollectionClient {
   /// [notificationMessage] - The message to send in the delivery notification. Max              length 160.
   ///
   /// [language] - An ISO 639-1 or ISO 639-3 language code. The language is used to select the best matching notification template when sending the delivery notification to the end-user. A default value is used if not specified.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @POST('/v1_0/requesttopay/{referenceId}/Deliverynotification')
   Future<void> requesttoPayDeliveryNotification({
     @Path('referenceId') required String referenceId,
     @Header('notificationMessage') required String notificationMessage,
     @Header('Language') String? language,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() Deliverynotification? deliverynotification,
+    @Body() Deliverynotification? body,
   });
 
   /// GetAccountBalanceInSpecificCurrency.
@@ -178,55 +130,37 @@ abstract class CollectionClient {
   /// Get the balance of own account. Currency parameter passed in GET.
   ///
   /// [currency] - Should be in ISO4217 Currency.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v1_0/account/balance/{currency}')
   Future<Balance> getAccountBalanceInSpecificCurrency({
     @Path('currency') required String currency,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// RequestToWithdraw-V1.
   ///
   /// This operation is used to request a withdrawal (cash-out) from a consumer (Payer). The payer will be asked to authorize the withdrawal. The transaction will be executed once the payer has authorized the withdrawal.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
   /// [xCallbackUrl] - POST Callback URL to the server where the callback should be sent.
   ///
   /// [xReferenceId] - Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example, validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @POST('/v1_0/requesttowithdraw')
   Future<void> requestToWithdrawV1({
-    @Header('Authorization') String? authorization,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Header('X-Reference-Id') String? xReferenceId,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() RequestToPay? requestToPay,
+    @Body() RequestToPay? body,
   });
 
   /// RequestToWithdraw-V2.
   ///
   /// This operation is used to request a withdrawal (cash-out) from a consumer (Payer). The payer will be asked to authorize the withdrawal. The transaction will be executed once the payer has authorized the withdrawal.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
   /// [xCallbackUrl] - PUT Callback URL to the server where the callback should be sent.
   ///
   /// [xReferenceId] - Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example, validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @POST('/v2_0/requesttowithdraw')
   Future<void> requestToWithdrawV2({
-    @Header('Authorization') String? authorization,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Header('X-Reference-Id') String? xReferenceId,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() RequestToPay? requestToPay,
+    @Body() RequestToPay? body,
   });
 
   /// RequestToWithdrawTransactionStatus.
@@ -234,35 +168,23 @@ abstract class CollectionClient {
   /// This operation is used to get the status of a request to withdraw. X-Reference-Id that was passed in the post is used as reference to the request.
   ///
   /// [referenceId] - UUID of transaction to get result. Reference id  used when creating the RequestToWithdraw.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v1_0/requesttowithdraw/{referenceId}')
   Future<RequestToPayResult> requestToWithdrawTransactionStatus({
     @Path('referenceId') required String referenceId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// CreateInvoice.
   ///
   /// A merchant may use this in order to create an invoice that can be paid by an intended payer via any channel at a later stage.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
   /// [xCallbackUrl] - PUT Callback URL to send callback to once the invoice is completed.
   ///
   /// [xReferenceId] - Format - UUID. An id to uniquely identify the making of an invoice.
-  ///
-  /// [xTargetEnvironment] - The desired target environment to use that is allowed for the API user.
   @POST('/v2_0/invoice')
   Future<void> createInvoice({
-    @Header('Authorization') String? authorization,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Header('X-Reference-Id') String? xReferenceId,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() CreateInvoice? createInvoice,
+    @Body() CreateInvoice? body,
   });
 
   /// GetInvoiceStatus.
@@ -270,15 +192,9 @@ abstract class CollectionClient {
   /// This operation is used to get the status of an invoice. X-Reference-Id that was passed in the post is used as reference to the request.
   ///
   /// [xReferenceId] - UUID of transaction to get result. Reference id  used when creating the Invoice.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v2_0/invoice/{x-referenceId}')
   Future<InvoiceResult> getInvoiceStatus({
     @Path('x-referenceId') required String xReferenceId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// CancelInvoice.
@@ -287,41 +203,29 @@ abstract class CollectionClient {
   ///
   /// [referenceId] - UUID of transaction to get result. An id to uniquely identify the cancelling an Invoice.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. The desired target environment to use that is allowed for the API user.
-  ///
   /// [xReferenceId] - Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example, validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.
   ///
   /// [xCallbackUrl] - PUT Callback URL to send callback to once the invoice is completed.
   @DELETE('/v2_0/invoice/{referenceId}')
   Future<dynamic> cancelInvoice({
     @Path('referenceId') required String referenceId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Header('X-Reference-Id') String? xReferenceId,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Body() dynamic externalId,
+    @Body() dynamic body,
   });
 
   /// PreApproval.
   ///
   /// Preapproval operation is used to create a pre-approval.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
   /// [xCallbackUrl] - PUT Callback URL to send callback to once the invoice is completed.
   ///
   /// [xReferenceId] - Format - UUID. An id to uniquely identify the making of an invoice.
-  ///
-  /// [xTargetEnvironment] - The desired target environment to use that is allowed for the API user.
   @POST('/v2_0/preapproval')
   Future<void> preApproval({
-    @Header('Authorization') String? authorization,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Header('X-Reference-Id') String? xReferenceId,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() PreApproval? preApproval,
+    @Body() PreApproval? body,
   });
 
   /// GetPreApprovalStatus.
@@ -329,35 +233,23 @@ abstract class CollectionClient {
   /// This operation is used to get the status of a pre-approval. X-Reference-Id that was passed in the post is used as reference to the request.
   ///
   /// [referenceId] - UUID of transaction to get result. Reference id  used when creating the PreApproval.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v2_0/preapproval/{referenceId}')
   Future<PreApprovalResult> getPreApprovalStatus({
     @Path('referenceId') required String referenceId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// CreatePayments.
   ///
   /// Making it possible to perform payments via the partner gateway. This may be used to pay for external bills or to perform air-time top-ups.
   ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
   /// [xCallbackUrl] - PUT Callback URL to send callback to once the invoice is completed.
   ///
   /// [xReferenceId] - Format - UUID. An id to uniquely identify the making of an invoice.
-  ///
-  /// [xTargetEnvironment] - The desired target environment to use that is allowed for the API user.
   @POST('/v2_0/payment')
   Future<void> createPayments({
-    @Header('Authorization') String? authorization,
+    @Header('X-Reference-Id') required String xReferenceId,
     @Header('X-Callback-Url') String? xCallbackUrl,
-    @Header('X-Reference-Id') String? xReferenceId,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Body() CreatePayments? createPayments,
+    @Body() CreatePayments? body,
   });
 
   /// GetPaymentStatus.
@@ -365,56 +257,31 @@ abstract class CollectionClient {
   /// This operation is used to get the status of a Payment. X-Reference-Id that was passed in the post is used as reference to the request.
   ///
   /// [xReferenceId] - UUID of transaction to get result. Reference id  used when creating the Payment.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v2_0/payment/{x-referenceId}')
   Future<PaymentResult> getPaymentStatus({
     @Path('x-referenceId') required String xReferenceId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 
   /// CreateOauth2Token.
   ///
   /// This operation is used to claim a consent by the account holder for the requested scopes.
-  ///
-  /// [authorization] - Basic authentication header containing API user ID and API key. Should be sent in as B64 encoded.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @FormUrlEncoded()
   @POST('/oauth2/token/')
   Future<Oauth2TokenResponse> createOauth2Token({
-    @Header('Authorization') required String authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Part(name: 'grant_type') String? grantType,
-    @Part(name: 'auth_req_id') String? authReqId,
-    @Part(name: 'refresh_token') String? refreshToken,
+    @Body() dynamic body,
   });
 
   /// GetUserInfoWithConsent.
   ///
   /// This operation is used to claim a consent by the account holder for the requested scopes.
-  ///
-  /// [authorization] - Bearer Token. Replace with a valid oauth2 token received from oauth2 token endpoint in Wallet Platform.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/oauth2/v1_0/userinfo')
-  Future<ConsentkycResponse> getUserInfoWithConsent({
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-  });
+  Future<ConsentkycResponse> getUserInfoWithConsent();
 
   /// CreateAccessToken.
   ///
   /// This operation is used to create an access token which can then be used to authorize and authenticate towards the other end-points of the API.
-  ///
-  /// [authorization] - Basic authentication header containing API user ID and API key. Should be sent in as B64 encoded.
   @POST('/token/')
-  Future<TokenPost200ApplicationJsonResponse> createAccessToken({
-    @Header('Authorization') required String authorization,
-  });
+  Future<TokenPost200ApplicationJsonResponse> createAccessToken();
 
   /// GetApprovedPreApprovals.
   ///
@@ -435,32 +302,19 @@ abstract class CollectionClient {
   /// email - E-mail. Validated with IsEmail.
   /// id - Internal Id of Account Holder. Validated with IsLongString.
   /// alias - Alias of the party. Validated with IsAlias.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
   @GET('/v1_0/preapprovals/{accountHolderIdType}/{accountHolderId}')
   Future<List<PreApprovalDetails>> getApprovedPreApprovals({
     @Path('accountHolderId') required String accountHolderId,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
-    @Path('accountHolderIdType')
-    required AccountHolderIdType2 accountHolderIdType,
+    @Path('accountHolderIdType') required AccountHolderIdType2 accountHolderIdType,
   });
 
   /// CancelPreApproval.
   ///
   /// This operation is used to cancel a pre-approval. It is possible to cancel only that preapproval which is in approved state and the requesting Account Holder (Service Provider or Merchant) is the payee.
   ///
-  /// [preapprovalid] - UUID of transaction to get result. Reference id  used when creating the PreApproval.
-  ///
-  /// [authorization] - Bearer Authentication Token generated using CreateAccessToken API Call.
-  ///
-  /// [xTargetEnvironment] - The identifier of the Wallet Platform system where the transaction shall be processed. This parameter is used to route the request to the Wallet Platform system that will initiate the transaction.
+  /// [preapprovalid] - System Id linked to the approved PreApproval. Obtained by calling the GetApprovedPreApprovals API.
   @DELETE('/v1_0/preapproval/{preapprovalid}')
   Future<void> cancelPreApproval({
     @Path('preapprovalid') required String preapprovalid,
-    @Header('Authorization') String? authorization,
-    @Header('X-Target-Environment') String? xTargetEnvironment,
   });
 }

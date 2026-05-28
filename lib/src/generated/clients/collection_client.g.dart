@@ -20,18 +20,10 @@ class _CollectionClient implements CollectionClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<Balance> getAccountBalance({
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<Balance> getAccountBalance() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Balance>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -58,17 +50,10 @@ class _CollectionClient implements CollectionClient {
   Future<void> validateAccountHolderStatus({
     required String accountHolderId,
     required String accountHolderIdType,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -85,23 +70,19 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<void> requesttoPay({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    RequestToPay? requestToPay,
+    RequestToPay? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = requestToPay;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -118,17 +99,10 @@ class _CollectionClient implements CollectionClient {
   @override
   Future<RequestToPayResult> requesttoPayTransactionStatus({
     required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<RequestToPayResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -153,21 +127,15 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<BcauthorizeResponse> bcAuthorize({
-    String? authorization,
-    String? xTargetEnvironment,
     String? xCallbackUrl,
-    AuthorizeBody? authorizeBody,
+    dynamic body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-      r'X-Callback-Url': xCallbackUrl,
-    };
+    final _headers = <String, dynamic>{r'X-Callback-Url': xCallbackUrl};
     _headers.removeWhere((k, v) => v == null);
-    final _data = authorizeBody;
+    final _data = body;
     final _options = _setStreamType<BcauthorizeResponse>(
       Options(
             method: 'POST',
@@ -198,17 +166,10 @@ class _CollectionClient implements CollectionClient {
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
     required AccountHolderIdType accountHolderIdType,
     required String accountHolderId,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<BasicUserInfoJsonResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -236,9 +197,7 @@ class _CollectionClient implements CollectionClient {
     required String referenceId,
     required String notificationMessage,
     String? language,
-    String? authorization,
-    String? xTargetEnvironment,
-    Deliverynotification? deliverynotification,
+    Deliverynotification? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -246,11 +205,9 @@ class _CollectionClient implements CollectionClient {
     final _headers = <String, dynamic>{
       r'notificationMessage': notificationMessage,
       r'Language': language,
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = deliverynotification;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -267,17 +224,10 @@ class _CollectionClient implements CollectionClient {
   @override
   Future<Balance> getAccountBalanceInSpecificCurrency({
     required String currency,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Balance>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -302,23 +252,19 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<void> requestToWithdrawV1({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    RequestToPay? requestToPay,
+    RequestToPay? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = requestToPay;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -334,23 +280,19 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<void> requestToWithdrawV2({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    RequestToPay? requestToPay,
+    RequestToPay? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = requestToPay;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -367,17 +309,10 @@ class _CollectionClient implements CollectionClient {
   @override
   Future<RequestToPayResult> requestToWithdrawTransactionStatus({
     required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<RequestToPayResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -402,23 +337,19 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<void> createInvoice({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    CreateInvoice? createInvoice,
+    CreateInvoice? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = createInvoice;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -433,19 +364,10 @@ class _CollectionClient implements CollectionClient {
   }
 
   @override
-  Future<InvoiceResult> getInvoiceStatus({
-    required String xReferenceId,
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<InvoiceResult> getInvoiceStatus({required String xReferenceId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<InvoiceResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -471,23 +393,19 @@ class _CollectionClient implements CollectionClient {
   @override
   Future<dynamic> cancelInvoice({
     required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
-    String? xReferenceId,
+    required String xReferenceId,
     String? xCallbackUrl,
-    dynamic externalId,
+    dynamic body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
       r'X-Reference-Id': xReferenceId,
       r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = externalId;
+    final _data = body;
     final _options = _setStreamType<dynamic>(
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
@@ -505,23 +423,19 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<void> preApproval({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    PreApproval? preApproval,
+    PreApproval? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = preApproval;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -538,17 +452,10 @@ class _CollectionClient implements CollectionClient {
   @override
   Future<PreApprovalResult> getPreApprovalStatus({
     required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<PreApprovalResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -573,23 +480,19 @@ class _CollectionClient implements CollectionClient {
 
   @override
   Future<void> createPayments({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    CreatePayments? createPayments,
+    CreatePayments? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = createPayments;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -604,19 +507,10 @@ class _CollectionClient implements CollectionClient {
   }
 
   @override
-  Future<PaymentResult> getPaymentStatus({
-    required String xReferenceId,
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<PaymentResult> getPaymentStatus({required String xReferenceId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<PaymentResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -640,31 +534,11 @@ class _CollectionClient implements CollectionClient {
   }
 
   @override
-  Future<Oauth2TokenResponse> createOauth2Token({
-    required String authorization,
-    String? xTargetEnvironment,
-    String? grantType,
-    String? authReqId,
-    String? refreshToken,
-  }) async {
+  Future<Oauth2TokenResponse> createOauth2Token({dynamic body}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
-    final _data = FormData();
-    if (grantType != null) {
-      _data.fields.add(MapEntry('grant_type', grantType));
-    }
-    if (authReqId != null) {
-      _data.fields.add(MapEntry('auth_req_id', authReqId));
-    }
-    if (refreshToken != null) {
-      _data.fields.add(MapEntry('refresh_token', refreshToken));
-    }
+    final _headers = <String, dynamic>{};
+    final _data = body;
     final _options = _setStreamType<Oauth2TokenResponse>(
       Options(
             method: 'POST',
@@ -692,18 +566,10 @@ class _CollectionClient implements CollectionClient {
   }
 
   @override
-  Future<ConsentkycResponse> getUserInfoWithConsent({
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<ConsentkycResponse> getUserInfoWithConsent() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<ConsentkycResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -727,13 +593,10 @@ class _CollectionClient implements CollectionClient {
   }
 
   @override
-  Future<TokenPost200ApplicationJsonResponse> createAccessToken({
-    required String authorization,
-  }) async {
+  Future<TokenPost200ApplicationJsonResponse> createAccessToken() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': authorization};
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<TokenPost200ApplicationJsonResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
@@ -759,18 +622,11 @@ class _CollectionClient implements CollectionClient {
   @override
   Future<List<PreApprovalDetails>> getApprovedPreApprovals({
     required String accountHolderId,
-    String? authorization,
-    String? xTargetEnvironment,
     required AccountHolderIdType2 accountHolderIdType,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<List<PreApprovalDetails>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -799,19 +655,10 @@ class _CollectionClient implements CollectionClient {
   }
 
   @override
-  Future<void> cancelPreApproval({
-    required String preapprovalid,
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<void> cancelPreApproval({required String preapprovalid}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
       Options(method: 'DELETE', headers: _headers, extra: _extra)

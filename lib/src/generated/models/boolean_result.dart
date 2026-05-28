@@ -8,9 +8,13 @@ part 'boolean_result.mapper.dart';
 
 @MappableClass()
 class BooleanResult with BooleanResultMappable {
-  const BooleanResult({this.result});
+  const BooleanResult({
+    this.result,
+  });
   final bool? result;
 
-  static BooleanResult fromJson(Map<String, dynamic> json) =>
-      BooleanResultMapper.ensureInitialized().decodeMap<BooleanResult>(json);
+
+  static BooleanResult fromJson(Map<String, dynamic> json) => BooleanResultMapper.ensureInitialized().decodeMap<BooleanResult>(json);
+
 }
+

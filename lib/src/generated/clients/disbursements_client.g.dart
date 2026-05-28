@@ -20,18 +20,10 @@ class _DisbursementsClient implements DisbursementsClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<Balance> getAccountBalance({
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<Balance> getAccountBalance() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Balance>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -58,17 +50,10 @@ class _DisbursementsClient implements DisbursementsClient {
   Future<void> validateAccountHolderStatus({
     required String accountHolderId,
     required String accountHolderIdType,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -86,17 +71,10 @@ class _DisbursementsClient implements DisbursementsClient {
   @override
   Future<TransferResult> getTransferStatus({
     required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<TransferResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -122,18 +100,11 @@ class _DisbursementsClient implements DisbursementsClient {
   @override
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
     required String accountHolderId,
-    String? authorization,
-    String? xTargetEnvironment,
     required AccountHolderIdType accountHolderIdType,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<BasicUserInfoJsonResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -158,46 +129,15 @@ class _DisbursementsClient implements DisbursementsClient {
 
   @override
   Future<BcauthorizeResponse> bcAuthorize({
-    String? authorization,
-    String? xTargetEnvironment,
     String? xCallbackUrl,
-    String? scope,
-    String? loginHint,
-    AccessType? accessType,
-    int? consentValidIn,
-    String? clientNotificationToken,
-    String? scopeInstruction,
+    dynamic body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-      r'X-Callback-Url': xCallbackUrl,
-    };
+    final _headers = <String, dynamic>{r'X-Callback-Url': xCallbackUrl};
     _headers.removeWhere((k, v) => v == null);
-    final _data = FormData();
-    if (scope != null) {
-      _data.fields.add(MapEntry('scope', scope));
-    }
-    if (loginHint != null) {
-      _data.fields.add(MapEntry('login_hint', loginHint));
-    }
-    if (accessType != null) {
-      _data.fields.add(MapEntry('access_type', accessType.toString()));
-    }
-    if (consentValidIn != null) {
-      _data.fields.add(MapEntry('consent_valid_in', consentValidIn.toString()));
-    }
-    if (clientNotificationToken != null) {
-      _data.fields.add(
-        MapEntry('client_notification_token', clientNotificationToken),
-      );
-    }
-    if (scopeInstruction != null) {
-      _data.fields.add(MapEntry('scope_instruction', scopeInstruction));
-    }
+    final _data = body;
     final _options = _setStreamType<BcauthorizeResponse>(
       Options(
             method: 'POST',
@@ -227,17 +167,10 @@ class _DisbursementsClient implements DisbursementsClient {
   @override
   Future<Balance> getAccountBalanceInSpecificCurrency({
     required String currency,
-    String? authorization,
-    String? xTargetEnvironment,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Balance>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -262,23 +195,19 @@ class _DisbursementsClient implements DisbursementsClient {
 
   @override
   Future<void> depositV1({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    Transfer? transfer,
+    Transfer? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = transfer;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -294,23 +223,19 @@ class _DisbursementsClient implements DisbursementsClient {
 
   @override
   Future<void> depositV2({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    Transfer? transfer,
+    Transfer? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = transfer;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -325,19 +250,10 @@ class _DisbursementsClient implements DisbursementsClient {
   }
 
   @override
-  Future<TransferResult> getDepositStatus({
-    required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<TransferResult> getDepositStatus({required String referenceId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<TransferResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -362,23 +278,19 @@ class _DisbursementsClient implements DisbursementsClient {
 
   @override
   Future<void> refundV1({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    Refund? refund,
+    Refund? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = refund;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -394,23 +306,19 @@ class _DisbursementsClient implements DisbursementsClient {
 
   @override
   Future<void> refundV2({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    Refund? refund,
+    Refund? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = refund;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -425,19 +333,10 @@ class _DisbursementsClient implements DisbursementsClient {
   }
 
   @override
-  Future<RefundResult> getRefundStatus({
-    required String referenceId,
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<RefundResult> getRefundStatus({required String referenceId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<RefundResult>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -461,31 +360,11 @@ class _DisbursementsClient implements DisbursementsClient {
   }
 
   @override
-  Future<Oauth2TokenResponse> createOauth2Token({
-    required String authorization,
-    String? xTargetEnvironment,
-    String? grantType,
-    String? authReqId,
-    String? refreshToken,
-  }) async {
+  Future<Oauth2TokenResponse> createOauth2Token({dynamic body}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
-    final _data = FormData();
-    if (grantType != null) {
-      _data.fields.add(MapEntry('grant_type', grantType));
-    }
-    if (authReqId != null) {
-      _data.fields.add(MapEntry('auth_req_id', authReqId));
-    }
-    if (refreshToken != null) {
-      _data.fields.add(MapEntry('refresh_token', refreshToken));
-    }
+    final _headers = <String, dynamic>{};
+    final _data = body;
     final _options = _setStreamType<Oauth2TokenResponse>(
       Options(
             method: 'POST',
@@ -513,18 +392,10 @@ class _DisbursementsClient implements DisbursementsClient {
   }
 
   @override
-  Future<ConsentkycResponse> getUserInfoWithConsent({
-    String? authorization,
-    String? xTargetEnvironment,
-  }) async {
+  Future<ConsentkycResponse> getUserInfoWithConsent() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Target-Environment': xTargetEnvironment,
-    };
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<ConsentkycResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
@@ -548,13 +419,10 @@ class _DisbursementsClient implements DisbursementsClient {
   }
 
   @override
-  Future<TokenPost200ApplicationJsonResponse> createAccessToken({
-    required String authorization,
-  }) async {
+  Future<TokenPost200ApplicationJsonResponse> createAccessToken() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': authorization};
-    _headers.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<TokenPost200ApplicationJsonResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
@@ -579,23 +447,19 @@ class _DisbursementsClient implements DisbursementsClient {
 
   @override
   Future<void> transfer({
-    String? authorization,
+    required String xReferenceId,
     String? xCallbackUrl,
-    String? xReferenceId,
-    String? xTargetEnvironment,
-    Transfer? transfer,
+    Transfer? body,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
-      r'Authorization': authorization,
-      r'X-Callback-Url': xCallbackUrl,
       r'X-Reference-Id': xReferenceId,
-      r'X-Target-Environment': xTargetEnvironment,
+      r'X-Callback-Url': xCallbackUrl,
     };
     _headers.removeWhere((k, v) => v == null);
-    final _data = transfer;
+    final _data = body;
     final _options = _setStreamType<void>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(

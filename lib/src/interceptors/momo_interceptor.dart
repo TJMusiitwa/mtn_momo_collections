@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 
@@ -7,6 +9,8 @@ import '../token_manager.dart';
 class MomoInterceptor extends Interceptor {
   final String subscriptionKey;
   final String targetEnvironment;
+  final String userId;
+  final String apiKey;
   final TokenManager tokenManager;
   final Future<String?> Function() onTokenExpired;
   final Uuid _uuid = const Uuid();
@@ -14,6 +18,8 @@ class MomoInterceptor extends Interceptor {
   MomoInterceptor({
     required this.subscriptionKey,
     required this.targetEnvironment,
+    required this.userId,
+    required this.apiKey,
     required this.tokenManager,
     required this.onTokenExpired,
   });
@@ -35,8 +41,13 @@ class MomoInterceptor extends Interceptor {
       options.headers['X-Reference-Id'] = _uuid.v4();
     }
 
-    // Skip Auth for token creation endpoints
+    // Skip Auth for token creation endpoints, injecting Basic Auth for /token
     if (options.path.contains('/token') || options.path.contains('/apiuser')) {
+      if (options.path.contains('/token')) {
+        final basicAuth =
+            'Basic ${base64Encode(utf8.encode('$userId:$apiKey'))}';
+        options.headers['Authorization'] = basicAuth;
+      }
       return handler.next(options);
     }
 

@@ -8,23 +8,21 @@ part 'pre_approval_result_status.mapper.dart';
 
 @MappableEnum(defaultValue: PreApprovalResultStatus.unknown)
 enum PreApprovalResultStatus {
-  @MappableValue('PENDING')
+  @MappableValue('PENDING') 
   pending,
 
-  @MappableValue('SUCCESSFUL')
+  @MappableValue('SUCCESSFUL') 
   successful,
 
-  @MappableValue('FAILED')
+  @MappableValue('FAILED') 
   failed,
 
-  @MappableValue('unknown')
+  @MappableValue('unknown') 
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<PreApprovalResultStatus> get $valuesDefined => values
-      .where((value) => value != PreApprovalResultStatus.unknown)
-      .toList();
+  static List<PreApprovalResultStatus> get $valuesDefined => values.where((value) => value != PreApprovalResultStatus.unknown).toList();
 }

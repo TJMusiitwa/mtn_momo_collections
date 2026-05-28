@@ -23,28 +23,24 @@ class RefundResult with RefundResultMappable {
     this.status,
     this.reason,
   });
-
   /// Amount that will be debited from the payer account.
   final String? amount;
-
   /// ISO4217 Currency
   final String? currency;
-
   /// Financial transactionIdd from mobile money manager.<br> Used to connect to the specific financial transaction made in the account
   final String? financialTransactionId;
-
   /// External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.
   final String? externalId;
   final Party? payee;
-
   /// Message that will be written in the payer transaction history message field.
   final String? payerMessage;
-
   /// Message that will be written in the payee transaction history note field.
   final String? payeeNote;
   final RefundResultStatus? status;
   final ErrorReason? reason;
 
-  static RefundResult fromJson(Map<String, dynamic> json) =>
-      RefundResultMapper.ensureInitialized().decodeMap<RefundResult>(json);
+
+  static RefundResult fromJson(Map<String, dynamic> json) => RefundResultMapper.ensureInitialized().decodeMap<RefundResult>(json);
+
 }
+

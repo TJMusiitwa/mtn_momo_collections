@@ -8,22 +8,21 @@ part 'transfer_result_status.mapper.dart';
 
 @MappableEnum(defaultValue: TransferResultStatus.unknown)
 enum TransferResultStatus {
-  @MappableValue('PENDING')
+  @MappableValue('PENDING') 
   pending,
 
-  @MappableValue('SUCCESSFUL')
+  @MappableValue('SUCCESSFUL') 
   successful,
 
-  @MappableValue('FAILED')
+  @MappableValue('FAILED') 
   failed,
 
-  @MappableValue('unknown')
+  @MappableValue('unknown') 
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<TransferResultStatus> get $valuesDefined =>
-      values.where((value) => value != TransferResultStatus.unknown).toList();
+  static List<TransferResultStatus> get $valuesDefined => values.where((value) => value != TransferResultStatus.unknown).toList();
 }

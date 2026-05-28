@@ -12,8 +12,7 @@ part 'sandbox_provisioning_client.g.dart';
 
 @RestApi()
 abstract class SandboxProvisioningClient {
-  factory SandboxProvisioningClient(Dio dio, {String? baseUrl}) =
-      _SandboxProvisioningClient;
+  factory SandboxProvisioningClient(Dio dio, {String? baseUrl}) = _SandboxProvisioningClient;
 
   /// /apiuser - POST.
   ///
@@ -23,7 +22,7 @@ abstract class SandboxProvisioningClient {
   @POST('/v1_0/apiuser')
   Future<void> postV10Apiuser({
     @Header('X-Reference-Id') required String xReferenceId,
-    @Body() ApiUser? apiUser,
+    @Body() ApiUser? body,
   });
 
   /// /v1_0/apiuser/{X-Reference-Id}/apikey - POST.

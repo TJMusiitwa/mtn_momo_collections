@@ -8,13 +8,14 @@ part 'api_user_key_result.mapper.dart';
 
 @MappableClass()
 class ApiUserKeyResult with ApiUserKeyResultMappable {
-  const ApiUserKeyResult({this.apiKey});
-
+  const ApiUserKeyResult({
+    this.apiKey,
+  });
   /// The created API user key
   final String? apiKey;
 
-  static ApiUserKeyResult fromJson(Map<String, dynamic> json) =>
-      ApiUserKeyResultMapper.ensureInitialized().decodeMap<ApiUserKeyResult>(
-        json,
-      );
+
+  static ApiUserKeyResult fromJson(Map<String, dynamic> json) => ApiUserKeyResultMapper.ensureInitialized().decodeMap<ApiUserKeyResult>(json);
+
 }
+

@@ -9,11 +9,14 @@ part 'api_user.mapper.dart';
 /// The create API user information
 @MappableClass()
 class ApiUser with ApiUserMappable {
-  const ApiUser({this.providerCallbackHost});
-
+  const ApiUser({
+    this.providerCallbackHost,
+  });
   /// The provider callback host
   final String? providerCallbackHost;
 
-  static ApiUser fromJson(Map<String, dynamic> json) =>
-      ApiUserMapper.ensureInitialized().decodeMap<ApiUser>(json);
+
+  static ApiUser fromJson(Map<String, dynamic> json) => ApiUserMapper.ensureInitialized().decodeMap<ApiUser>(json);
+
 }
+

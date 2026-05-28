@@ -17,12 +17,13 @@ class ApiUserResult with ApiUserResultMappable {
     this.paymentServerUrl,
     this.targetEnvironment,
   });
-
   /// The provider callback host
   final String? providerCallbackHost;
   final PaymentServerUrl? paymentServerUrl;
   final TargetEnvironment? targetEnvironment;
 
-  static ApiUserResult fromJson(Map<String, dynamic> json) =>
-      ApiUserResultMapper.ensureInitialized().decodeMap<ApiUserResult>(json);
+
+  static ApiUserResult fromJson(Map<String, dynamic> json) => ApiUserResultMapper.ensureInitialized().decodeMap<ApiUserResult>(json);
+
 }
+
