@@ -21,6 +21,8 @@ void main() async {
   final dio = Dio(
     BaseOptions(
       baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
       headers: {
         'Ocp-Apim-Subscription-Key': subscriptionKey,
         'Content-Type': 'application/json',
@@ -35,7 +37,7 @@ void main() async {
   try {
     await sandboxClient.postV10Apiuser(
       xReferenceId: userUuid,
-      apiUser: ApiUser(providerCallbackHost: 'callbacks.example.com'),
+      body: ApiUser(providerCallbackHost: 'callbacks.example.com'),
     );
     print('   Success');
   } catch (e) {
@@ -43,8 +45,17 @@ void main() async {
     return;
   }
 
-  print('   Waiting for propagation...');
-  await Future.delayed(Duration(seconds: 2));
+  print('   Waiting for propagation (5 seconds)...');
+  await Future.delayed(Duration(seconds: 5));
+
+  print('1b. Verifying API User Existence');
+  try {
+    await sandboxClient.getV10Apiuser(xReferenceId: userUuid);
+    print('   User exists!');
+  } catch (e) {
+    print('   Failed to verify user: $e');
+    return;
+  }
 
   print('2. Creating API Key');
   String? apiKey;

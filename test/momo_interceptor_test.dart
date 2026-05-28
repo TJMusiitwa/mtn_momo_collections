@@ -56,6 +56,8 @@ void main() {
         MomoInterceptor(
           subscriptionKey: 'test_subscription_key_123',
           targetEnvironment: 'sandbox',
+          userId: 'test_user_id_123',
+          apiKey: 'test_api_key_123',
           tokenManager: tokenManager,
           onTokenExpired: onTokenExpiredMock,
         ),
