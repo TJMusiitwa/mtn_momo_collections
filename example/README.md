@@ -9,7 +9,7 @@ This directory contains executable code examples demonstrating how to get the mo
 
 ## 📱 Interactive SDK Playground App
 
-We have built a premium, state-of-the-art interactive **SDK Playground App** in Flutter, located at [main.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/lib/main.dart).
+We have built a premium, state-of-the-art interactive **SDK Playground App** in Flutter, located at [main.dart](lib/main.dart).
 
 It offers a gorgeous visual interface adhering strictly to MTN's official **Sunshine Yellow & Black** brand guidelines:
 - **Sandbox User & Key Generator**: Tap once to programmatically generate dynamic Sandbox credentials.
@@ -33,46 +33,46 @@ If you are developing backend systems, scripts, or console apps, you can run and
 
 ### 1. Sandbox User & API Key Generation
 Provision a new sandbox user ID and retrieve its corresponding API key.
-* **File**: [sandbox_provisioning_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/sandbox_provisioning_example.dart)
+* **File**: [sandbox_provisioning_example.dart](lib/sandbox_provisioning_example.dart)
 * **Execution**:
   ```bash
-  dart example/sandbox_provisioning_example.dart
+  dart example/lib/sandbox_provisioning_example.dart
   ```
 
 ### 2. Mobile Collections Workflow
 Initiate customer payments (USSD push prompts), poll payment status, and verify merchant balance.
-* **File**: [collections_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/collections_example.dart)
+* **File**: [collections_example.dart](lib/collections_example.dart)
 * **Execution**:
   ```bash
   export MTN_MOMO_SUBSCRIPTION_KEY="your_sub_key"
   export MTN_MOMO_USER_ID="your_provisioned_user_id"
   export MTN_MOMO_API_KEY="your_provisioned_api_key"
-  dart example/collections_example.dart
+  dart example/lib/collections_example.dart
   ```
 
 ### 3. Mobile Payouts & Disbursements Workflow
 Check recipient wallet status, disburse funds directly to a mobile number, and poll the transfer status.
-* **File**: [disbursements_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/disbursements_example.dart)
+* **File**: [disbursements_example.dart](lib/disbursements_example.dart)
 * **Execution**:
   ```bash
   export MTN_MOMO_SUBSCRIPTION_KEY="your_sub_key"
   export MTN_MOMO_USER_ID="your_provisioned_user_id"
   export MTN_MOMO_API_KEY="your_provisioned_api_key"
-  dart example/disbursements_example.dart
+  dart example/lib/disbursements_example.dart
   ```
 
-### 4. Robust Error & Business Exception Handling
+### 4. Robust Error & Business Business Exception Handling
 See how the SDK automatically intercepts raw API faults and maps them into clear, actionable `MtnMomoException` types and `MtnMomoErrorCode` enums.
-* **File**: [resilient_error_handling_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/resilient_error_handling_example.dart)
+* **File**: [resilient_error_handling_example.dart](lib/resilient_error_handling_example.dart)
 * **Execution**:
   ```bash
-  dart example/resilient_error_handling_example.dart
+  dart example/lib/resilient_error_handling_example.dart
   ```
 
 ### 5. Multi-Threaded Access Token Deduplication
 Demonstrate how the SDK automatically deduplicates concurrent access token refreshes when multiple parallel network calls are fired at once.
-* **File**: [thread_safety_deduplication_example.dart](file:///Users/jonathanmusiitwa/Desktop/FLUTTER_PROJ/mtn_momo_collections/example/thread_safety_deduplication_example.dart)
+* **File**: [thread_safety_deduplication_example.dart](lib/thread_safety_deduplication_example.dart)
 * **Execution**:
   ```bash
-  dart example/thread_safety_deduplication_example.dart
+  dart example/lib/thread_safety_deduplication_example.dart
   ```

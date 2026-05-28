@@ -46,13 +46,13 @@ The project relies on [swagger_parser](https://pub.dev/packages/swagger_parser) 
 * **Output Path**: Generated files reside inside `lib/src/generated/` to isolate them from manual SDK enhancements.
 * **JSON Serializer**: `dart_mappable` is used exclusively. Avoid using standard `json_serializable` as `dart_ mappable` provides superior polymorphism support, type safety, and clean builder methods.
 * **Root Client**: Set to `false` (we compose our own unified `MtnMomoClient` manually in `lib/src/generated/mtn_momo_client.dart`).
-* **Optional Headers**: Transaction reference IDs and authentication headers are configured as optional in the OpenAPI JSON schemas, enabling a clean developer experience when utilizing `MomoCollections` (where the interceptor injects authentication and reference UUIDs automatically).
+* **Skipped Headers**: To enable a clean, developer-shielded experience when utilizing `MomoCollections` (where the interceptor injects dynamic auth and environment headers automatically), the `skipped_parameters` array is configured in `swagger_parser.yaml` to omit `Authorization` and `X-Target-Environment` from client method signatures. This leaves `X-Reference-Id` as a standard parameter so developers can provide custom transaction-tracking UUIDs.
 
 ### Code Generation Pipeline
 To compile changes to schemas, run the following pipeline:
 ```bash
-flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run swagger_parser
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 ---
@@ -79,10 +79,7 @@ Future<String?> _fetchToken() async {
 
   _tokenFetchFuture = () async {
     try {
-      final basicAuth = 'Basic ${base64Encode(utf8.encode('$userId:$apiKey'))}';
-      final response = await _collectionClient.createAccessToken(
-        authorization: basicAuth,
-      );
+      final response = await _collectionClient.createAccessToken();
       _tokenManager.setToken(response);
       return response.accessToken;
     } catch (e) {
