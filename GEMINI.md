@@ -142,7 +142,7 @@ Testing is treated as a P0 requirement for ensuring zero regression in API schem
 ### Execution Commands
 * **Run entire unit suite**:
   ```bash
-  flutter test
+  dart test
   ```
 * **Run manual sandbox validation**:
   Ensure a valid `subscriptionKey` is defined in `test/manual_sandbox_test.dart`, then execute:
