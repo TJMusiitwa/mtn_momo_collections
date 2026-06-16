@@ -61,7 +61,7 @@ dependencies:
 
 Run pub get:
 ```bash
-flutter pub get
+dart pub get
 ```
 
 ### Best Practice: Product Token Isolation
@@ -370,14 +370,14 @@ If you modify the Swagger specifications under the `schemes/` directory, you mus
 2. **Build Generated Files**:
    Execute the Dart compiler code generator:
    ```bash
-   flutter pub get
-   flutter pub run build_runner build --delete-conflicting-outputs
+   dart pub get
+   dart run build_runner build --delete-conflicting-outputs
    ```
 
 3. **Running SDK Tests**:
    Run the regression test suite:
    ```bash
-   flutter test
+   dart test
    ```
 
 ---
