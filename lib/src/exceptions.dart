@@ -64,6 +64,10 @@ enum MtnMomoErrorCode {
     'ACCESS_DENIED',
     'Invalid subscription key or inactive product subscription.',
   ),
+  notAllowedTargetEnvironment(
+    'NOT_ALLOWED_TARGET_ENVIRONMENT',
+    'Access to target environment is forbidden.',
+  ),
   unknown('unknown', 'An unknown or unmapped error occurred.');
 
   final String code;

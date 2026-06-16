@@ -12,7 +12,7 @@ class MomoInterceptor extends Interceptor {
   final String userId;
   final String apiKey;
   final TokenManager tokenManager;
-  final Future<String?> Function() onTokenExpired;
+  final Future<String?> Function(RequestOptions options) onTokenExpired;
   final Uuid _uuid = const Uuid();
 
   MomoInterceptor({
@@ -29,6 +29,23 @@ class MomoInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    // Convert custom request body objects to Map/JSON using dart_mappable
+    if (options.data != null &&
+        options.data is! Map &&
+        options.data is! List &&
+        options.data is! String &&
+        options.data is! FormData) {
+      try {
+        options.data = (options.data as dynamic).toMap();
+      } catch (_) {
+        try {
+          options.data = (options.data as dynamic).toJson();
+        } catch (_) {
+          // Keep as is if no serialization method exists
+        }
+      }
+    }
+
     // Inject Subscription Key
     options.headers['Ocp-Apim-Subscription-Key'] = subscriptionKey;
 
@@ -54,7 +71,7 @@ class MomoInterceptor extends Interceptor {
     // Handle Authorization
     if (!tokenManager.isValid) {
       try {
-        final newToken = await onTokenExpired();
+        final newToken = await onTokenExpired(options);
         if (newToken == null) {
           return handler.reject(
             DioException(

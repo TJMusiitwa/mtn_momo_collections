@@ -1,7 +1,9 @@
+import 'package:dart_mappable/dart_mappable.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:mtn_momo_collections/src/generated/export.dart';
 import 'package:mtn_momo_collections/src/interceptors/momo_interceptor.dart';
+import 'package:mtn_momo_collections/src/mappers/error_reason_custom_mapper.dart';
 import 'package:mtn_momo_collections/src/token_manager.dart';
 
 class MomoCollections {
@@ -25,7 +27,18 @@ class MomoCollections {
     required this.apiKey,
     this.targetEnvironment = 'sandbox',
   }) {
-    _dio = Dio(BaseOptions(baseUrl: baseUrl));
+    // Register custom mapper for ErrorReason to handle String/Map mismatch in Sandbox
+    // We must ensure the generated mapper is initialized first, otherwise its lazy
+    // initialization will overwrite our custom mapper in the global container.
+    ErrorReasonMapper.ensureInitialized();
+    MapperContainer.globals.use(const ErrorReasonCustomMapper());
+
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
 
     _dio.interceptors.add(
       MomoInterceptor(
@@ -38,8 +51,11 @@ class MomoCollections {
       ),
     );
 
-    _collectionClient = CollectionClient(_dio, baseUrl: baseUrl);
-    _disbursementsClient = DisbursementsClient(_dio, baseUrl: baseUrl);
+    _collectionClient = CollectionClient(_dio, baseUrl: '$baseUrl/collection');
+    _disbursementsClient = DisbursementsClient(
+      _dio,
+      baseUrl: '$baseUrl/disbursement',
+    );
     _sandboxProvisioningClient = SandboxProvisioningClient(
       _dio,
       baseUrl: baseUrl,
@@ -53,14 +69,17 @@ class MomoCollections {
 
   Future<String?>? _tokenFetchFuture;
 
-  Future<String?> _fetchToken() async {
+  Future<String?> _fetchToken(RequestOptions options) async {
     if (_tokenFetchFuture != null) {
       return _tokenFetchFuture;
     }
 
     _tokenFetchFuture = () async {
       try {
-        final response = await _collectionClient.createAccessToken();
+        final isDisbursement = options.baseUrl.contains('/disbursement');
+        final response = isDisbursement
+            ? await _disbursementsClient.createAccessToken()
+            : await _collectionClient.createAccessToken();
         _tokenManager.setToken(response);
         return response.accessToken;
       } catch (e) {
