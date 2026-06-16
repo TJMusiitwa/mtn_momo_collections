@@ -7,8 +7,33 @@ import 'package:mtn_momo_collections/mtn_momo_collections.dart';
 import 'package:uuid/uuid.dart';
 
 final _logger = Logger(
+  filter: ProductionFilter(),
   printer: SimplePrinter(colors: true),
 );
+
+Map<String, String> _loadEnv() {
+  final file = File('.env');
+  if (!file.existsSync()) {
+    return {};
+  }
+  final lines = file.readAsLinesSync();
+  final env = <String, String>{};
+  for (final line in lines) {
+    if (line.trim().isEmpty || line.trim().startsWith('#')) continue;
+    final parts = line.split('=');
+    if (parts.length >= 2) {
+      final key = parts[0].trim();
+      var val = parts.sublist(1).join('=').trim();
+      if (val.startsWith('"') && val.endsWith('"')) {
+        val = val.substring(1, val.length - 1);
+      } else if (val.startsWith("'") && val.endsWith("'")) {
+        val = val.substring(1, val.length - 1);
+      }
+      env[key] = val;
+    }
+  }
+  return env;
+}
 
 /// Standalone CLI Example: Sandbox Provisioning
 ///
@@ -23,17 +48,17 @@ void main() async {
   print('==================================================');
 
   // --- Configuration ---
-  // IMPORTANT: You MUST retrieve your Primary or Secondary Subscription Key from your official
-  // MTN MoMo Developer profile at https://momodeveloper.mtn.com/
-  // You can set it as an environment variable (MTN_MOMO_SUBSCRIPTION_KEY) or define it below:
+  final env = _loadEnv();
   final subscriptionKey = Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
+      env['COLLECTIONS_KEY'] ??
+      env['DISBURSMENTS_KEY'] ??
       'a9acc520ea7d487baa58af01167d5659';
 
   if (subscriptionKey == 'YOUR_SUBSCRIPTION_KEY' || subscriptionKey.isEmpty) {
     _logger.w(
       'Subscription Key is missing!\n'
       'Please obtain your Subscription Key from your Profile on the MTN MoMo Developer portal (https://momodeveloper.mtn.com/)\n'
-      'and export it as an environment variable (MTN_MOMO_SUBSCRIPTION_KEY) or paste it here.',
+      'and export it as an environment variable (MTN_MOMO_SUBSCRIPTION_KEY) or define it in a .env file as COLLECTIONS_KEY or DISBURSMENTS_KEY.',
     );
     return;
   }

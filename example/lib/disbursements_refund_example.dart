@@ -35,22 +35,21 @@ Map<String, String> _loadEnv() {
   return env;
 }
 
-/// Standalone CLI Example: Disbursements
+/// Standalone CLI Example: Disbursements Payout & Refund
 ///
-/// Demonstrates how to use the high-level `MomoCollections` wrapper to:
-/// 1. Retrieve merchant disbursements account balance.
-/// 2. Validate payee wallet status (is recipient active).
-/// 3. Trigger a disbursement transfer to a recipient's mobile wallet.
-/// 4. Poll transfer status until a terminal state is reached.
+/// Demonstrates how to:
+/// 1. Create a dynamic Sandbox user for Disbursements.
+/// 2. Disburse funds to a payee wallet (Transfer).
+/// 3. Refund the disbursed funds using the original Transfer Reference ID.
+/// 4. Poll and monitor the status of the Refund request.
 ///
 /// Run this example using:
-/// `dart example/disbursements_example.dart`
+/// `dart example/lib/disbursements_refund_example.dart`
 void main() async {
   print('==================================================');
-  print('   MTN MoMo Disbursements Workflow Example');
+  print('   MTN MoMo Disbursements Payout & Refund Example');
   print('==================================================');
 
-  // --- Configuration ---
   final env = _loadEnv();
   final subscriptionKey =
       Platform.environment['MTN_MOMO_DISB_SUBSCRIPTION_KEY'] ??
@@ -70,18 +69,15 @@ void main() async {
   if (subscriptionKey == 'YOUR_SUBSCRIPTION_KEY' || subscriptionKey.isEmpty) {
     _logger.w(
       'Required credentials (Subscription Key) are missing!\n'
-      'Please obtain your Subscription Key from your Profile on the MTN MoMo Developer portal (https://momodeveloper.mtn.com/)\n'
-      'and export it as an environment variable (MTN_MOMO_DISB_SUBSCRIPTION_KEY) or define it in a .env file as DISBURSMENTS_KEY.',
+      'Please define DISBURSMENTS_KEY in your .env file or set MTN_MOMO_DISB_SUBSCRIPTION_KEY in your environment.',
     );
     return;
   }
 
-  // Dynamically provision a temporary Sandbox User & Key if not provided or placeholder
-  if (userId.isEmpty ||
-      apiKey.isEmpty ||
-      userId == 'a5db8b08-3067-4221-a3f2-ef971e467d5c') {
+  // Dynamically provision sandbox credentials if not provided
+  if (userId.isEmpty || apiKey.isEmpty) {
     _logger.i(
-        'Sandbox User ID or API Key not provided. Provisioning sandbox credentials dynamically...');
+        'Provisioning sandbox credentials dynamically using Subscription Key...');
     try {
       const sandboxBaseUrl = 'https://sandbox.momodeveloper.mtn.com';
       final dio = Dio(
@@ -93,7 +89,6 @@ void main() async {
           },
         ),
       );
-      // Register serializer interceptor to handle WAF payload requirements
       dio.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) {
           if (options.data != null &&
@@ -116,16 +111,11 @@ void main() async {
       final sandboxClient = SandboxProvisioningClient(dio);
       final generatedUserId = const Uuid().v4();
 
-      _logger.i('1. Registering Sandbox API User (ID: $generatedUserId)...');
       await sandboxClient.postV10Apiuser(
         xReferenceId: generatedUserId,
         body: const ApiUser(providerCallbackHost: 'callbacks.example.com'),
       );
-
-      _logger.i('2. Waiting for sandbox propagation (2s)...');
       await Future.delayed(const Duration(seconds: 2));
-
-      _logger.i('3. Requesting API Key...');
       final response = await sandboxClient.postV10ApiuserApikey(
           xReferenceId: generatedUserId);
       final generatedApiKey = response.apiKey;
@@ -144,7 +134,7 @@ void main() async {
     }
   }
 
-  // --- Initialization ---
+  // Initialize client
   final momo = MomoCollections(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
@@ -153,89 +143,90 @@ void main() async {
     targetEnvironment: 'sandbox',
   );
 
+  const payeeMsisdn = '256772987654';
+  final originalTransferRefId = const Uuid().v4();
+
+  // 1. Perform Transfer first
+  _logger.i(
+      '\n1. Performing initial Payout Transfer of 5,000 EUR to payee ($payeeMsisdn)...');
   try {
-    // 1. Check Disbursements Account Balance
-    _logger.i('1. Checking merchant Disbursements account balance...');
-    try {
-      final balance = await momo.disbursements.getAccountBalance();
-      _logger.i('   Balance: ${balance.availableBalance} ${balance.currency}');
-    } on MtnMomoException catch (e) {
-      if (e is MtnMomoTransactionException ||
-          e is MtnMomoServerException ||
-          e is MtnMomoForbiddenException) {
-        _logger.w(
-          '   Note: Disbursements balance endpoint returned a gateway error (expected volatile sandbox behavior): $e',
-        );
-      } else {
-        rethrow;
-      }
-    }
-
-    // 2. Validate Recipient Phone Number (Payee active check)
-    const payeeMsisdn = '256772987654';
-    _logger.i('2. Checking if payee wallet status is active ($payeeMsisdn)...');
-    await momo.disbursements.validateAccountHolderStatus(
-      accountHolderId: payeeMsisdn,
-      accountHolderIdType: 'msisdn',
-    );
-    _logger.i('   ✓ Payee wallet verified and active.');
-
-    // 3. Initiate Transfer (Disburse Funds)
-    final referenceId = const Uuid().v4();
-    _logger.i(
-        '3. Creating Transfer ($referenceId) for 12,000 UGX to recipient...');
-
-    final transferBody = Transfer(
-      amount: '12000',
-      currency: 'EUR', // Sandbox supports specific currencies like EUR
-      externalId: 'PAYOUT_SAL_554',
-      payee: const Party(
-        partyIdType: PartyPartyIdType.msisdn,
-        partyId: payeeMsisdn,
-      ),
-      payerMessage: 'Salary Payout March',
-      payeeNote: 'Salary processed successfully',
-    );
-
-    // X-Reference-Id and Authorization are injected automatically by the MomoInterceptor!
     await momo.disbursements.transfer(
-      xReferenceId: referenceId,
-      body: transferBody,
+      xReferenceId: originalTransferRefId,
+      body: Transfer(
+        amount: '5000',
+        currency: 'EUR',
+        externalId: 'TXN_PAYOUT_REF_100',
+        payee: const Party(
+          partyIdType: PartyPartyIdType.msisdn,
+          partyId: payeeMsisdn,
+        ),
+        payerMessage: 'Salary Payment',
+        payeeNote: 'Salary transfer',
+      ),
     );
-    _logger.i('   ✓ Transfer initiated successfully on the gateway.');
+    _logger.i(
+        '✓ Transfer initiated successfully. Waiting on success state propagation...');
+    await Future.delayed(const Duration(seconds: 3));
+  } on MtnMomoException catch (e) {
+    _logger.e('Failed to execute initial transfer: ${e.message}');
+    return;
+  }
 
-    // 4. Poll Transfer Status
-    _logger.i('4. Polling transfer status...');
-    TransferResult? status;
+  // 2. Trigger Refund referencing the Transfer
+  final refundRefId = const Uuid().v4();
+  _logger.i(
+      '\n2. Triggering Refund request ($refundRefId) for the original transfer...');
+  try {
+    final refund = Refund(
+      amount: '5000',
+      currency: 'EUR',
+      externalId: 'TXN_REFUND_REF_100',
+      referenceIdToRefund: originalTransferRefId, // Refers to original transfer
+      payerMessage: 'Refund salary payment error',
+      payeeNote: 'Refunding salary payout',
+    );
+
+    await momo.disbursements.refundV1(
+      xReferenceId: refundRefId,
+      body: refund,
+    );
+    _logger.i('✓ Refund request accepted. Polling status on gateway...');
+
+    // 3. Poll Refund Status
+    RefundResult? status;
     var attempts = 0;
 
     while (attempts < 10) {
       attempts++;
-      _logger.i('   Checking transfer status (attempt $attempts/10)...');
-      status = await momo.disbursements.getTransferStatus(
-        referenceId: referenceId,
-      );
+      await Future.delayed(const Duration(seconds: 2));
+      try {
+        status =
+            await momo.disbursements.getRefundStatus(referenceId: refundRefId);
+        final state = status.status;
+        _logger.i('   [Attempt $attempts/10] Current Status: $state');
 
-      final state = status.status;
-      _logger.i('   Current Status: $state');
-
-      if (state == TransferResultStatus.successful) {
-        _logger.i('   ✓ Transfer completed SUCCESSFUL!');
-        break;
-      } else if (state == TransferResultStatus.failed) {
-        _logger.e('   ✗ Transfer FAILED.');
-        if (status.reason != null) {
-          _logger.e('     Failure Reason Code: ${status.reason?.code}');
+        if (state == RefundResultStatus.successful) {
+          _logger.i('   ✓ Payout Refund completed SUCCESSFUL!');
+          break;
+        } else if (state == RefundResultStatus.failed) {
+          _logger.e('   ✗ Payout Refund FAILED.');
+          if (status.reason != null) {
+            _logger.e('     Reason: ${status.reason?.code}');
+          }
+          break;
         }
-        break;
+      } on MtnMomoNotFoundException catch (_) {
+        _logger.i(
+            '   [Attempt $attempts/10] Refund not propagated on gateway yet (404)...');
       }
-
-      // Wait 3 seconds before next poll
-      await Future.delayed(const Duration(seconds: 3));
     }
   } on MtnMomoException catch (e) {
-    _logger.e('MTN MoMo Error occurred: ${e.message}');
+    _logger.e('MTN MoMo Exception: ${e.message}');
   } catch (e) {
-    _logger.e('An unexpected error occurred: $e');
+    _logger.e('Unexpected error during refund: $e');
   }
+
+  print('\n==================================================');
+  print('          REFUND PROCESS ENDED');
+  print('==================================================\n');
 }

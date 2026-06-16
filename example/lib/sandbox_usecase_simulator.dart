@@ -35,22 +35,18 @@ Map<String, String> _loadEnv() {
   return env;
 }
 
-/// Standalone CLI Example: Collections
+/// Standalone CLI Example: Sandbox Use Cases Simulator
 ///
-/// Demonstrates how to use the high-level `MomoCollections` wrapper to:
-/// 1. Retrieve account balance.
-/// 2. Validate customer account holder status (is registered and active).
-/// 3. Dispatch a Request to Pay (Push USSD) transaction.
-/// 4. Poll transaction status until a terminal state is reached.
+/// Demonstrates how to trigger and catch specific Sandbox scenarios
+/// using MTN MoMo predefined test numbers (MSISDNs).
 ///
 /// Run this example using:
-/// `dart example/collections_example.dart`
+/// `dart example/lib/sandbox_usecase_simulator.dart`
 void main() async {
   print('==================================================');
-  print('   MTN MoMo Collections Workflow Example');
+  print('   MTN MoMo Sandbox Use Cases Simulator');
   print('==================================================');
 
-  // --- Configuration ---
   final env = _loadEnv();
   final subscriptionKey = Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
       env['COLLECTIONS_KEY'] ??
@@ -66,18 +62,14 @@ void main() async {
   if (subscriptionKey == 'YOUR_SUBSCRIPTION_KEY' || subscriptionKey.isEmpty) {
     _logger.w(
       'Required credentials (Subscription Key) are missing!\n'
-      'Please obtain your Subscription Key from your Profile on the MTN MoMo Developer portal (https://momodeveloper.mtn.com/)\n'
-      'and export it as an environment variable (MTN_MOMO_SUBSCRIPTION_KEY) or define it in a .env file as COLLECTIONS_KEY.',
+      'Please define COLLECTIONS_KEY in your .env file or set MTN_MOMO_SUBSCRIPTION_KEY in your environment.',
     );
     return;
   }
 
-  // Dynamically provision a temporary Sandbox User & Key if not provided or placeholder
-  if (userId.isEmpty ||
-      apiKey.isEmpty ||
-      userId == 'a5db8b08-3067-4221-a3f2-ef971e467d5c') {
-    _logger.i(
-        'Sandbox User ID or API Key not provided. Provisioning sandbox credentials dynamically...');
+  // Provision credentials dynamically if missing
+  if (userId.isEmpty || apiKey.isEmpty) {
+    _logger.i('Provisioning sandbox credentials dynamically...');
     try {
       const sandboxBaseUrl = 'https://sandbox.momodeveloper.mtn.com';
       final dio = Dio(
@@ -89,7 +81,6 @@ void main() async {
           },
         ),
       );
-      // Register serializer interceptor to handle WAF payload requirements
       dio.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) {
           if (options.data != null &&
@@ -112,16 +103,11 @@ void main() async {
       final sandboxClient = SandboxProvisioningClient(dio);
       final generatedUserId = const Uuid().v4();
 
-      _logger.i('1. Registering Sandbox API User (ID: $generatedUserId)...');
       await sandboxClient.postV10Apiuser(
         xReferenceId: generatedUserId,
         body: const ApiUser(providerCallbackHost: 'callbacks.example.com'),
       );
-
-      _logger.i('2. Waiting for sandbox propagation (2s)...');
       await Future.delayed(const Duration(seconds: 2));
-
-      _logger.i('3. Requesting API Key...');
       final response = await sandboxClient.postV10ApiuserApikey(
           xReferenceId: generatedUserId);
       final generatedApiKey = response.apiKey;
@@ -140,7 +126,6 @@ void main() async {
     }
   }
 
-  // --- Initialization ---
   final momo = MomoCollections(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
@@ -149,89 +134,102 @@ void main() async {
     targetEnvironment: 'sandbox',
   );
 
-  try {
-    // 1. Check Account Balance
-    _logger.i('1. Checking merchant Collections balance...');
-    try {
-      final balance = await momo.collection.getAccountBalance();
-      _logger.i('   Balance: ${balance.availableBalance} ${balance.currency}');
-    } on MtnMomoException catch (e) {
-      if (e is MtnMomoTransactionException ||
-          e is MtnMomoServerException ||
-          e is MtnMomoForbiddenException) {
-        _logger.w(
-          '   Note: Collections balance endpoint returned a gateway error (expected volatile sandbox behavior): $e',
-        );
-      } else {
-        rethrow;
-      }
-    }
+  // 1. Success Case
+  await _simulateCollect(
+      momo, '256772123456', 'Success Case (Standard MSISDN)');
 
-    // 2. Validate Customer Phone Number (MSISDN)
-    const customerMsisdn = '256772123456';
-    _logger.i(
-        '2. Checking if customer wallet status is active ($customerMsisdn)...');
+  // 2. Account Not Found
+  await _simulateValidation(momo, '46733123450', 'Account Holder Not Found');
+
+  // 3. Account Holder Inactive (Expired)
+  await _simulateCollect(
+      momo, '46733123451', 'Account Holder Not Active (Expired Status)');
+
+  // 4. Operation Not Allowed
+  await _simulateValidation(momo, '46733123452', 'Operation Not Allowed');
+
+  // 5. Target Environment Forbidden
+  await _simulateCollect(momo, '46733123453', 'Target Environment Forbidden');
+
+  // 6. Internal Processing Error
+  await _simulateCollect(
+      momo, '46733123454', 'Internal Processing Error Status');
+}
+
+Future<void> _simulateValidation(
+    MomoCollections momo, String msisdn, String label) async {
+  _logger.i(
+      '\n--- Running Account Validation Simulation: $label (MSISDN: $msisdn) ---');
+  try {
     await momo.collection.validateAccountHolderStatus(
-      accountHolderId: customerMsisdn,
+      accountHolderId: msisdn,
       accountHolderIdType: 'msisdn',
     );
-    _logger.i('   ✓ Customer wallet verified and active.');
+    _logger.i(
+        '✓ Account holder validation completed successfully (Account is Active).');
+  } on MtnMomoException catch (e) {
+    _logger.w('✓ Caught expected MtnMomoException:');
+    _logger.w('  Type   : ${e.runtimeType}');
+    _logger.w('  Message: ${e.message}');
+  }
+}
 
-    // 3. Initiate Request to Pay (Push USSD Prompt)
-    final referenceId = const Uuid().v4();
-    _logger.i('3. Creating Request to Pay ($referenceId) for 5,000 UGX...');
+Future<void> _simulateCollect(
+    MomoCollections momo, String msisdn, String label) async {
+  _logger
+      .i('\n--- Running Collection Simulation: $label (MSISDN: $msisdn) ---');
+  final referenceId = const Uuid().v4();
 
-    final request = RequestToPay(
-      amount: '5000',
-      currency: 'EUR', // Sandbox supports specific currencies like EUR
-      externalId: 'TXN_REF_009988',
-      payer: const Party(
-        partyIdType: PartyPartyIdType.msisdn,
-        partyId: customerMsisdn,
-      ),
-      payerMessage: 'Premium App subscription',
-      payeeNote: 'Antigravity Collections',
-    );
-
-    // X-Reference-Id and Authorization are injected automatically by the MomoInterceptor!
+  try {
     await momo.collection.requesttoPay(
       xReferenceId: referenceId,
-      body: request,
+      body: RequestToPay(
+        amount: '1000',
+        currency: 'EUR',
+        externalId: 'TXN_SIM_${referenceId.substring(0, 8)}',
+        payer: Party(
+          partyIdType: PartyPartyIdType.msisdn,
+          partyId: msisdn,
+        ),
+        payerMessage: 'Simulation of $label',
+        payeeNote: 'Sandbox simulation',
+      ),
     );
-    _logger.i('   ✓ Request to pay sent to customer handset successfully.');
+    _logger.i('✓ Request to Pay submitted. Polling transaction status...');
 
-    // 4. Poll for Transaction Status
-    _logger.i('4. Polling transaction status...');
     RequestToPayResult? status;
     var attempts = 0;
 
     while (attempts < 10) {
       attempts++;
-      _logger.i('   Checking status (attempt $attempts/10)...');
-      status = await momo.collection.requesttoPayTransactionStatus(
-        referenceId: referenceId,
-      );
+      await Future.delayed(const Duration(seconds: 2));
+      try {
+        status = await momo.collection
+            .requesttoPayTransactionStatus(referenceId: referenceId);
+        final state = status.status;
+        _logger.i('  [Poll $attempts/10] Current Status: $state');
 
-      final state = status.status;
-      _logger.i('   Current Status: $state');
-
-      if (state == RequestToPayResultStatus.successful) {
-        _logger.i('   ✓ Transaction Completed SUCCESSFUL!');
-        break;
-      } else if (state == RequestToPayResultStatus.failed) {
-        _logger.e('   ✗ Transaction FAILED.');
-        if (status.reason != null) {
-          _logger.e('     Failure Reason Code: ${status.reason?.code}');
+        if (state == RequestToPayResultStatus.successful) {
+          _logger.i('  ✓ Transaction completed SUCCESSFUL!');
+          break;
+        } else if (state == RequestToPayResultStatus.failed) {
+          _logger.e('  ✗ Transaction FAILED on the gateway.');
+          if (status.reason != null) {
+            _logger.e('    Failure Reason: ${status.reason?.code}');
+          }
+          break;
         }
-        break;
+      } on MtnMomoNotFoundException catch (_) {
+        _logger.i(
+            '  [Poll $attempts/10] Transaction not propagated on gateway yet (404)...');
       }
-
-      // Wait 3 seconds before next poll
-      await Future.delayed(const Duration(seconds: 3));
     }
   } on MtnMomoException catch (e) {
-    _logger.e('MTN MoMo Error occurred: ${e.message}');
+    _logger
+        .w('✓ Caught expected MtnMomoException during request initialization:');
+    _logger.w('  Type   : ${e.runtimeType}');
+    _logger.w('  Message: ${e.message}');
   } catch (e) {
-    _logger.e('An unexpected error occurred: $e');
+    _logger.e('  Unexpected error: $e');
   }
 }

@@ -122,23 +122,36 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
   final _disbMsisdnController = TextEditingController(text: '256772987654');
   final _disbAmountController = TextEditingController(text: '12000');
 
+  // New Controllers for Advanced examples
+  final _preAppMsisdnController = TextEditingController(text: '256772123456');
+  final _preAppValidityController = TextEditingController(text: '3600');
+  final _refundTransferIdController = TextEditingController();
+  final _refundAmountController = TextEditingController(text: '5000');
+
   // Interactive UI States
   bool _isProvisioning = false;
   bool _isCollectionsRunning = false;
   bool _isDisbursementsRunning = false;
+  bool _isPreAppRunning = false;
+  bool _isRefundRunning = false;
+  bool _isSimulatorRunning = false;
 
   // Active status values
   String _colBalance = '—';
   String _disbBalance = '—';
   String _colTxnState = 'No active transaction';
   String _disbTxnState = 'No active transaction';
+  String _preAppTxnState = 'No active request';
+  String _refundTxnState = 'No active request';
+  String _simulatorState = 'Idle';
 
   // Live Terminal Logs
   final List<String> _terminalLogs = [];
   final ScrollController _terminalScrollController = ScrollController();
 
-  // Unified Momo SDK wrapper
-  MomoCollections? _momo;
+  // Unified Momo SDK wrappers for Product Token Isolation
+  MomoCollections? _collectionsMomo;
+  MomoCollections? _disbursementsMomo;
 
   @override
   void initState() {
@@ -157,6 +170,10 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
     _collectAmountController.dispose();
     _disbMsisdnController.dispose();
     _disbAmountController.dispose();
+    _preAppMsisdnController.dispose();
+    _preAppValidityController.dispose();
+    _refundTransferIdController.dispose();
+    _refundAmountController.dispose();
     _terminalScrollController.dispose();
     super.dispose();
   }
@@ -178,9 +195,9 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
     });
   }
 
-  /// Instantiates the client wrapper using current fields.
+  /// Instantiates the client wrappers using current fields.
   bool _initializeClient() {
-    if (_momo != null) return true;
+    if (_collectionsMomo != null && _disbursementsMomo != null) return true;
 
     final subKey = _subKeyController.text.trim();
     final uid = _userIdController.text.trim();
@@ -196,14 +213,24 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
       return false;
     }
 
-    _momo = MomoCollections(
+    _collectionsMomo = MomoCollections(
       baseUrl: 'https://sandbox.momodeveloper.mtn.com',
       subscriptionKey: subKey,
       userId: uid,
       apiKey: key,
       targetEnvironment: 'sandbox',
     );
-    _logTerminal('Client: MtnMomoClient coordinate initialized successfully.');
+
+    _disbursementsMomo = MomoCollections(
+      baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+      subscriptionKey: subKey,
+      userId: uid,
+      apiKey: key,
+      targetEnvironment: 'sandbox',
+    );
+
+    _logTerminal(
+        'Client: Separate dedicated Collections and Disbursements clients initialized.');
     return true;
   }
 
@@ -219,7 +246,8 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
 
     setState(() {
       _isProvisioning = true;
-      _momo = null; // Reset existing wrapper
+      _collectionsMomo = null;
+      _disbursementsMomo = null; // Reset existing wrappers
     });
 
     _logTerminal('Sandbox: Initializing user provisioning process...');
@@ -286,7 +314,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
 
     _logTerminal('Collections: Fetching merchant account balance...');
     try {
-      final balance = await _momo!.collection.getAccountBalance();
+      final balance = await _collectionsMomo!.collection.getAccountBalance();
       setState(() {
         _colBalance = '${balance.availableBalance} ${balance.currency}';
       });
@@ -322,7 +350,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
       // 1. Validate status
       _logTerminal(
           'Collections: Validating customer wallet registration ($customer)...');
-      await _momo!.collection.validateAccountHolderStatus(
+      await _collectionsMomo!.collection.validateAccountHolderStatus(
         accountHolderId: customer,
         accountHolderIdType: 'msisdn',
       );
@@ -345,7 +373,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
         payeeNote: 'Antigravity systems integration',
       );
 
-      await _momo!.collection.requesttoPay(
+      await _collectionsMomo!.collection.requesttoPay(
         xReferenceId: referenceId,
         body: requestBody,
       );
@@ -362,7 +390,8 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
           _colTxnState = 'Polling status (Attempt $attempts/10)';
         });
 
-        final status = await _momo!.collection.requesttoPayTransactionStatus(
+        final status =
+            await _collectionsMomo!.collection.requesttoPayTransactionStatus(
           referenceId: referenceId,
         );
 
@@ -418,7 +447,8 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
 
     _logTerminal('Disbursements: Fetching merchant payout balance...');
     try {
-      final balance = await _momo!.disbursements.getAccountBalance();
+      final balance =
+          await _disbursementsMomo!.disbursements.getAccountBalance();
       setState(() {
         _disbBalance = '${balance.availableBalance} ${balance.currency}';
       });
@@ -453,7 +483,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
     try {
       // 1. Validate status
       _logTerminal('Disbursements: Checking payee wallet status ($payee)...');
-      await _momo!.disbursements.validateAccountHolderStatus(
+      await _disbursementsMomo!.disbursements.validateAccountHolderStatus(
         accountHolderId: payee,
         accountHolderIdType: 'msisdn',
       );
@@ -476,7 +506,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
         payeeNote: 'Playground transfer',
       );
 
-      await _momo!.disbursements.transfer(
+      await _disbursementsMomo!.disbursements.transfer(
         xReferenceId: referenceId,
         body: transferBody,
       );
@@ -493,7 +523,8 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
           _disbTxnState = 'Polling status (Attempt $attempts/10)';
         });
 
-        final status = await _momo!.disbursements.getTransferStatus(
+        final status =
+            await _disbursementsMomo!.disbursements.getTransferStatus(
           referenceId: referenceId,
         );
 
@@ -543,67 +574,711 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
     }
   }
 
+  /// Advanced Flow 1: Collections Pre-Approval
+  Future<void> _runPreApprovalFlow() async {
+    if (!_initializeClient()) return;
+
+    final customer = _preAppMsisdnController.text.trim();
+    final validityStr = _preAppValidityController.text.trim();
+
+    if (customer.isEmpty || validityStr.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('Please specify customer phone and validity duration.')),
+      );
+      return;
+    }
+
+    final validity = int.tryParse(validityStr) ?? 3600;
+
+    setState(() {
+      _isPreAppRunning = true;
+      _preAppTxnState = 'Initializing request...';
+    });
+
+    try {
+      final referenceId = const Uuid().v4();
+      _logTerminal(
+          'Pre-Approval: Initiating consent request ($referenceId) for $customer...');
+
+      final preApproval = PreApproval(
+        payer: Party(
+          partyIdType: PartyPartyIdType.msisdn,
+          partyId: customer,
+        ),
+        payerCurrency: 'EUR',
+        payerMessage: 'Consent to charge wallet for subscription.',
+        validityTime: validity,
+      );
+
+      await _collectionsMomo!.collection.preApproval(
+        xReferenceId: referenceId,
+        body: preApproval,
+      );
+      _logTerminal(
+          'Pre-Approval: ✓ Consent request submitted. Polling status...');
+
+      PreApprovalResultStatus? finalState;
+      var attempts = 0;
+
+      while (attempts < 10) {
+        attempts++;
+        setState(() {
+          _preAppTxnState = 'Polling status (Attempt $attempts/10)';
+        });
+        await Future.delayed(const Duration(seconds: 2));
+
+        try {
+          final status = await _collectionsMomo!.collection
+              .getPreApprovalStatus(referenceId: referenceId);
+          finalState = status.status;
+          _logTerminal('Pre-Approval: Current status: $finalState');
+
+          if (finalState == PreApprovalResultStatus.successful) {
+            setState(() {
+              _preAppTxnState = '✓ Consent Granted';
+            });
+            _logTerminal('Pre-Approval: ✓ Mandate GRANTED successfully!');
+            break;
+          } else if (finalState == PreApprovalResultStatus.failed) {
+            setState(() {
+              _preAppTxnState = '✗ Consent Rejected: ${status.reason?.code}';
+            });
+            _logTerminal(
+                'Pre-Approval: ✗ Consent REJECTED. Reason: ${status.reason?.code}');
+            break;
+          }
+        } on MtnMomoNotFoundException catch (_) {
+          _logTerminal(
+              'Pre-Approval: [Attempt $attempts/10] Not propagated on gateway yet (404)...');
+        }
+      }
+
+      if (finalState == PreApprovalResultStatus.pending) {
+        setState(() {
+          _preAppTxnState = '✗ Polling Timeout';
+        });
+        _logTerminal('Pre-Approval: ✗ Polling timeout. No response received.');
+      }
+    } on MtnMomoException catch (e) {
+      setState(() {
+        _preAppTxnState = 'Exception: ${e.message}';
+      });
+      _logTerminal('Pre-Approval: ✗ Exception: ${e.message}');
+    } catch (e) {
+      setState(() {
+        _preAppTxnState = 'Error: $e';
+      });
+      _logTerminal('Pre-Approval: ✗ Error: $e');
+    } finally {
+      setState(() {
+        _isPreAppRunning = false;
+      });
+    }
+  }
+
+  /// Advanced Flow 2: Disbursements Refund
+  Future<void> _runRefundFlow() async {
+    if (!_initializeClient()) return;
+
+    final transferId = _refundTransferIdController.text.trim();
+    final amount = _refundAmountController.text.trim();
+
+    if (transferId.isEmpty || amount.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                'Please specify the original Transfer Reference ID and refund amount.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isRefundRunning = true;
+      _refundTxnState = 'Initializing refund...';
+    });
+
+    try {
+      final refundRefId = const Uuid().v4();
+      _logTerminal(
+          'Refund: Initiating refund request ($refundRefId) for Transfer ID: $transferId...');
+
+      final refund = Refund(
+        amount: amount,
+        currency: 'EUR',
+        externalId: 'TXN_REFUND_${refundRefId.substring(0, 8)}',
+        referenceIdToRefund: transferId,
+        payerMessage: 'Refunding salary payment error',
+        payeeNote: 'Refunding payout via Playground',
+      );
+
+      await _disbursementsMomo!.disbursements.refundV1(
+        xReferenceId: refundRefId,
+        body: refund,
+      );
+      _logTerminal('Refund: ✓ Refund request accepted. Polling status...');
+
+      RefundResultStatus? finalState;
+      var attempts = 0;
+
+      while (attempts < 10) {
+        attempts++;
+        setState(() {
+          _refundTxnState = 'Polling status (Attempt $attempts/10)';
+        });
+        await Future.delayed(const Duration(seconds: 2));
+
+        try {
+          final status = await _disbursementsMomo!.disbursements
+              .getRefundStatus(referenceId: refundRefId);
+          finalState = status.status;
+          _logTerminal('Refund: Current status: $finalState');
+
+          if (finalState == RefundResultStatus.successful) {
+            setState(() {
+              _refundTxnState = '✓ Refund Successful';
+            });
+            _logTerminal('Refund: ✓ Refund completed SUCCESSFUL!');
+            break;
+          } else if (finalState == RefundResultStatus.failed) {
+            setState(() {
+              _refundTxnState = '✗ Refund Failed: ${status.reason?.code}';
+            });
+            _logTerminal(
+                'Refund: ✗ Refund FAILED. Reason: ${status.reason?.code}');
+            break;
+          }
+        } on MtnMomoNotFoundException catch (_) {
+          _logTerminal(
+              'Refund: [Attempt $attempts/10] Not propagated on gateway yet (404)...');
+        }
+      }
+
+      if (finalState == RefundResultStatus.pending) {
+        setState(() {
+          _refundTxnState = '✗ Polling Timeout';
+        });
+        _logTerminal('Refund: ✗ Polling timeout. Gateway took too long.');
+      }
+    } on MtnMomoException catch (e) {
+      setState(() {
+        _refundTxnState = 'Exception: ${e.message}';
+      });
+      _logTerminal('Refund: ✗ Exception: ${e.message}');
+    } catch (e) {
+      setState(() {
+        _refundTxnState = 'Error: $e';
+      });
+      _logTerminal('Refund: ✗ Error: $e');
+    } finally {
+      setState(() {
+        _isRefundRunning = false;
+      });
+      _fetchDisbursementsBalance();
+    }
+  }
+
+  /// Advanced Flow 3: Sandbox Use Cases Simulator
+  Future<void> _runSandboxSimulatorFlow() async {
+    if (!_initializeClient()) return;
+
+    setState(() {
+      _isSimulatorRunning = true;
+      _simulatorState = 'Running Simulation...';
+    });
+
+    _logTerminal('Simulator: starting full sandbox test cases execution...');
+
+    try {
+      // 1. Success Case
+      await _simulateCollect('256772123456', 'Success Case (Standard MSISDN)');
+
+      // 2. Account Not Found
+      await _simulateValidation('46733123450', 'Account Holder Not Found');
+
+      // 3. Account Holder Inactive (Expired)
+      await _simulateCollect(
+          '46733123451', 'Account Holder Not Active (Expired Status)');
+
+      // 4. Operation Not Allowed
+      await _simulateValidation('46733123452', 'Operation Not Allowed');
+
+      // 5. Target Environment Forbidden
+      await _simulateCollect('46733123453', 'Target Environment Forbidden');
+
+      // 6. Internal Processing Error
+      await _simulateCollect('46733123454', 'Internal Processing Error Status');
+
+      setState(() {
+        _simulatorState = '✓ Completed';
+      });
+      _logTerminal(
+          'Simulator: All simulation test cases completed successfully.');
+    } catch (e) {
+      setState(() {
+        _simulatorState = '✗ Simulation Error';
+      });
+      _logTerminal('Simulator: ✗ Unexpected Simulator Error: $e');
+    } finally {
+      setState(() {
+        _isSimulatorRunning = false;
+      });
+    }
+  }
+
+  Future<void> _simulateValidation(String msisdn, String label) async {
+    _logTerminal('Simulator: Running validation: $label (MSISDN: $msisdn)...');
+    try {
+      await _collectionsMomo!.collection.validateAccountHolderStatus(
+        accountHolderId: msisdn,
+        accountHolderIdType: 'msisdn',
+      );
+      _logTerminal('Simulator: ✓ Active account status verified.');
+    } on MtnMomoException catch (e) {
+      _logTerminal(
+          'Simulator: Caught expected exception: ${e.runtimeType} -> ${e.message}');
+    }
+  }
+
+  Future<void> _simulateCollect(String msisdn, String label) async {
+    _logTerminal('Simulator: Running collection: $label (MSISDN: $msisdn)...');
+    final referenceId = const Uuid().v4();
+
+    try {
+      await _collectionsMomo!.collection.requesttoPay(
+        xReferenceId: referenceId,
+        body: RequestToPay(
+          amount: '1000',
+          currency: 'EUR',
+          externalId: 'TXN_SIM_${referenceId.substring(0, 8)}',
+          payer: Party(
+            partyIdType: PartyPartyIdType.msisdn,
+            partyId: msisdn,
+          ),
+          payerMessage: 'Simulation of $label',
+          payeeNote: 'Sandbox simulation',
+        ),
+      );
+      _logTerminal('Simulator: Request submitted. Polling...');
+
+      RequestToPayResultStatus? state;
+      var attempts = 0;
+
+      while (attempts < 10) {
+        attempts++;
+        await Future.delayed(const Duration(milliseconds: 1500));
+        try {
+          final status = await _collectionsMomo!.collection
+              .requesttoPayTransactionStatus(referenceId: referenceId);
+          state = status.status;
+          _logTerminal(
+              'Simulator:   [Poll $attempts/10] Current status: $state');
+
+          if (state == RequestToPayResultStatus.successful) {
+            _logTerminal('Simulator:   ✓ Success!');
+            break;
+          } else if (state == RequestToPayResultStatus.failed) {
+            _logTerminal(
+                'Simulator:   ✗ Failed. Reason: ${status.reason?.code}');
+            break;
+          }
+        } on MtnMomoNotFoundException catch (_) {
+          _logTerminal(
+              'Simulator:   [Poll $attempts/10] Not propagated yet (404)...');
+        }
+      }
+    } on MtnMomoException catch (e) {
+      _logTerminal(
+          'Simulator: Caught expected initialization exception: ${e.runtimeType} -> ${e.message}');
+    } catch (e) {
+      _logTerminal('Simulator: Unexpected error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF004F71), // Solid MoMo Blue
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFCB05), // MTN Sunshine Yellow
-                shape: BoxShape.circle,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF004F71), // Solid MoMo Blue
+          foregroundColor: Colors.white,
+          elevation: 0,
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFCB05), // MTN Sunshine Yellow
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.wallet,
+                    color: Color(0xFF004F71), size: 20),
               ),
-              child:
-                  const Icon(Icons.wallet, color: Color(0xFF004F71), size: 20),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'MTN MoMo SDK Playground',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.white),
+              const SizedBox(width: 10),
+              const Text(
+                'MTN MoMo SDK Playground',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.white),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.white),
+              tooltip: 'Clear Logs',
+              onPressed: () {
+                setState(() {
+                  _terminalLogs.clear();
+                });
+              },
             ),
           ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.white),
-            tooltip: 'Clear Logs',
-            onPressed: () {
-              setState(() {
-                _terminalLogs.clear();
-              });
-            },
+          bottom: const TabBar(
+            indicatorColor: Color(0xFFFFCB05),
+            labelColor: Color(0xFFFFCB05),
+            unselectedLabelColor: Colors.white70,
+            tabs: [
+              Tab(icon: Icon(Icons.star), text: 'Core APIs'),
+              Tab(icon: Icon(Icons.extension), text: 'Advanced'),
+              Tab(icon: Icon(Icons.bug_report), text: 'Simulator'),
+            ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: TabBarView(
                 children: [
-                  _buildSandboxCredentialsCard(isDark),
-                  const SizedBox(height: 16),
-                  _buildCollectionsCard(isDark),
-                  const SizedBox(height: 16),
-                  _buildDisbursementsCard(isDark),
+                  // Tab 1: Core APIs
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildSandboxCredentialsCard(isDark),
+                        const SizedBox(height: 16),
+                        _buildCollectionsCard(isDark),
+                        const SizedBox(height: 16),
+                        _buildDisbursementsCard(isDark),
+                      ],
+                    ),
+                  ),
+                  // Tab 2: Advanced
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildPreApprovalCard(isDark),
+                        const SizedBox(height: 16),
+                        _buildRefundCard(isDark),
+                      ],
+                    ),
+                  ),
+                  // Tab 3: Simulator
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildSimulatorCard(isDark),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
+            _buildTerminalConsole(isDark),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreApprovalCard(bool isDark) {
+    final credentialsValid =
+        _userIdController.text.isNotEmpty && _apiKeyController.text.isNotEmpty;
+
+    return Opacity(
+      opacity: credentialsValid ? 1.0 : 0.5,
+      child: AbsorbPointer(
+        absorbing: !credentialsValid,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.lock_person, color: Color(0xFF004F71)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Collections Pre-Approval',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        controller: _preAppMsisdnController,
+                        decoration: const InputDecoration(
+                            labelText: 'Payer Phone (MSISDN)'),
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: _preAppValidityController,
+                        decoration:
+                            const InputDecoration(labelText: 'Validity (sec)'),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isPreAppRunning ? null : _runPreApprovalFlow,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF004F71),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: isDark
+                        ? const Color(0xFF143D56)
+                        : const Color(0xFFE5E5E5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: _isPreAppRunning
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Request Payment Consent',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    _preAppTxnState,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          _buildTerminalConsole(isDark),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRefundCard(bool isDark) {
+    final credentialsValid =
+        _userIdController.text.isNotEmpty && _apiKeyController.text.isNotEmpty;
+
+    return Opacity(
+      opacity: credentialsValid ? 1.0 : 0.5,
+      child: AbsorbPointer(
+        absorbing: !credentialsValid,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.settings_backup_restore,
+                        color: Color(0xFF004F71)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Disbursements Refund',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _refundTransferIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'Original Transfer Reference ID (UUID)',
+                    hintText: 'Enter transfer UUID to refund...',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _refundAmountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Refund Amount (EUR)',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isRefundRunning ? null : _runRefundFlow,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF004F71),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: isDark
+                        ? const Color(0xFF143D56)
+                        : const Color(0xFFE5E5E5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: _isRefundRunning
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Initiate Payout Refund',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    _refundTxnState,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSimulatorCard(bool isDark) {
+    final credentialsValid =
+        _userIdController.text.isNotEmpty && _apiKeyController.text.isNotEmpty;
+
+    return Opacity(
+      opacity: credentialsValid ? 1.0 : 0.5,
+      child: AbsorbPointer(
+        absorbing: !credentialsValid,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.play_circle_outline,
+                        color: Color(0xFF004F71)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Predefined Sandbox Use Cases Simulator',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Runs a sequential suite of 6 standard sandbox test scenarios using official MSISDN configurations (Success, Bad Wallet, Inactive User, Permissions Error, Forbidden Env, Server Fault). Results stream live into the scrolling Console below.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey[300] : Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed:
+                      _isSimulatorRunning ? null : _runSandboxSimulatorFlow,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFCB05),
+                    foregroundColor: Colors.black,
+                    disabledBackgroundColor: isDark
+                        ? const Color(0xFF143D56)
+                        : const Color(0xFFE5E5E5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: _isSimulatorRunning
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.black,
+                          ),
+                        )
+                      : const Text(
+                          'Run Use Cases Simulator',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    _simulatorState,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

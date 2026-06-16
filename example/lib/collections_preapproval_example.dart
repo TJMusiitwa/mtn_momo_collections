@@ -35,24 +35,21 @@ Map<String, String> _loadEnv() {
   return env;
 }
 
-/// Standalone CLI Example: Thread Safety & Token Deduplication
+/// Standalone CLI Example: Collections Pre-Approval (Payment Consent)
 ///
-/// Demonstrates the thread-safe token manager in the SDK.
-/// When your app spawns multiple parallel HTTP requests at once without a valid token,
-/// standard interceptors would launch duplicate parallel auth requests.
-///
-/// This SDK uses concurrent future deduplication: all requests queue up and await
-/// the single in-flight token fetch future, preventing redundant load, rate limits,
-/// or authentication race conditions.
+/// Demonstrates how to:
+/// 1. Create a dynamic Sandbox user for Collections.
+/// 2. Request a Pre-Approval (Mandate/Consent) from a Payer.
+/// 3. Poll for the status of the Pre-Approval request.
+/// 4. Verify successful versus rejected sandbox scenarios.
 ///
 /// Run this example using:
-/// `dart example/thread_safety_deduplication_example.dart`
+/// `dart example/lib/collections_preapproval_example.dart`
 void main() async {
   print('==================================================');
-  print('   MTN MoMo Token Fetch Deduplication Example');
+  print('   MTN MoMo Collections Pre-Approval Example');
   print('==================================================');
 
-  // --- Configuration ---
   final env = _loadEnv();
   final subscriptionKey = Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
       env['COLLECTIONS_KEY'] ??
@@ -68,18 +65,15 @@ void main() async {
   if (subscriptionKey == 'YOUR_SUBSCRIPTION_KEY' || subscriptionKey.isEmpty) {
     _logger.w(
       'Required credentials (Subscription Key) are missing!\n'
-      'Please obtain your Subscription Key from your Profile on the MTN MoMo Developer portal (https://momodeveloper.mtn.com/)\n'
-      'and export it as an environment variable (MTN_MOMO_SUBSCRIPTION_KEY) or define it in a .env file as COLLECTIONS_KEY.',
+      'Please define COLLECTIONS_KEY in your .env file or set MTN_MOMO_SUBSCRIPTION_KEY in your environment.',
     );
     return;
   }
 
-  // Dynamically provision a temporary Sandbox User & Key if not provided or placeholder
-  if (userId.isEmpty ||
-      apiKey.isEmpty ||
-      userId == 'a5db8b08-3067-4221-a3f2-ef971e467d5c') {
+  // Dynamically provision sandbox credentials if not provided
+  if (userId.isEmpty || apiKey.isEmpty) {
     _logger.i(
-        'Sandbox User ID or API Key not provided. Provisioning sandbox credentials dynamically...');
+        'Provisioning sandbox credentials dynamically using Subscription Key...');
     try {
       const sandboxBaseUrl = 'https://sandbox.momodeveloper.mtn.com';
       final dio = Dio(
@@ -91,7 +85,6 @@ void main() async {
           },
         ),
       );
-      // Register serializer interceptor to handle WAF payload requirements
       dio.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) {
           if (options.data != null &&
@@ -114,16 +107,11 @@ void main() async {
       final sandboxClient = SandboxProvisioningClient(dio);
       final generatedUserId = const Uuid().v4();
 
-      _logger.i('1. Registering Sandbox API User (ID: $generatedUserId)...');
       await sandboxClient.postV10Apiuser(
         xReferenceId: generatedUserId,
         body: const ApiUser(providerCallbackHost: 'callbacks.example.com'),
       );
-
-      _logger.i('2. Waiting for sandbox propagation (2s)...');
       await Future.delayed(const Duration(seconds: 2));
-
-      _logger.i('3. Requesting API Key...');
       final response = await sandboxClient.postV10ApiuserApikey(
           xReferenceId: generatedUserId);
       final generatedApiKey = response.apiKey;
@@ -142,7 +130,7 @@ void main() async {
     }
   }
 
-  // --- Initialization ---
+  // Initialize client
   final momo = MomoCollections(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
@@ -151,46 +139,71 @@ void main() async {
     targetEnvironment: 'sandbox',
   );
 
+  // Run two scenarios: 1. Success case, 2. Rejected case
+  await _runPreApprovalScenario(
+      momo, '256772123456', 'Success Case (Standard User)');
+  await _runPreApprovalScenario(
+      momo, '46733123450', 'Rejected Case (User Not Found/Declined)');
+}
+
+Future<void> _runPreApprovalScenario(
+  MomoCollections momo,
+  String msisdn,
+  String scenarioName,
+) async {
+  _logger.i('\n--- Running Scenario: $scenarioName ---');
+  final referenceId = const Uuid().v4();
   _logger
-      .i('Spawning 3 parallel balance inquiries at the exact same moment...');
-  _logger.i(
-      'Check the logger output below: you will notice that the Token Interceptor');
-  _logger.i(
-      'triggers a SINGLE access token request. All three parallel balance queries');
-  _logger.i(
-      'wait for it to complete and then proceed with the newly generated token!');
-  print('');
+      .i('Requesting pre-approval (reference ID: $referenceId) for $msisdn...');
+
+  final preApproval = PreApproval(
+    payer: Party(
+      partyIdType: PartyPartyIdType.msisdn,
+      partyId: msisdn,
+    ),
+    payerCurrency: 'EUR',
+    payerMessage: 'Consent to charge your wallet for subscription services.',
+    validityTime: 3600, // Valid for 1 hour
+  );
 
   try {
-    // Fire 3 asynchronous balance fetches simultaneously
-    final results = await Future.wait([
-      momo.collection.getAccountBalance(),
-      momo.collection.getAccountBalance(),
-      momo.collection.getAccountBalance(),
-    ]);
+    await momo.collection.preApproval(
+      xReferenceId: referenceId,
+      body: preApproval,
+    );
+    _logger
+        .i('✓ Pre-Approval request submitted successfully. Polling status...');
 
-    _logger.i('   ✓ Concurrent requests completed successfully!');
-    for (var i = 0; i < results.length; i++) {
-      final balance = results[i];
-      _logger.i(
-          '     Request $i balance: ${balance.availableBalance} ${balance.currency}');
+    PreApprovalResult? status;
+    var attempts = 0;
+
+    while (attempts < 10) {
+      attempts++;
+      await Future.delayed(const Duration(seconds: 2));
+      try {
+        status = await momo.collection
+            .getPreApprovalStatus(referenceId: referenceId);
+        final state = status.status;
+        _logger.i('  [Attempt $attempts] Current Status: $state');
+
+        if (state == PreApprovalResultStatus.successful) {
+          _logger.i('  ✓ Pre-Approval mandate GRANTED successfully!');
+          break;
+        } else if (state == PreApprovalResultStatus.failed) {
+          _logger.e('  ✗ Pre-Approval request REJECTED/FAILED.');
+          if (status.reason != null) {
+            _logger.e('    Reason: ${status.reason?.code}');
+          }
+          break;
+        }
+      } on MtnMomoNotFoundException catch (_) {
+        _logger.i(
+            '  [Attempt $attempts] Pre-approval not propagated on gateway yet (404)...');
+      }
     }
   } on MtnMomoException catch (e) {
-    if (e is MtnMomoTransactionException ||
-        e is MtnMomoServerException ||
-        e is MtnMomoForbiddenException) {
-      _logger.i('   ✓ Deduplication and token fetch verified.');
-      _logger.w(
-        '   Note: Collections balance endpoint returned a gateway error (expected volatile sandbox behavior): $e',
-      );
-    } else {
-      _logger.e('MTN MoMo Error occurred: ${e.message}');
-    }
+    _logger.e('MTN MoMo Exception: ${e.message}');
   } catch (e) {
-    _logger.e('An unexpected error occurred: $e');
+    _logger.e('Unexpected error: $e');
   }
-
-  print('\n==================================================');
-  print('          DEDUPLICATION COMPLETED');
-  print('==================================================\n');
 }
