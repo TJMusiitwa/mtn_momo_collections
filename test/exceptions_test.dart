@@ -88,5 +88,27 @@ void main() {
       expect(transEx.errorCode, equals(MtnMomoErrorCode.payerLimitReached));
       expect(transEx.message, equals('Limit has been reached.'));
     });
+
+    test('maps target environment error to MtnMomoTransactionException', () {
+      final dioError = DioException(
+        requestOptions: requestOptions,
+        response: Response(
+          requestOptions: requestOptions,
+          statusCode: 400,
+          data: {
+            'code': 'NOT_ALLOWED_TARGET_ENVIRONMENT',
+            'message': 'Access to target environment is forbidden.',
+          },
+        ),
+      );
+
+      final result = mapDioException(dioError);
+      expect(result, isA<MtnMomoTransactionException>());
+      final transEx = result as MtnMomoTransactionException;
+      expect(
+        transEx.errorCode,
+        equals(MtnMomoErrorCode.notAllowedTargetEnvironment),
+      );
+    });
   });
 }

@@ -36,7 +36,7 @@ void main() {
     late TokenManager tokenManager;
     late MockHttpClientAdapter mockAdapter;
     late List<Future<String?> Function()> tokenExpiredCalls;
-    late Future<String?> Function() onTokenExpiredMock;
+    late Future<String?> Function(RequestOptions options) onTokenExpiredMock;
 
     setUp(() {
       dio = Dio();
@@ -45,7 +45,7 @@ void main() {
       tokenManager = TokenManager();
 
       tokenExpiredCalls = [];
-      onTokenExpiredMock = () async {
+      onTokenExpiredMock = (options) async {
         if (tokenExpiredCalls.isNotEmpty) {
           return tokenExpiredCalls.removeAt(0)();
         }
