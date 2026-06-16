@@ -64,6 +64,33 @@ Run pub get:
 flutter pub get
 ```
 
+### Best Practice: Product Token Isolation
+
+> [!IMPORTANT]
+> **Collections** and **Disbursements** are configured as different products on the MTN MoMo Developer Portal and use separate subscriptions, User IDs, API Keys, and target environment scopes.
+>
+> Under the hood, `MomoCollections` utilizes a local `TokenManager` cache. If you attempt to share a single `MomoCollections` instance for both Collections and Disbursements, their access tokens will collide and overwrite each other in the shared cache, resulting in **`401 Unauthorized`** or **`403 Forbidden`** errors.
+>
+> **Recommendation**: Always instantiate **separate, dedicated instances** of `MomoCollections` for Collections and Disbursements:
+>
+> ```dart
+> // Dedicated Collections Instance
+> final collectionsMomo = MomoCollections(
+>   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+>   subscriptionKey: collectionsSubKey,
+>   userId: collectionsUserId,
+>   apiKey: collectionsApiKey,
+> );
+>
+> // Dedicated Disbursements Instance
+> final disbursementsMomo = MomoCollections(
+>   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+>   subscriptionKey: disbursementsSubKey,
+>   userId: disbursementsUserId,
+>   apiKey: disbursementsApiKey,
+> );
+> ```
+
 ---
 
 ## 🛠 Complete Sandbox Walkthrough

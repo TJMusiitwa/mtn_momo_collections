@@ -11,11 +11,20 @@ This directory contains executable code examples demonstrating how to get the mo
 
 We have built a premium, state-of-the-art interactive **SDK Playground App** in Flutter, located at [main.dart](lib/main.dart).
 
-It offers a gorgeous visual interface adhering strictly to MTN's official **Sunshine Yellow & Black** brand guidelines:
-- **Sandbox User & Key Generator**: Tap once to programmatically generate dynamic Sandbox credentials.
-- **Collections API Dashboard**: Input a payer's number and amount, dispatch a Push USSD transaction, check live status updates, and read the Collections balance.
-- **Disbursements API Dashboard**: Validate a recipient, initialize a transfer (disbursing funds), track the state, and read the Disbursements balance.
-- **Live Scrolling Terminal**: View raw gateway responses and exception mappings in real-time.
+It offers a gorgeous visual interface adhering strictly to MTN's official **Sunshine Yellow & Black** brand guidelines, organized into a clean **tabbed interface**:
+*   **Core APIs Tab**:
+    *   **Sandbox Credentials**: Programmatically provision a dynamic Sandbox User ID and API Key.
+    *   **Collections (USSD Push)**: Input a payer's number and amount, dispatch a transaction, and poll for live status updates.
+    *   **Disbursements (Transfer)**: Verify a payee wallet, disburse funds, and monitor transfer states.
+*   **Advanced Tab**:
+    *   **Collections Pre-Approval**: Request customer mandates/consents with custom validity durations and poll authorization status.
+    *   **Disbursements Refund**: Reference a prior transfer ID to issue a payout refund, monitoring the status.
+*   **Simulator Tab**:
+    *   **Sandbox Use Cases Simulator**: Run a sequential sequence of 6 predefined sandbox test scenarios (Success, validation errors, mandate rejections, etc.) streaming execution logs live into the console.
+*   **Live Scrolling Terminal**: Displays WAF raw responses, token manager updates, and mapped exception logs in real-time.
+
+> [!TIP]
+> **Product Token Isolation Example**: Look at the source code in `lib/main.dart`. The playground initializes separate, dedicated instances of `MomoCollections` (`_collectionsMomo` and `_disbursementsMomo`) to demonstrate the recommended best practice of avoiding token cache overwrites between the different portal product scopes.
 
 To launch the Playground on a simulator or device:
 ```bash
@@ -76,3 +85,31 @@ Demonstrate how the SDK automatically deduplicates concurrent access token refre
   ```bash
   dart example/lib/thread_safety_deduplication_example.dart
   ```
+
+### 6. Collections Pre-Approval (Mandates)
+Demonstrate requesting payment consent/mandates from customers and checking status.
+* **File**: [collections_preapproval_example.dart](lib/collections_preapproval_example.dart)
+* **Execution**:
+  ```bash
+  export MTN_MOMO_SUBSCRIPTION_KEY="your_sub_key"
+  dart example/lib/collections_preapproval_example.dart
+  ```
+
+### 7. Disbursements Payout Refund
+Demonstrate making a disbursement transfer and then issuing a refund referencing the original transfer.
+* **File**: [disbursements_refund_example.dart](lib/disbursements_refund_example.dart)
+* **Execution**:
+  ```bash
+  export MTN_MOMO_DISB_SUBSCRIPTION_KEY="your_disb_sub_key"
+  dart example/lib/disbursements_refund_example.dart
+  ```
+
+### 8. Sandbox Use Cases Simulator
+A comprehensive simulation runner that tests a sequence of 6 predefined sandbox behaviors (success, validation error, account inactive, mandate rejection, etc.) mapping exceptions correctly.
+* **File**: [sandbox_usecase_simulator.dart](lib/sandbox_usecase_simulator.dart)
+* **Execution**:
+  ```bash
+  export MTN_MOMO_SUBSCRIPTION_KEY="your_sub_key"
+  dart example/lib/sandbox_usecase_simulator.dart
+  ```
+

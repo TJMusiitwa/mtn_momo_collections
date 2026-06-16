@@ -94,6 +94,13 @@ Future<String?> _fetchToken() async {
 }
 ```
 
+### 3. Product Token Isolation (Avoiding Cache Collisions)
+> [!WARNING]
+> Because `MomoCollections` utilizes a single shared `TokenManager` cache inside its interceptor, sharing a single `MomoCollections` instance to invoke both Collections and Disbursements concurrently is strongly discouraged.
+> Since each product has distinct credentials (subscription keys, user IDs, and API keys) and requires distinct OAuth2 tokens, sharing a client instance will cause access token cache collisions, resulting in HTTP 401 Unauthorized errors on subsequent requests.
+>
+> **Best Practice Recommendation**: Developers must always instantiate separate, dedicated instances of `MomoCollections` for Collections and Disbursements to isolate their token cache lifecycles.
+
 ---
 
 ## 🔒 Custom SDK Exception Hierarchy
