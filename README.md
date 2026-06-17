@@ -346,7 +346,7 @@ try {
       payerMessage: 'Cross-border remittance',
       payeeNote: 'Cash received',
       // Payer identity for compliance
-      payerIdentificationType: 'PassportNumber',
+      payerIdentificationType: CashTransferPayerIdentificationType.pass,
       payerIdentificationNumber: 'AB123456',
       payerFirstName: 'Erik',
       payerSurName: 'Andersson',
