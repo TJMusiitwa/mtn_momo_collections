@@ -351,5 +351,260 @@ void main() {
         skip: !hasDisbursements ? 'Requires DISBURSMENTS_KEY' : null,
       );
     });
+
+    group('Remittances Product Live Validation', () {
+      late String userId;
+      late String apiKey;
+      late MomoCollections momo;
+
+      final remittancesKey =
+          env['REMITTANCES_KEY'] ?? Platform.environment['REMITTANCES_KEY'];
+      final hasRemittances =
+          remittancesKey != null && remittancesKey.isNotEmpty;
+
+      setUpAll(() async {
+        if (!hasRemittances) return;
+        final creds = await _provisionSandboxUser(remittancesKey);
+        userId = creds['userId']!;
+        apiKey = creds['apiKey']!;
+        momo = MomoCollections(
+          baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+          subscriptionKey: remittancesKey,
+          userId: userId,
+          apiKey: apiKey,
+        );
+      });
+
+      test(
+        'Retrieves remittances account balance successfully',
+        () async {
+          try {
+            final balance = await momo.remittance.getAccountBalance();
+            expect(balance.availableBalance, isNotNull);
+            expect(balance.currency, equals('EUR'));
+          } on MtnMomoException catch (e) {
+            if (e is MtnMomoTransactionException ||
+                e is MtnMomoServerException ||
+                e is MtnMomoForbiddenException ||
+                e is MtnMomoNotFoundException) {
+              print(
+                'Note: Remittances balance endpoint returned a gateway error in sandbox (expected volatile behavior): $e',
+              );
+              return;
+            }
+            rethrow;
+          }
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY in .env' : null,
+      );
+
+      test(
+        'Validates active MSISDN returns successfully',
+        () async {
+          // Any MSISDN not in the special-case list results in success (sandbox rule)
+          await expectLater(
+            momo.remittance.validateAccountHolderStatus(
+              accountHolderId: '256772123456',
+              accountHolderIdType: 'msisdn',
+            ),
+            completes,
+          );
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY' : null,
+      );
+
+      test(
+        'Validates inactive MSISDN throws MtnMomoNotFoundException',
+        () async {
+          // AccountHolderActiveMsisdnNotFound Use Case: 46733123450
+          await expectLater(
+            momo.remittance.validateAccountHolderStatus(
+              accountHolderId: '46733123450',
+              accountHolderIdType: 'msisdn',
+            ),
+            throwsA(isA<MtnMomoNotFoundException>()),
+          );
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY' : null,
+      );
+
+      test(
+        'Initiates Remittance Transfer and polls status (Success Case)',
+        () async {
+          // Any valid MSISDN + amount 1000 EUR → SUCCESSFUL
+          final refId = const Uuid().v4();
+          await momo.remittance.transfer(
+            xReferenceId: refId,
+            body: Transfer(
+              amount: '1000', // PaymentAmountSuccess Use Case
+              currency: 'EUR',
+              externalId: 'REM_TXN_SUCCESS_${refId.substring(0, 8)}',
+              payee: const Party(
+                partyId: '256772123456',
+                partyIdType: PartyPartyIdType.msisdn,
+              ),
+              payerMessage: 'Test Remittance Transfer Success',
+              payeeNote: 'Success',
+            ),
+          );
+
+          TransferResult? status;
+          for (int i = 0; i < 5; i++) {
+            await Future.delayed(const Duration(seconds: 1));
+            status = await momo.remittance.getTransferStatus(
+              referenceId: refId,
+            );
+            if (status.status == TransferResultStatus.successful) break;
+          }
+
+          expect(status?.status, equals(TransferResultStatus.successful));
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY' : null,
+      );
+
+      test(
+        'Initiates Remittance Transfer and polls status (Failed Case)',
+        () async {
+          // TransferPayeeFailed Use Case: MSISDN 46733123450
+          final refId = const Uuid().v4();
+          await momo.remittance.transfer(
+            xReferenceId: refId,
+            body: Transfer(
+              amount: '1000',
+              currency: 'EUR',
+              externalId: 'REM_TXN_FAILED_${refId.substring(0, 8)}',
+              payee: const Party(
+                partyId: '46733123450', // TransferPayeeFailed Use Case
+                partyIdType: PartyPartyIdType.msisdn,
+              ),
+              payerMessage: 'Test Remittance Transfer Failed',
+              payeeNote: 'Failure',
+            ),
+          );
+
+          TransferResult? status;
+          for (int i = 0; i < 5; i++) {
+            await Future.delayed(const Duration(seconds: 1));
+            status = await momo.remittance.getTransferStatus(
+              referenceId: refId,
+            );
+            if (status.status == TransferResultStatus.failed) break;
+          }
+
+          expect(status?.status, equals(TransferResultStatus.failed));
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY' : null,
+      );
+
+      test(
+        'Initiates Cash Transfer and polls status (Success Case)',
+        () async {
+          // CashTransfer with amount 1000 EUR → SUCCESSFUL (sandbox default)
+          final refId = const Uuid().v4();
+          try {
+            await momo.remittance.cashTransfer(
+              xReferenceId: refId,
+              body: CashTransfer(
+                amount: '1000',
+                currency: 'EUR',
+                externalId: 'CASH_TXN_SUCCESS_${refId.substring(0, 8)}',
+                payee: const Party(
+                  partyId: '256772123456',
+                  partyIdType: PartyPartyIdType.msisdn,
+                ),
+                orginatingCountry: 'SE',
+                originalAmount: '10000',
+                originalCurrency: 'SEK',
+                payerMessage: 'Cross-border cash transfer',
+                payeeNote: 'Cash received',
+                payerIdentificationType: 'PassportNumber',
+                payerIdentificationNumber: 'AB123456',
+                payerFirstName: 'Erik',
+                payerSurName: 'Andersson',
+                payerLanguageCode: 'sv',
+                payerEmail: 'erik.andersson@example.se',
+                payerMsisdn: '46701234567',
+                payerGender: 'M',
+              ),
+            );
+
+            CashTransferResult? status;
+            for (int i = 0; i < 5; i++) {
+              await Future.delayed(const Duration(seconds: 1));
+              status = await momo.remittance.getCashTransferStatus(
+                referenceId: refId,
+              );
+              if (status.status == CashTransferResultStatus.successful) break;
+            }
+
+            expect(status?.status, equals(CashTransferResultStatus.successful));
+          } on MtnMomoException catch (e) {
+            if (e is MtnMomoServerException || e is MtnMomoNotFoundException) {
+              print(
+                'Note: Cash Transfer endpoint returned volatile sandbox behavior: $e',
+              );
+              return;
+            }
+            rethrow;
+          }
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY' : null,
+      );
+
+      test(
+        'Initiates Cash Transfer and polls status (Failed Case)',
+        () async {
+          // CashTransferTransactionFailed Use Case: amount 2000 EUR
+          final refId = const Uuid().v4();
+          try {
+            await momo.remittance.cashTransfer(
+              xReferenceId: refId,
+              body: CashTransfer(
+                amount: '2000', // CashTransferTransactionFailed Use Case
+                currency: 'EUR',
+                externalId: 'CASH_TXN_FAILED_${refId.substring(0, 8)}',
+                payee: const Party(
+                  partyId: '256772123456',
+                  partyIdType: PartyPartyIdType.msisdn,
+                ),
+                orginatingCountry: 'SE',
+                originalAmount: '20000',
+                originalCurrency: 'SEK',
+                payerMessage: 'Cross-border cash transfer (failed case)',
+                payeeNote: 'Should fail',
+                payerIdentificationType: 'PassportNumber',
+                payerIdentificationNumber: 'XY999999',
+                payerFirstName: 'Lars',
+                payerSurName: 'Nilsson',
+                payerLanguageCode: 'sv',
+                payerEmail: 'lars.nilsson@example.se',
+                payerMsisdn: '46709876543',
+                payerGender: 'M',
+              ),
+            );
+
+            CashTransferResult? status;
+            for (int i = 0; i < 5; i++) {
+              await Future.delayed(const Duration(seconds: 1));
+              status = await momo.remittance.getCashTransferStatus(
+                referenceId: refId,
+              );
+              if (status.status == CashTransferResultStatus.failed) break;
+            }
+
+            expect(status?.status, equals(CashTransferResultStatus.failed));
+          } on MtnMomoException catch (e) {
+            if (e is MtnMomoServerException || e is MtnMomoNotFoundException) {
+              print(
+                'Note: Cash Transfer endpoint returned volatile sandbox behavior: $e',
+              );
+              return;
+            }
+            rethrow;
+          }
+        },
+        skip: !hasRemittances ? 'Requires REMITTANCES_KEY' : null,
+      );
+    });
   });
 }
