@@ -4,6 +4,7 @@
 
 import 'package:dart_mappable/dart_mappable.dart';
 
+import 'cash_transfer_payer_identification_type.dart';
 import 'party.dart';
 
 part 'cash_transfer.mapper.dart';
@@ -30,61 +31,44 @@ class CashTransfer with CashTransferMappable {
     this.payerMsisdn,
     this.payerGender,
   });
-
   /// Amount that will be debited from the payer account.
   final String? amount;
-
   /// ISO4217 Currency
   final String? currency;
-
   final Party? payee;
-
-  /// External id is used as a reference to the transaction. External id is used for reconciliation.
-  /// The external id will be included in transaction history report.
+  /// External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.
   final String? externalId;
-
-  /// The originating country of the transfer (ISO 3166-1 alpha-2 country code).
+  /// Country where the request came from
   final String? orginatingCountry;
-
-  /// The original amount in the originating country's currency before conversion.
+  /// Amount that was sent before any foreign exchange
   final String? originalAmount;
-
-  /// The original currency (ISO4217) before conversion.
+  /// ISO4217 Currency of the originalAmoun
   final String? originalCurrency;
-
   /// Message that will be written in the payer transaction history message field.
   final String? payerMessage;
-
   /// Message that will be written in the payee transaction history note field.
   final String? payeeNote;
-
-  /// The payer identification type (e.g. PassportNumber, NationalIdCard, DriversLicense, etc.)
-  final String? payerIdentificationType;
-
-  /// The payer identification number.
+  /// Identification type of the payer
+  final CashTransferPayerIdentificationType? payerIdentificationType;
+  /// Identification number of the payer
   final String? payerIdentificationNumber;
-
-  /// The full identity string of the payer.
+  /// Identification of the payer
   final String? payerIdentity;
-
-  /// First name of the payer.
+  /// FirstName
   final String? payerFirstName;
-
-  /// Surname of the payer.
+  /// Surname
   final String? payerSurName;
-
-  /// Language code of the payer (ISO 639-1).
+  /// LanguageCode
   final String? payerLanguageCode;
-
-  /// Email address of the payer.
+  /// Email
   final String? payerEmail;
-
-  /// MSISDN (mobile number) of the payer.
+  /// Msisdn
   final String? payerMsisdn;
-
-  /// Gender of the payer.
+  /// GenderCode according to ISO 20022
   final String? payerGender;
 
-  static CashTransfer fromJson(Map<String, dynamic> json) =>
-      CashTransferMapper.ensureInitialized().decodeMap<CashTransfer>(json);
+
+  static CashTransfer fromJson(Map<String, dynamic> json) => CashTransferMapper.ensureInitialized().decodeMap<CashTransfer>(json);
+
 }
+

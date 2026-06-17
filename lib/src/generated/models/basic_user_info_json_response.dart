@@ -13,7 +13,6 @@ class BasicUserInfoJsonResponse with BasicUserInfoJsonResponseMappable {
     this.familyName,
     this.birthdate,
     this.locale,
-    this.gender,
     this.status,
   });
   /// Given name(s) or first name(s) of the End-User. Note that in some cultures, people can have multiple given names; all can be present, with the names being separated by space characters.
@@ -26,8 +25,6 @@ class BasicUserInfoJsonResponse with BasicUserInfoJsonResponseMappable {
   final String? birthdate;
   /// End-User's locale, represented as a  BCP47 [RFC5646] language tag. This is typically an  ISO 639-1 Alpha-2 [ISO639�|�1] language code in lowercase and an  ISO 3166-1 Alpha-2 [ISO3166�|�1] country code in uppercase, separated by a dash. For example,  en-US or  fr-CA. As a compatibility note, some implementations have used an underscore as the separator rather than a dash, for example,  en_US; Relying Parties may choose to accept this locale syntax as well.
   final String? locale;
-  /// End-User's gender. Values defined by this specification are female and male. Other values may be used when neither of the defined values are applicable.
-  final String? gender;
   /// Accountholder status.
   final String? status;
 

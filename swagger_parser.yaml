@@ -29,3 +29,6 @@ swagger_parser:
 
     - schema_path: schemes/sandbox-provisioning-api.json
       name: SandboxProvisioning  
+
+    - schema_path: schemes/remittance.json
+      name: Remittance

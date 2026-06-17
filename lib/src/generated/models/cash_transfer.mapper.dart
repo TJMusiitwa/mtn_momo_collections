@@ -16,6 +16,7 @@ class CashTransferMapper extends ClassMapperBase<CashTransfer> {
     if (_instance == null) {
       MapperContainer.globals.use(_instance = CashTransferMapper._());
       PartyMapper.ensureInitialized();
+      CashTransferPayerIdentificationTypeMapper.ensureInitialized();
     }
     return _instance!;
   }
@@ -77,9 +78,11 @@ class CashTransferMapper extends ClassMapperBase<CashTransfer> {
     _$payeeNote,
     opt: true,
   );
-  static String? _$payerIdentificationType(CashTransfer v) =>
-      v.payerIdentificationType;
-  static const Field<CashTransfer, String> _f$payerIdentificationType = Field(
+  static CashTransferPayerIdentificationType? _$payerIdentificationType(
+    CashTransfer v,
+  ) => v.payerIdentificationType;
+  static const Field<CashTransfer, CashTransferPayerIdentificationType>
+  _f$payerIdentificationType = Field(
     'payerIdentificationType',
     _$payerIdentificationType,
     opt: true,
@@ -252,7 +255,7 @@ abstract class CashTransferCopyWith<$R, $In extends CashTransfer, $Out>
     String? originalCurrency,
     String? payerMessage,
     String? payeeNote,
-    String? payerIdentificationType,
+    CashTransferPayerIdentificationType? payerIdentificationType,
     String? payerIdentificationNumber,
     String? payerIdentity,
     String? payerFirstName,

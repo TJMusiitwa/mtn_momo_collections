@@ -517,7 +517,8 @@ void main() {
                 originalCurrency: 'SEK',
                 payerMessage: 'Cross-border cash transfer',
                 payeeNote: 'Cash received',
-                payerIdentificationType: 'PassportNumber',
+                payerIdentificationType:
+                    CashTransferPayerIdentificationType.pass,
                 payerIdentificationNumber: 'AB123456',
                 payerFirstName: 'Erik',
                 payerSurName: 'Andersson',
@@ -534,10 +535,10 @@ void main() {
               status = await momo.remittance.getCashTransferStatus(
                 referenceId: refId,
               );
-              if (status.status == CashTransferResultStatus.successful) break;
+              if (status.status == 'SUCCESSFUL') break;
             }
 
-            expect(status?.status, equals(CashTransferResultStatus.successful));
+            expect(status?.status, equals('SUCCESSFUL'));
           } on MtnMomoException catch (e) {
             if (e is MtnMomoServerException || e is MtnMomoNotFoundException) {
               print(
@@ -572,7 +573,8 @@ void main() {
                 originalCurrency: 'SEK',
                 payerMessage: 'Cross-border cash transfer (failed case)',
                 payeeNote: 'Should fail',
-                payerIdentificationType: 'PassportNumber',
+                payerIdentificationType:
+                    CashTransferPayerIdentificationType.pass,
                 payerIdentificationNumber: 'XY999999',
                 payerFirstName: 'Lars',
                 payerSurName: 'Nilsson',
@@ -589,10 +591,10 @@ void main() {
               status = await momo.remittance.getCashTransferStatus(
                 referenceId: refId,
               );
-              if (status.status == CashTransferResultStatus.failed) break;
+              if (status.status == 'FAILED') break;
             }
 
-            expect(status?.status, equals(CashTransferResultStatus.failed));
+            expect(status?.status, equals('FAILED'));
           } on MtnMomoException catch (e) {
             if (e is MtnMomoServerException || e is MtnMomoNotFoundException) {
               print(

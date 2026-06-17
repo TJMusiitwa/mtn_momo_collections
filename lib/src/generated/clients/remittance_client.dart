@@ -28,23 +28,11 @@ abstract class RemittanceClient {
   @GET('/v1_0/account/balance')
   Future<Balance> getAccountBalance();
 
-  /// GetAccountBalanceInSpecificCurrency.
-  ///
-  /// Get the balance of own account. Currency parameter passed in GET.
-  ///
-  /// [currency] - Should be in ISO4217 Currency.
-  @GET('/v1_0/account/balance/{currency}')
-  Future<Balance> getAccountBalanceInSpecificCurrency({
-    @Path('currency') required String currency,
-  });
-
   /// ValidateAccountHolderStatus.
   ///
-  /// Operation is used to check if an account holder is registered and active in the system.
+  /// Operation is used  to check if an account holder is registered and active in the system.
   ///
-  /// [accountHolderId] - The AccountHolder number. Validated according to the AccountHolder ID type.
-  /// <br> msisdn - Mobile Number validated according to ITU-T E.164. Validated with IsMSISDN
-  /// <br> email - Validated to be a valid e-mail format. Validated with IsEmail
+  /// [accountHolderId] - The AccountHolder number that's Validated according to the AccountHolder ID type (case Sensitive)<br> msisdn - Mobile Number validated according to ITU-T E.164. Validated with IsMSISDN <br>email - Validated to be a valid e-mail format. Validated with IsEmail.
   ///
   /// [accountHolderIdType] - Specifies the type of the party id. Allowed values [msisdn, email, party_code].
   @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/active')
@@ -53,27 +41,13 @@ abstract class RemittanceClient {
     @Path('accountHolderIdType') required String accountHolderIdType,
   });
 
-  /// GetBasicUserinfo.
-  ///
-  /// This operation returns personal information of the account holder.
-  /// The operation does not need any consent by the account holder.
-  ///
-  /// [accountHolderMSISDN] - MSISDN of the account holder.
-  @GET('/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo')
-  Future<BasicUserInfoJsonResponse> getBasicUserinfo({
-    @Path('accountHolderMSISDN') required String accountHolderMSISDN,
-  });
-
   /// Transfer.
   ///
-  /// Transfer operation is used to transfer an amount from the own account to a payee account.
-  /// <br> Status of the transaction can validated by using the GET /transfer/\{referenceId\}.
+  /// Transfer operation is used to transfer an amount from the own account to a payee account.<br> Status of the transaction can validated by using the GET /transfer/\{referenceId\}.
   ///
   /// [xCallbackUrl] - URL to the server where the callback should be sent.
   ///
-  /// [xReferenceId] - Format - UUID. Resource ID of the created transfer transaction. This ID is used,
-  /// for example validating the status of the request. 'Universal Unique ID' for the transaction
-  /// generated using UUID version 4.
+  /// [xReferenceId] - Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.
   @POST('/v1_0/transfer')
   Future<void> transfer({
     @Header('X-Reference-Id') required String xReferenceId,
@@ -83,42 +57,22 @@ abstract class RemittanceClient {
 
   /// GetTransferStatus.
   ///
-  /// This operation is used to get the status of a transfer.
-  /// X-Reference-Id that was passed in the post is used as reference to the request.
+  /// This operation is used to get the status of a transfer. X-Reference-Id that was passed in the post is used as reference to the request.
   ///
-  /// [referenceId] - UUID of transaction to get result. Reference id used when creating the Transfer.
+  /// [referenceId] - UUID of transaction to get result. Reference id  used when creating the Transfer.
   @GET('/v1_0/transfer/{referenceId}')
   Future<TransferResult> getTransferStatus({
     @Path('referenceId') required String referenceId,
   });
 
-  /// CashTransfer.
+  /// GetBasicUserinfo.
   ///
-  /// Cash transfer operation is used to transfer an amount from the owner's account to a payee account.
-  /// Supports cross-border remittance with full payer identity information.
-  /// Status of the transaction can be validated by using GET /cashtransfer/\{referenceId\}.
+  /// This operation returns personal information of the account holder. The operation does not need any consent by the account holder.
   ///
-  /// [xCallbackUrl] - URL to the server where the callback should be sent (uses PORT method).
-  ///
-  /// [xReferenceId] - Format - UUID. Resource ID of the created 'request-to-pay' transaction. This ID is
-  /// used for e.g. validating the status of the request. Universal Unique ID for the transaction
-  /// generated using UUID version 4.
-  @POST('/v2_0/cashtransfer')
-  Future<void> cashTransfer({
-    @Header('X-Reference-Id') required String xReferenceId,
-    @Header('X-Callback-Url') String? xCallbackUrl,
-    @Body() CashTransfer? body,
-  });
-
-  /// GetCashTransferStatus.
-  ///
-  /// This operation is used to get the status of a cash transfer.
-  /// X-Reference-Id that was passed in the post is used as reference to the request.
-  ///
-  /// [referenceId] - UUID of transaction to get result. Reference id used when creating the CashTransfer.
-  @GET('/v2_0/cashtransfer/{referenceId}')
-  Future<CashTransferResult> getCashTransferStatus({
-    @Path('referenceId') required String referenceId,
+  /// [accountHolderMsisdn] - Bearer Authentication Token generated using CreateAccessToken API Call.
+  @GET('/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo')
+  Future<BasicUserInfoJsonResponse> getBasicUserinfo({
+    @Path('accountHolderMSISDN') required String accountHolderMsisdn,
   });
 
   /// bc-authorize.
@@ -131,6 +85,16 @@ abstract class RemittanceClient {
   Future<BcauthorizeResponse> bcAuthorize({
     @Header('X-Callback-Url') String? xCallbackUrl,
     @Body() dynamic body,
+  });
+
+  /// GetAccountBalanceInSpecificCurrency.
+  ///
+  /// Get the balance of own account. Currency parameter passed in GET.
+  ///
+  /// [currency] - Should be in ISO4217 Currency.
+  @GET('/v1_0/account/balance/{currency}')
+  Future<Balance> getAccountBalanceInSpecificCurrency({
+    @Path('currency') required String currency,
   });
 
   /// CreateOauth2Token.
@@ -150,8 +114,55 @@ abstract class RemittanceClient {
 
   /// CreateAccessToken.
   ///
-  /// This operation is used to create an access token which can then be used to authorize and
-  /// authenticate towards the other end-points of the API.
+  /// This operation is used to create an access token which can then be used to authorize and authenticate towards the other end-points of the API.
   @POST('/token/')
   Future<TokenPost200ApplicationJsonResponse> createAccessToken();
+
+  /// CashTransfer.
+  ///
+  /// Cash transfer operation is used to transfer an amount from the owner’s account to a payee account. Status of the transaction can be validated by using GET /cashtransfer/{referenceId}.
+  ///
+  /// [xCallbackUrl] - URL to the server where the callback should be sent, Uses PORT method.
+  ///
+  /// [xReferenceId] - Format - UUID. Recource ID of the created ‘request-to-pay’ transaction. This ID is used for e.g. validating the status of the request. Universal Unique ID for the transaction generated using UUID version 4.
+  @POST('/v2_0/cashtransfer')
+  Future<void> cashTransfer({
+    @Header('X-Reference-Id') required String xReferenceId,
+    @Header('X-Callback-Url') String? xCallbackUrl,
+    @Body() CashTransfer? body,
+  });
+
+  /// GetCashTransferStatus.
+  ///
+  /// This operation is used to get the status of a transfer. X-Reference-Id that was passed in the post is used as reference to the request.
+  ///
+  /// [referenceId] - UUID of transaction to get result. Reference id  used when creating the CashTransfer.
+  @GET('/v2_0/cashtransfer/{referenceId}')
+  Future<CashTransferResult> getCashTransferStatus({
+    @Path('referenceId') required String referenceId,
+  });
+
+  /// GetBasicUserinfo (clone).
+  ///
+  /// This operation returns personal information of the account holder. The operation does not need any consent by the account holder.
+  ///
+  /// [accountHolderMsisdn] - Bearer Authentication Token generated using CreateAccessToken API Call.
+  ///
+  /// Incorrect name has been replaced. Original name: `671b099705fd58bc55c9bbca`.
+  @GET('/clone-671b0/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo')
+  Future<BasicUserInfoJsonResponse> getClone671b0V10AccountholderMsisdnAccountHolderMsisdnBasicuserinfo({
+    @Path('accountHolderMSISDN') required String accountHolderMsisdn,
+  });
+
+  /// GetBasicUserinfo-v3.
+  ///
+  /// This operation returns personal information of the account holder. The operation does not need any consent by the account holder.
+  ///
+  /// [accountHolderMsisdn] - Bearer Authentication Token generated using CreateAccessToken API Call.
+  ///
+  /// Incorrect name has been replaced. Original name: `671b4b855d145f9b8f15e836`.
+  @GET('/v1_0/accountholder/msisdn/999{accountHolderMSISDN}999/basicuserinfo')
+  Future<BasicUserInfoJsonResponse> getV10AccountholderMsisdn999AccountHolderMsisdn999Basicuserinfo({
+    @Path('accountHolderMSISDN') required String accountHolderMsisdn,
+  });
 }

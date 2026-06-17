@@ -51,12 +51,6 @@ class BasicUserInfoJsonResponseMapper
     _$locale,
     opt: true,
   );
-  static String? _$gender(BasicUserInfoJsonResponse v) => v.gender;
-  static const Field<BasicUserInfoJsonResponse, String> _f$gender = Field(
-    'gender',
-    _$gender,
-    opt: true,
-  );
   static String? _$status(BasicUserInfoJsonResponse v) => v.status;
   static const Field<BasicUserInfoJsonResponse, String> _f$status = Field(
     'status',
@@ -70,7 +64,6 @@ class BasicUserInfoJsonResponseMapper
     #familyName: _f$familyName,
     #birthdate: _f$birthdate,
     #locale: _f$locale,
-    #gender: _f$gender,
     #status: _f$status,
   };
 
@@ -80,7 +73,6 @@ class BasicUserInfoJsonResponseMapper
       familyName: data.dec(_f$familyName),
       birthdate: data.dec(_f$birthdate),
       locale: data.dec(_f$locale),
-      gender: data.dec(_f$gender),
       status: data.dec(_f$status),
     );
   }
@@ -164,7 +156,6 @@ abstract class BasicUserInfoJsonResponseCopyWith<
     String? familyName,
     String? birthdate,
     String? locale,
-    String? gender,
     String? status,
   });
   BasicUserInfoJsonResponseCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
@@ -187,7 +178,6 @@ class _BasicUserInfoJsonResponseCopyWithImpl<$R, $Out>
     Object? familyName = $none,
     Object? birthdate = $none,
     Object? locale = $none,
-    Object? gender = $none,
     Object? status = $none,
   }) => $apply(
     FieldCopyWithData({
@@ -195,7 +185,6 @@ class _BasicUserInfoJsonResponseCopyWithImpl<$R, $Out>
       if (familyName != $none) #familyName: familyName,
       if (birthdate != $none) #birthdate: birthdate,
       if (locale != $none) #locale: locale,
-      if (gender != $none) #gender: gender,
       if (status != $none) #status: status,
     }),
   );
@@ -206,7 +195,6 @@ class _BasicUserInfoJsonResponseCopyWithImpl<$R, $Out>
         familyName: data.get(#familyName, or: $value.familyName),
         birthdate: data.get(#birthdate, or: $value.birthdate),
         locale: data.get(#locale, or: $value.locale),
-        gender: data.get(#gender, or: $value.gender),
         status: data.get(#status, or: $value.status),
       );
 

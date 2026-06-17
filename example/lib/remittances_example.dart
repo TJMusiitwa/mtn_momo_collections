@@ -262,7 +262,7 @@ void main() async {
       originalCurrency: 'SEK',
       payerMessage: 'Cross-border remittance from Sweden',
       payeeNote: 'Cash transfer received',
-      payerIdentificationType: 'PassportNumber',
+      payerIdentificationType: CashTransferPayerIdentificationType.pass,
       payerIdentificationNumber: 'AB123456',
       payerFirstName: 'Erik',
       payerSurName: 'Andersson',
@@ -290,13 +290,13 @@ void main() async {
       final state = cashStatus.status;
       _logger.i('   Current Status: $state');
 
-      if (state == CashTransferResultStatus.successful) {
+      if (state == 'SUCCESSFUL') {
         _logger.i('   ✓ Cash transfer completed SUCCESSFULLY!');
         break;
-      } else if (state == CashTransferResultStatus.failed) {
+      } else if (state == 'FAILED') {
         _logger.e('   ✗ Cash transfer FAILED.');
         if (cashStatus.reason != null) {
-          _logger.e('     Failure Reason: ${cashStatus.reason?.code}');
+          _logger.e('     Failure Reason: ${cashStatus.reason}');
         }
         break;
       }

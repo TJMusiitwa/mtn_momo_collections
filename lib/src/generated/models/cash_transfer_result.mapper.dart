@@ -16,8 +16,7 @@ class CashTransferResultMapper extends ClassMapperBase<CashTransferResult> {
     if (_instance == null) {
       MapperContainer.globals.use(_instance = CashTransferResultMapper._());
       PartyMapper.ensureInitialized();
-      CashTransferResultStatusMapper.ensureInitialized();
-      ErrorReasonMapper.ensureInitialized();
+      CashTransferResultPayerIdentificationTypeMapper.ensureInitialized();
     }
     return _instance!;
   }
@@ -25,6 +24,22 @@ class CashTransferResultMapper extends ClassMapperBase<CashTransferResult> {
   @override
   final String id = 'CashTransferResult';
 
+  static String? _$financialTransactionId(CashTransferResult v) =>
+      v.financialTransactionId;
+  static const Field<CashTransferResult, String> _f$financialTransactionId =
+      Field('financialTransactionId', _$financialTransactionId, opt: true);
+  static String? _$status(CashTransferResult v) => v.status;
+  static const Field<CashTransferResult, String> _f$status = Field(
+    'status',
+    _$status,
+    opt: true,
+  );
+  static String? _$reason(CashTransferResult v) => v.reason;
+  static const Field<CashTransferResult, String> _f$reason = Field(
+    'reason',
+    _$reason,
+    opt: true,
+  );
   static String? _$amount(CashTransferResult v) => v.amount;
   static const Field<CashTransferResult, String> _f$amount = Field(
     'amount',
@@ -37,20 +52,35 @@ class CashTransferResultMapper extends ClassMapperBase<CashTransferResult> {
     _$currency,
     opt: true,
   );
-  static String? _$financialTransactionId(CashTransferResult v) =>
-      v.financialTransactionId;
-  static const Field<CashTransferResult, String> _f$financialTransactionId =
-      Field('financialTransactionId', _$financialTransactionId, opt: true);
+  static Party? _$payee(CashTransferResult v) => v.payee;
+  static const Field<CashTransferResult, Party> _f$payee = Field(
+    'payee',
+    _$payee,
+    opt: true,
+  );
   static String? _$externalId(CashTransferResult v) => v.externalId;
   static const Field<CashTransferResult, String> _f$externalId = Field(
     'externalId',
     _$externalId,
     opt: true,
   );
-  static Party? _$payee(CashTransferResult v) => v.payee;
-  static const Field<CashTransferResult, Party> _f$payee = Field(
-    'payee',
-    _$payee,
+  static String? _$orginatingCountry(CashTransferResult v) =>
+      v.orginatingCountry;
+  static const Field<CashTransferResult, String> _f$orginatingCountry = Field(
+    'orginatingCountry',
+    _$orginatingCountry,
+    opt: true,
+  );
+  static String? _$originalAmount(CashTransferResult v) => v.originalAmount;
+  static const Field<CashTransferResult, String> _f$originalAmount = Field(
+    'originalAmount',
+    _$originalAmount,
+    opt: true,
+  );
+  static String? _$originalCurrency(CashTransferResult v) => v.originalCurrency;
+  static const Field<CashTransferResult, String> _f$originalCurrency = Field(
+    'originalCurrency',
+    _$originalCurrency,
     opt: true,
   );
   static String? _$payerMessage(CashTransferResult v) => v.payerMessage;
@@ -65,40 +95,118 @@ class CashTransferResultMapper extends ClassMapperBase<CashTransferResult> {
     _$payeeNote,
     opt: true,
   );
-  static CashTransferResultStatus? _$status(CashTransferResult v) => v.status;
-  static const Field<CashTransferResult, CashTransferResultStatus> _f$status =
-      Field('status', _$status, opt: true);
-  static ErrorReason? _$reason(CashTransferResult v) => v.reason;
-  static const Field<CashTransferResult, ErrorReason> _f$reason = Field(
-    'reason',
-    _$reason,
+  static CashTransferResultPayerIdentificationType? _$payerIdentificationType(
+    CashTransferResult v,
+  ) => v.payerIdentificationType;
+  static const Field<
+    CashTransferResult,
+    CashTransferResultPayerIdentificationType
+  >
+  _f$payerIdentificationType = Field(
+    'payerIdentificationType',
+    _$payerIdentificationType,
+    opt: true,
+  );
+  static String? _$payerIdentificationNumber(CashTransferResult v) =>
+      v.payerIdentificationNumber;
+  static const Field<CashTransferResult, String> _f$payerIdentificationNumber =
+      Field(
+        'payerIdentificationNumber',
+        _$payerIdentificationNumber,
+        opt: true,
+      );
+  static String? _$payerIdentity(CashTransferResult v) => v.payerIdentity;
+  static const Field<CashTransferResult, String> _f$payerIdentity = Field(
+    'payerIdentity',
+    _$payerIdentity,
+    opt: true,
+  );
+  static String? _$payerFirstName(CashTransferResult v) => v.payerFirstName;
+  static const Field<CashTransferResult, String> _f$payerFirstName = Field(
+    'payerFirstName',
+    _$payerFirstName,
+    opt: true,
+  );
+  static String? _$payerSurName(CashTransferResult v) => v.payerSurName;
+  static const Field<CashTransferResult, String> _f$payerSurName = Field(
+    'payerSurName',
+    _$payerSurName,
+    opt: true,
+  );
+  static String? _$payerLanguageCode(CashTransferResult v) =>
+      v.payerLanguageCode;
+  static const Field<CashTransferResult, String> _f$payerLanguageCode = Field(
+    'payerLanguageCode',
+    _$payerLanguageCode,
+    opt: true,
+  );
+  static String? _$payerEmail(CashTransferResult v) => v.payerEmail;
+  static const Field<CashTransferResult, String> _f$payerEmail = Field(
+    'payerEmail',
+    _$payerEmail,
+    opt: true,
+  );
+  static String? _$payerMsisdn(CashTransferResult v) => v.payerMsisdn;
+  static const Field<CashTransferResult, String> _f$payerMsisdn = Field(
+    'payerMsisdn',
+    _$payerMsisdn,
+    opt: true,
+  );
+  static String? _$payerGender(CashTransferResult v) => v.payerGender;
+  static const Field<CashTransferResult, String> _f$payerGender = Field(
+    'payerGender',
+    _$payerGender,
     opt: true,
   );
 
   @override
   final MappableFields<CashTransferResult> fields = const {
-    #amount: _f$amount,
-    #currency: _f$currency,
     #financialTransactionId: _f$financialTransactionId,
-    #externalId: _f$externalId,
-    #payee: _f$payee,
-    #payerMessage: _f$payerMessage,
-    #payeeNote: _f$payeeNote,
     #status: _f$status,
     #reason: _f$reason,
+    #amount: _f$amount,
+    #currency: _f$currency,
+    #payee: _f$payee,
+    #externalId: _f$externalId,
+    #orginatingCountry: _f$orginatingCountry,
+    #originalAmount: _f$originalAmount,
+    #originalCurrency: _f$originalCurrency,
+    #payerMessage: _f$payerMessage,
+    #payeeNote: _f$payeeNote,
+    #payerIdentificationType: _f$payerIdentificationType,
+    #payerIdentificationNumber: _f$payerIdentificationNumber,
+    #payerIdentity: _f$payerIdentity,
+    #payerFirstName: _f$payerFirstName,
+    #payerSurName: _f$payerSurName,
+    #payerLanguageCode: _f$payerLanguageCode,
+    #payerEmail: _f$payerEmail,
+    #payerMsisdn: _f$payerMsisdn,
+    #payerGender: _f$payerGender,
   };
 
   static CashTransferResult _instantiate(DecodingData data) {
     return CashTransferResult(
-      amount: data.dec(_f$amount),
-      currency: data.dec(_f$currency),
       financialTransactionId: data.dec(_f$financialTransactionId),
-      externalId: data.dec(_f$externalId),
-      payee: data.dec(_f$payee),
-      payerMessage: data.dec(_f$payerMessage),
-      payeeNote: data.dec(_f$payeeNote),
       status: data.dec(_f$status),
       reason: data.dec(_f$reason),
+      amount: data.dec(_f$amount),
+      currency: data.dec(_f$currency),
+      payee: data.dec(_f$payee),
+      externalId: data.dec(_f$externalId),
+      orginatingCountry: data.dec(_f$orginatingCountry),
+      originalAmount: data.dec(_f$originalAmount),
+      originalCurrency: data.dec(_f$originalCurrency),
+      payerMessage: data.dec(_f$payerMessage),
+      payeeNote: data.dec(_f$payeeNote),
+      payerIdentificationType: data.dec(_f$payerIdentificationType),
+      payerIdentificationNumber: data.dec(_f$payerIdentificationNumber),
+      payerIdentity: data.dec(_f$payerIdentity),
+      payerFirstName: data.dec(_f$payerFirstName),
+      payerSurName: data.dec(_f$payerSurName),
+      payerLanguageCode: data.dec(_f$payerLanguageCode),
+      payerEmail: data.dec(_f$payerEmail),
+      payerMsisdn: data.dec(_f$payerMsisdn),
+      payerGender: data.dec(_f$payerGender),
     );
   }
 
@@ -174,17 +282,28 @@ abstract class CashTransferResultCopyWith<
 >
     implements ClassCopyWith<$R, $In, $Out> {
   PartyCopyWith<$R, Party, Party>? get payee;
-  ErrorReasonCopyWith<$R, ErrorReason, ErrorReason>? get reason;
   $R call({
+    String? financialTransactionId,
+    String? status,
+    String? reason,
     String? amount,
     String? currency,
-    String? financialTransactionId,
-    String? externalId,
     Party? payee,
+    String? externalId,
+    String? orginatingCountry,
+    String? originalAmount,
+    String? originalCurrency,
     String? payerMessage,
     String? payeeNote,
-    CashTransferResultStatus? status,
-    ErrorReason? reason,
+    CashTransferResultPayerIdentificationType? payerIdentificationType,
+    String? payerIdentificationNumber,
+    String? payerIdentity,
+    String? payerFirstName,
+    String? payerSurName,
+    String? payerLanguageCode,
+    String? payerEmail,
+    String? payerMsisdn,
+    String? payerGender,
   });
   CashTransferResultCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
     Then<$Out2, $R2> t,
@@ -203,47 +322,94 @@ class _CashTransferResultCopyWithImpl<$R, $Out>
   PartyCopyWith<$R, Party, Party>? get payee =>
       $value.payee?.copyWith.$chain((v) => call(payee: v));
   @override
-  ErrorReasonCopyWith<$R, ErrorReason, ErrorReason>? get reason =>
-      $value.reason?.copyWith.$chain((v) => call(reason: v));
-  @override
   $R call({
-    Object? amount = $none,
-    Object? currency = $none,
     Object? financialTransactionId = $none,
-    Object? externalId = $none,
-    Object? payee = $none,
-    Object? payerMessage = $none,
-    Object? payeeNote = $none,
     Object? status = $none,
     Object? reason = $none,
+    Object? amount = $none,
+    Object? currency = $none,
+    Object? payee = $none,
+    Object? externalId = $none,
+    Object? orginatingCountry = $none,
+    Object? originalAmount = $none,
+    Object? originalCurrency = $none,
+    Object? payerMessage = $none,
+    Object? payeeNote = $none,
+    Object? payerIdentificationType = $none,
+    Object? payerIdentificationNumber = $none,
+    Object? payerIdentity = $none,
+    Object? payerFirstName = $none,
+    Object? payerSurName = $none,
+    Object? payerLanguageCode = $none,
+    Object? payerEmail = $none,
+    Object? payerMsisdn = $none,
+    Object? payerGender = $none,
   }) => $apply(
     FieldCopyWithData({
-      if (amount != $none) #amount: amount,
-      if (currency != $none) #currency: currency,
       if (financialTransactionId != $none)
         #financialTransactionId: financialTransactionId,
-      if (externalId != $none) #externalId: externalId,
-      if (payee != $none) #payee: payee,
-      if (payerMessage != $none) #payerMessage: payerMessage,
-      if (payeeNote != $none) #payeeNote: payeeNote,
       if (status != $none) #status: status,
       if (reason != $none) #reason: reason,
+      if (amount != $none) #amount: amount,
+      if (currency != $none) #currency: currency,
+      if (payee != $none) #payee: payee,
+      if (externalId != $none) #externalId: externalId,
+      if (orginatingCountry != $none) #orginatingCountry: orginatingCountry,
+      if (originalAmount != $none) #originalAmount: originalAmount,
+      if (originalCurrency != $none) #originalCurrency: originalCurrency,
+      if (payerMessage != $none) #payerMessage: payerMessage,
+      if (payeeNote != $none) #payeeNote: payeeNote,
+      if (payerIdentificationType != $none)
+        #payerIdentificationType: payerIdentificationType,
+      if (payerIdentificationNumber != $none)
+        #payerIdentificationNumber: payerIdentificationNumber,
+      if (payerIdentity != $none) #payerIdentity: payerIdentity,
+      if (payerFirstName != $none) #payerFirstName: payerFirstName,
+      if (payerSurName != $none) #payerSurName: payerSurName,
+      if (payerLanguageCode != $none) #payerLanguageCode: payerLanguageCode,
+      if (payerEmail != $none) #payerEmail: payerEmail,
+      if (payerMsisdn != $none) #payerMsisdn: payerMsisdn,
+      if (payerGender != $none) #payerGender: payerGender,
     }),
   );
   @override
   CashTransferResult $make(CopyWithData data) => CashTransferResult(
-    amount: data.get(#amount, or: $value.amount),
-    currency: data.get(#currency, or: $value.currency),
     financialTransactionId: data.get(
       #financialTransactionId,
       or: $value.financialTransactionId,
     ),
-    externalId: data.get(#externalId, or: $value.externalId),
-    payee: data.get(#payee, or: $value.payee),
-    payerMessage: data.get(#payerMessage, or: $value.payerMessage),
-    payeeNote: data.get(#payeeNote, or: $value.payeeNote),
     status: data.get(#status, or: $value.status),
     reason: data.get(#reason, or: $value.reason),
+    amount: data.get(#amount, or: $value.amount),
+    currency: data.get(#currency, or: $value.currency),
+    payee: data.get(#payee, or: $value.payee),
+    externalId: data.get(#externalId, or: $value.externalId),
+    orginatingCountry: data.get(
+      #orginatingCountry,
+      or: $value.orginatingCountry,
+    ),
+    originalAmount: data.get(#originalAmount, or: $value.originalAmount),
+    originalCurrency: data.get(#originalCurrency, or: $value.originalCurrency),
+    payerMessage: data.get(#payerMessage, or: $value.payerMessage),
+    payeeNote: data.get(#payeeNote, or: $value.payeeNote),
+    payerIdentificationType: data.get(
+      #payerIdentificationType,
+      or: $value.payerIdentificationType,
+    ),
+    payerIdentificationNumber: data.get(
+      #payerIdentificationNumber,
+      or: $value.payerIdentificationNumber,
+    ),
+    payerIdentity: data.get(#payerIdentity, or: $value.payerIdentity),
+    payerFirstName: data.get(#payerFirstName, or: $value.payerFirstName),
+    payerSurName: data.get(#payerSurName, or: $value.payerSurName),
+    payerLanguageCode: data.get(
+      #payerLanguageCode,
+      or: $value.payerLanguageCode,
+    ),
+    payerEmail: data.get(#payerEmail, or: $value.payerEmail),
+    payerMsisdn: data.get(#payerMsisdn, or: $value.payerMsisdn),
+    payerGender: data.get(#payerGender, or: $value.payerGender),
   );
 
   @override

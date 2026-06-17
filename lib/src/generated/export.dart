@@ -19,6 +19,7 @@ export 'models/authorize_body.dart';
 export 'models/balance.dart';
 export 'models/basic_user_info_json_response.dart';
 export 'models/cash_transfer.dart';
+export 'models/cash_transfer_payer_identification_type.dart';
 export 'models/cash_transfer_result.dart';
 export 'models/cash_transfer_result_status.dart';
 export 'models/bcauthorize.dart';

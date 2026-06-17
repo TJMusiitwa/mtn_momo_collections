@@ -4,52 +4,80 @@
 
 import 'package:dart_mappable/dart_mappable.dart';
 
-import 'error_reason.dart';
+import 'cash_transfer_result_payer_identification_type.dart';
 import 'party.dart';
-import 'cash_transfer_result_status.dart';
 
 part 'cash_transfer_result.mapper.dart';
 
 @MappableClass()
 class CashTransferResult with CashTransferResultMappable {
   const CashTransferResult({
-    this.amount,
-    this.currency,
     this.financialTransactionId,
-    this.externalId,
-    this.payee,
-    this.payerMessage,
-    this.payeeNote,
     this.status,
     this.reason,
+    this.amount,
+    this.currency,
+    this.payee,
+    this.externalId,
+    this.orginatingCountry,
+    this.originalAmount,
+    this.originalCurrency,
+    this.payerMessage,
+    this.payeeNote,
+    this.payerIdentificationType,
+    this.payerIdentificationNumber,
+    this.payerIdentity,
+    this.payerFirstName,
+    this.payerSurName,
+    this.payerLanguageCode,
+    this.payerEmail,
+    this.payerMsisdn,
+    this.payerGender,
   });
-
-  /// Amount that was transferred.
+  /// transaction id of the cash transfer.
+  final String? financialTransactionId;
+  /// status of the cash transfer
+  final String? status;
+  /// contains error if one occurred
+  final String? reason;
+  /// Amount that will be debited from the payer account.
   final String? amount;
-
   /// ISO4217 Currency
   final String? currency;
-
-  /// Financial transaction ID from mobile money manager.
-  /// Used to connect to the specific financial transaction made in the account.
-  final String? financialTransactionId;
-
-  /// External id is used as a reference to the transaction. External id is used for reconciliation.
-  final String? externalId;
-
   final Party? payee;
-
-  /// Message that was written in the payer transaction history message field.
+  /// External id is used as a reference to the transaction. External id is used for reconciliation. The external id will be included in transaction history report. <br>External id is not required to be unique.
+  final String? externalId;
+  /// Country where the request came from
+  final String? orginatingCountry;
+  /// Amount that was sent before any foreign exchange
+  final String? originalAmount;
+  /// ISO4217 Currency of the originalAmoun
+  final String? originalCurrency;
+  /// Message that will be written in the payer transaction history message field.
   final String? payerMessage;
-
-  /// Message that was written in the payee transaction history note field.
+  /// Message that will be written in the payee transaction history note field.
   final String? payeeNote;
+  /// Identification type of the payer
+  final CashTransferResultPayerIdentificationType? payerIdentificationType;
+  /// Identification number of the payer
+  final String? payerIdentificationNumber;
+  /// payerIdentity number of the payer
+  final String? payerIdentity;
+  /// FirstName
+  final String? payerFirstName;
+  /// Surname
+  final String? payerSurName;
+  /// LanguageCode
+  final String? payerLanguageCode;
+  /// Email
+  final String? payerEmail;
+  /// Msisdn
+  final String? payerMsisdn;
+  /// GenderCode
+  final String? payerGender;
 
-  final CashTransferResultStatus? status;
 
-  final ErrorReason? reason;
+  static CashTransferResult fromJson(Map<String, dynamic> json) => CashTransferResultMapper.ensureInitialized().decodeMap<CashTransferResult>(json);
 
-  static CashTransferResult fromJson(Map<String, dynamic> json) =>
-      CashTransferResultMapper.ensureInitialized()
-          .decodeMap<CashTransferResult>(json);
 }
+
