@@ -21,11 +21,12 @@ graph TD
     subgraph retrofit ["Retrofit Clients"]
         MMC --> CC[CollectionClient]
         MMC --> DC[DisbursementsClient]
+        MMC --> RC[RemittanceClient]
         MMC --> SC[SandboxProvisioningClient]
     end
     
     subgraph resiliency ["Resiliency & Auth"]
-        CC & DC & SC -.->|Applies| MI[MomoInterceptor]
+        CC & DC & RC & SC -.->|Applies| MI[MomoInterceptor]
         MI -->|Caches / Validates| TM[TokenManager]
         MI -->|Deduplicates authentication requests| TFF[_tokenFetchFuture]
     end
@@ -96,10 +97,10 @@ Future<String?> _fetchToken() async {
 
 ### 3. Product Token Isolation (Avoiding Cache Collisions)
 > [!WARNING]
-> Because `MomoCollections` utilizes a single shared `TokenManager` cache inside its interceptor, sharing a single `MomoCollections` instance to invoke both Collections and Disbursements concurrently is strongly discouraged.
+> Because `MomoCollections` utilizes a single shared `TokenManager` cache inside its interceptor, sharing a single `MomoCollections` instance to invoke Collections, Disbursements, and Remittances concurrently is strongly discouraged.
 > Since each product has distinct credentials (subscription keys, user IDs, and API keys) and requires distinct OAuth2 tokens, sharing a client instance will cause access token cache collisions, resulting in HTTP 401 Unauthorized errors on subsequent requests.
 >
-> **Best Practice Recommendation**: Developers must always instantiate separate, dedicated instances of `MomoCollections` for Collections and Disbursements to isolate their token cache lifecycles.
+> **Best Practice Recommendation**: Developers must always instantiate separate, dedicated instances of `MomoCollections` for Collections, Disbursements, and Remittances to isolate their token cache lifecycles.
 
 ---
 
@@ -137,7 +138,11 @@ Testing is treated as a P0 requirement for ensuring zero regression in API schem
 ### Test Directory Layout
 * `test/exceptions_test.dart`: Validates full coverage of raw Dio JSON responses mapped into correct sub-classes of `MtnMomoException` and verifies error code parsing accuracy.
 * `test/mtn_momo_collections_test.dart`: Validates coordinator construction, sub-client provisioning, and barrel file export integrity.
+* `test/sandbox_usecases_test.dart`: Validates sandbox use cases for Collections, Disbursements, and Remittances against live/mocked environments.
 * `test/manual_sandbox_test.dart`: An execution script allowing automated validation against a live sandboxed endpoint (validates programmatic user creation, API key retrieval, and balance check).
+* `test/disbursements_test.dart`: Dedicated unit/integration tests for disbursements workflows.
+* `test/token_manager_test.dart`: Tests token caching, expiration detection, and thread-safe fetching.
+* `test/momo_interceptor_test.dart`: Verifies header injection, authorization flow, and environmental routing.
 
 ### Execution Commands
 * **Run entire unit suite**:

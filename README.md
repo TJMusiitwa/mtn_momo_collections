@@ -7,6 +7,8 @@
 
 An elegant, type-safe, and robust Dart & Flutter SDK for integrating with the **MTN Mobile Money (MoMo) API**. This package supports sandboxed and production environments across all active African markets (e.g., Uganda, Ghana, Cameroon, Côte d'Ivoire, Zambia).
 
+**Supported Products**: Collections · Disbursements · **Remittances** · Sandbox Provisioning
+
 > [!WARNING]
 > This is an unofficial community package. It is not affiliated with, endorsed by, or officially connected to MTN Group or any of its subsidiaries.
 
@@ -27,6 +29,7 @@ graph TD
     subgraph gen ["Generated Clients (Retrofit & dart_mappable)"]
         MC --> CC[CollectionClient]
         MC --> DC[DisbursementsClient]
+        MC --> RC[RemittanceClient]
         MC --> SC[SandboxProvisioningClient]
     end
 
@@ -35,13 +38,13 @@ graph TD
         MME --> MTE[MtnMomoTransactionException with Error Codes]
     end
 
-    CC & DC & SC -.-> |HTTP Requests via Dio| MTN[MTN MoMo Gateway]
+    CC & DC & RC & SC -.-> |HTTP Requests via Dio| MTN[MTN MoMo Gateway]
 ```
 
 ### Highlights
-* **Unified Client Coordinator (`MtnMomoClient`)**: A single entry point providing access to generated clients: `CollectionClient`, `DisbursementsClient`, and `SandboxProvisioningClient`.
-* **Advanced High-Level Wrapper (`MomoCollections`)**: Handles tedious authentication plumbing automatically.
-* **Automated OAuth2 Token Lifecycle**: Built-in token caching, lifecycle validation, and lazy auto-refresh.
+* **Unified Client Coordinator (`MtnMomoClient`)**: A single entry point providing access to generated clients: `CollectionClient`, `DisbursementsClient`, `RemittanceClient`, and `SandboxProvisioningClient`.
+* **Advanced High-Level Wrapper (`MomoCollections`)**: Handles tedious authentication plumbing automatically — including Remittances.
+* **Automated OAuth2 Token Lifecycle**: Built-in token caching, lifecycle validation, and lazy auto-refresh per product.
 * **Concurrent Token Deduplication**: Concurrent API requests seamlessly await a single ongoing token generation process, preventing race conditions or redundant token creation hits.
 * **Rich Native Exception Hierarchy**: Maps complex raw HTTP & MTN errors into distinct Dart Exceptions (`MtnMomoNetworkException`, `MtnMomoAuthException`, `MtnMomoTransactionException`, etc.).
 
@@ -67,11 +70,11 @@ dart pub get
 ### Best Practice: Product Token Isolation
 
 > [!IMPORTANT]
-> **Collections** and **Disbursements** are configured as different products on the MTN MoMo Developer Portal and use separate subscriptions, User IDs, API Keys, and target environment scopes.
+> **Collections**, **Disbursements**, and **Remittances** are configured as separate products on the MTN MoMo Developer Portal and each uses distinct subscriptions, User IDs, API Keys, and target environment scopes.
 >
-> Under the hood, `MomoCollections` utilizes a local `TokenManager` cache. If you attempt to share a single `MomoCollections` instance for both Collections and Disbursements, their access tokens will collide and overwrite each other in the shared cache, resulting in **`401 Unauthorized`** or **`403 Forbidden`** errors.
+> Under the hood, `MomoCollections` utilizes a local `TokenManager` cache. If you attempt to share a single `MomoCollections` instance across products, their access tokens will collide and overwrite each other in the shared cache, resulting in **`401 Unauthorized`** or **`403 Forbidden`** errors.
 >
-> **Recommendation**: Always instantiate **separate, dedicated instances** of `MomoCollections` for Collections and Disbursements:
+> **Recommendation**: Always instantiate **separate, dedicated instances** of `MomoCollections` per product:
 >
 > ```dart
 > // Dedicated Collections Instance
@@ -88,6 +91,14 @@ dart pub get
 >   subscriptionKey: disbursementsSubKey,
 >   userId: disbursementsUserId,
 >   apiKey: disbursementsApiKey,
+> );
+>
+> // Dedicated Remittances Instance
+> final remittancesMomo = MomoCollections(
+>   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+>   subscriptionKey: remittancesSubKey,
+>   userId: remittancesUserId,
+>   apiKey: remittancesApiKey,
 > );
 > ```
 
@@ -280,6 +291,87 @@ try {
 }
 ```
 
+### Remittances API
+
+Send cross-border money transfers internationally with full payer identity support for compliance.
+
+```dart
+// Use a dedicated MomoCollections instance for Remittances!
+final remittanceMomo = MomoCollections(
+  baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+  subscriptionKey: 'YOUR_REMITTANCES_SUBSCRIPTION_KEY',
+  userId: 'YOUR_PROVISIONED_USER_ID',
+  apiKey: 'YOUR_PROVISIONED_API_KEY',
+);
+
+// 1. Initiate a standard remittance transfer
+final remitUuid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'; // Unique UUID v4
+try {
+  await remittanceMomo.remittance.transfer(
+    xReferenceId: remitUuid,
+    body: Transfer(
+      amount: '1000',
+      currency: 'EUR',
+      externalId: 'REM_INV_20241',
+      payee: const Party(
+        partyIdType: PartyPartyIdType.msisdn,
+        partyId: '256772987654',
+      ),
+      payerMessage: 'Family support',
+      payeeNote: 'Remittance received',
+    ),
+  );
+  print('Remittance transfer initiated.');
+} catch (e) {
+  print('Remittance failed: $e');
+}
+
+// 2. Initiate a cross-border cash transfer with full payer identity
+final cashUuid = 'b2c3d4e5-f6a7-8901-bcde-f12345678901'; // Unique UUID v4
+try {
+  await remittanceMomo.remittance.cashTransfer(
+    xReferenceId: cashUuid,
+    body: CashTransfer(
+      amount: '1000',
+      currency: 'EUR',
+      externalId: 'CASH_REM_441',
+      payee: const Party(
+        partyIdType: PartyPartyIdType.msisdn,
+        partyId: '256772987654',
+      ),
+      // Cross-border origination details
+      orginatingCountry: 'SE',
+      originalAmount: '12000',
+      originalCurrency: 'SEK',
+      payerMessage: 'Cross-border remittance',
+      payeeNote: 'Cash received',
+      // Payer identity for compliance
+      payerIdentificationType: 'PassportNumber',
+      payerIdentificationNumber: 'AB123456',
+      payerFirstName: 'Erik',
+      payerSurName: 'Andersson',
+      payerLanguageCode: 'sv',
+      payerEmail: 'erik@example.se',
+      payerMsisdn: '46701234567',
+      payerGender: 'M',
+    ),
+  );
+  print('Cash transfer initiated.');
+} catch (e) {
+  print('Cash transfer failed: $e');
+}
+
+// 3. Poll cash transfer status
+try {
+  final cashStatus = await remittanceMomo.remittance.getCashTransferStatus(
+    referenceId: cashUuid,
+  );
+  print('Cash Transfer Status: ${cashStatus.status}');
+} catch (e) {
+  print('Cash transfer status check failed: $e');
+}
+```
+
 ---
 
 ## 📂 Standalone Modular Examples Suite
@@ -289,6 +381,7 @@ We have created individual standalone example files for each core integration sc
 *   [sandbox_provisioning_example.dart](example/lib/sandbox_provisioning_example.dart) — Provision Sandbox API User and generate API key.
 *   [collections_example.dart](example/lib/collections_example.dart) — Initiate payment, poll transaction status, check collections balance.
 *   [disbursements_example.dart](example/lib/disbursements_example.dart) — Check recipient status, trigger transfer, check disbursements balance.
+*   [remittances_example.dart](example/lib/remittances_example.dart) — Initiate remittance transfers, cross-border cash transfers with payer identity, poll status.
 *   [resilient_error_handling_example.dart](example/lib/resilient_error_handling_example.dart) — Handle specific exceptions and map transaction failure error codes.
 *   [thread_safety_deduplication_example.dart](example/lib/thread_safety_deduplication_example.dart) — Parallel asynchronous request safety and token deduplication.
 
@@ -365,7 +458,7 @@ try {
 If you modify the Swagger specifications under the `schemes/` directory, you must run code generation:
 
 1. **Model Parsing**:
-   Modify models or schemas in `schemes/` (e.g. `collection.json`, `disbursement.json`, `sandbox-provisioning-api.json`).
+   Modify models or schemas in `schemes/` (e.g. `collection.json`, `disbursement.json`, `remittance.json`, `sandbox-provisioning-api.json`).
    
 2. **Build Generated Files**:
    Execute the Dart compiler code generator:
@@ -378,6 +471,11 @@ If you modify the Swagger specifications under the `schemes/` directory, you mus
    Run the regression test suite:
    ```bash
    dart test
+   ```
+   
+   Run live sandbox integration tests (requires `.env` with keys):
+   ```bash
+   dart test test/sandbox_usecases_test.dart
    ```
 
 ---
