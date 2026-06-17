@@ -16,6 +16,7 @@ class MomoCollections {
   late final Dio _dio;
   late final CollectionClient _collectionClient;
   late final DisbursementsClient _disbursementsClient;
+  late final RemittanceClient _remittanceClient;
   late final SandboxProvisioningClient _sandboxProvisioningClient;
   final TokenManager _tokenManager = TokenManager();
   final Logger _logger = Logger();
@@ -56,14 +57,23 @@ class MomoCollections {
       _dio,
       baseUrl: '$baseUrl/disbursement',
     );
+    _remittanceClient = RemittanceClient(_dio, baseUrl: '$baseUrl/remittance');
     _sandboxProvisioningClient = SandboxProvisioningClient(
       _dio,
       baseUrl: baseUrl,
     );
   }
 
+  /// Access point for the MTN Mobile Money Remittances API.
+  ///
+  /// > [!IMPORTANT]
+  /// > Always use a **dedicated** `MomoCollections` instance for Remittances.
+  /// > Sharing a single instance across Collections, Disbursements, and Remittances
+  /// > will cause OAuth2 token cache collisions, resulting in `401 Unauthorized` errors.
   CollectionClient get collection => _collectionClient;
   DisbursementsClient get disbursements => _disbursementsClient;
+  RemittanceClient get remittance => _remittanceClient;
+
   SandboxProvisioningClient get sandbox => _sandboxProvisioningClient;
   Dio get dio => _dio;
 
@@ -77,9 +87,15 @@ class MomoCollections {
     _tokenFetchFuture = () async {
       try {
         final isDisbursement = options.baseUrl.contains('/disbursement');
-        final response = isDisbursement
-            ? await _disbursementsClient.createAccessToken()
-            : await _collectionClient.createAccessToken();
+        final isRemittance = options.baseUrl.contains('/remittance');
+        final TokenPost200ApplicationJsonResponse response;
+        if (isRemittance) {
+          response = await _remittanceClient.createAccessToken();
+        } else if (isDisbursement) {
+          response = await _disbursementsClient.createAccessToken();
+        } else {
+          response = await _collectionClient.createAccessToken();
+        }
         _tokenManager.setToken(response);
         return response.accessToken;
       } catch (e) {
