@@ -5,6 +5,7 @@
 // Clients
 export 'clients/collection_client.dart';
 export 'clients/disbursements_client.dart';
+export 'clients/remittance_client.dart';
 export 'clients/sandbox_provisioning_client.dart';
 // Models
 export 'models/access_type.dart';
@@ -17,6 +18,9 @@ export 'models/api_user_result.dart';
 export 'models/authorize_body.dart';
 export 'models/balance.dart';
 export 'models/basic_user_info_json_response.dart';
+export 'models/cash_transfer.dart';
+export 'models/cash_transfer_result.dart';
+export 'models/cash_transfer_result_status.dart';
 export 'models/bcauthorize.dart';
 export 'models/bcauthorize_access_type.dart';
 export 'models/bcauthorize_response.dart';

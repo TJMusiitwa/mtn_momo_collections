@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'clients/collection_client.dart';
 import 'clients/disbursements_client.dart';
+import 'clients/remittance_client.dart';
 import 'clients/sandbox_provisioning_client.dart';
 
 /// MTN Momo Client coordinator for all API products.
@@ -17,6 +18,7 @@ class MtnMomoClient {
 
   CollectionClient? _collection;
   DisbursementsClient? _disbursements;
+  RemittanceClient? _remittance;
   SandboxProvisioningClient? _sandboxProvisioning;
 
   /// Access point for MTN Mobile Money Collections API.
@@ -26,6 +28,10 @@ class MtnMomoClient {
   /// Access point for MTN Mobile Money Disbursements API.
   DisbursementsClient get disbursementsClient =>
       _disbursements ??= DisbursementsClient(_dio, baseUrl: _baseUrl);
+
+  /// Access point for MTN Mobile Money Remittances API.
+  RemittanceClient get remittanceClient =>
+      _remittance ??= RemittanceClient(_dio, baseUrl: _baseUrl);
 
   /// Access point for Sandbox User Provisioning API.
   SandboxProvisioningClient get sandboxProvisioningClient =>
