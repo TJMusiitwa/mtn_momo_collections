@@ -1,4 +1,4 @@
-import 'package:mtn_momo_collections/src/generated/export.dart';
+import 'package:mtn_momo_sdk/src/generated/export.dart';
 
 /// Manages the OAuth2 access token lifecycle for the MTN MoMo API.
 ///

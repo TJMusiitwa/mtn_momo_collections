@@ -1,6 +1,6 @@
 # MTN Mobile Money (MoMo) SDK for Dart & Flutter
 
-[![Pub Version](https://img.shields.io/pub/v/mtn_momo_collections?logo=dart&color=005A9C)](https://pub.dev)
+[![Pub Version](https://img.shields.io/pub/v/mtn_momo_sdk?logo=dart&color=005A9C)](https://pub.dev)
 [![Dart SDK](https://img.shields.io/badge/Dart-3.0+-blue.svg?logo=dart)](https://dart.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.10+-02569B.svg?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -58,7 +58,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  mtn_momo_collections: ^0.0.1
+  mtn_momo_sdk: ^0.0.1
   dio: ^5.9.0
 ```
 
@@ -112,7 +112,7 @@ Integrating with MTN MoMo Sandbox requires provisioning a dynamic API User and r
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
-import 'package:mtn_momo_collections/mtn_momo_collections.dart';
+import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
 
 final logger = Logger();
 

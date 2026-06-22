@@ -19,7 +19,7 @@ The sandbox environment requires a dynamic API user and API key for each session
 ```dart
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
-import 'package:mtn_momo_collections/mtn_momo_collections.dart';
+import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
 
 Future<MomoCollections> createSandboxClient({
   required String subscriptionKey,

@@ -2,7 +2,7 @@
 
 ## Architectural Design Reference
 
-This document provides a highly technical, deep-dive reference of the internals of the `mtn_momo_collections` package, outlining how components integrate, code-generation rules, custom class patterns, and testing conventions.
+This document provides a highly technical, deep-dive reference of the internals of the `mtn_momo_sdk` package, outlining how components integrate, code-generation rules, custom class patterns, and testing conventions.
 
 ---
 
@@ -137,7 +137,7 @@ Testing is treated as a P0 requirement for ensuring zero regression in API schem
 
 ### Test Directory Layout
 * `test/exceptions_test.dart`: Validates full coverage of raw Dio JSON responses mapped into correct sub-classes of `MtnMomoException` and verifies error code parsing accuracy.
-* `test/mtn_momo_collections_test.dart`: Validates coordinator construction, sub-client provisioning, and barrel file export integrity.
+* `test/mtn_momo_sdk_test.dart`: Validates coordinator construction, sub-client provisioning, and barrel file export integrity.
 * `test/sandbox_usecases_test.dart`: Validates sandbox use cases for Collections, Disbursements, and Remittances against live/mocked environments.
 * `test/manual_sandbox_test.dart`: An execution script allowing automated validation against a live sandboxed endpoint (validates programmatic user creation, API key retrieval, and balance check).
 * `test/disbursements_test.dart`: Dedicated unit/integration tests for disbursements workflows.

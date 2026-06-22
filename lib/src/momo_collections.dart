@@ -1,10 +1,10 @@
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:mtn_momo_collections/src/generated/export.dart';
-import 'package:mtn_momo_collections/src/interceptors/momo_interceptor.dart';
-import 'package:mtn_momo_collections/src/mappers/error_reason_custom_mapper.dart';
-import 'package:mtn_momo_collections/src/token_manager.dart';
+import 'package:mtn_momo_sdk/src/generated/export.dart';
+import 'package:mtn_momo_sdk/src/interceptors/momo_interceptor.dart';
+import 'package:mtn_momo_sdk/src/mappers/error_reason_custom_mapper.dart';
+import 'package:mtn_momo_sdk/src/token_manager.dart';
 
 /// High-level wrapper for the MTN Mobile Money (MoMo) API.
 ///

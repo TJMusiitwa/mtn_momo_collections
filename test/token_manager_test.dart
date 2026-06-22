@@ -1,5 +1,5 @@
-import 'package:mtn_momo_collections/src/generated/export.dart';
-import 'package:mtn_momo_collections/src/token_manager.dart';
+import 'package:mtn_momo_sdk/src/generated/export.dart';
+import 'package:mtn_momo_sdk/src/token_manager.dart';
 import 'package:test/test.dart';
 
 void main() {

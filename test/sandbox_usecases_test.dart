@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:mtn_momo_collections/mtn_momo_collections.dart';
+import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
 import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
 

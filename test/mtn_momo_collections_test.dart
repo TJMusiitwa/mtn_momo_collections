@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:mtn_momo_collections/mtn_momo_collections.dart';
+import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
 import 'package:test/test.dart';
 
 class MockHttpClientAdapter implements HttpClientAdapter {

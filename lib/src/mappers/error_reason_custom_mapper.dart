@@ -1,6 +1,6 @@
 import 'package:dart_mappable/dart_mappable.dart';
-import 'package:mtn_momo_collections/src/generated/models/error_reason.dart';
-import 'package:mtn_momo_collections/src/generated/models/error_reason_code.dart';
+import 'package:mtn_momo_sdk/src/generated/models/error_reason.dart';
+import 'package:mtn_momo_sdk/src/generated/models/error_reason_code.dart';
 
 class ErrorReasonCustomMapper extends SimpleMapper<ErrorReason> {
   const ErrorReasonCustomMapper();

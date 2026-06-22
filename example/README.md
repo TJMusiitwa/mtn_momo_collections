@@ -1,6 +1,6 @@
 # MTN Mobile Money (MoMo) SDK - Developer Examples
 
-This directory contains executable code examples demonstrating how to get the most out of the `mtn_momo_collections` SDK.
+This directory contains executable code examples demonstrating how to get the most out of the `mtn_momo_sdk` SDK.
 
 > [!IMPORTANT]
 > To run any of these examples, you **MUST** obtain your Primary or Secondary Subscription Key from your Profile on the official **MTN MoMo Developer Portal** at [momodeveloper.mtn.com](https://momodeveloper.mtn.com/).
