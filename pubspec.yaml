@@ -25,5 +25,3 @@ dev_dependencies:
   retrofit_generator: ^10.2.6
   swagger_parser: ^1.43.1
   test: ^1.31.1
-
-flutter: null
