@@ -56,7 +56,7 @@ void main() async {
   final env = _loadEnv();
   final subscriptionKey = Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
       env['COLLECTIONS_KEY'] ??
-      'a9acc520ea7d487baa58af01167d5659';
+      '';
 
   var userId = Platform.environment['MTN_MOMO_USER_ID'] ??
       env['COLLECTIONS_USER_ID'] ??

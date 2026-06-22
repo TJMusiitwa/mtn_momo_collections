@@ -52,7 +52,7 @@ void main() async {
   final subscriptionKey = Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
       env['COLLECTIONS_KEY'] ??
       env['DISBURSMENTS_KEY'] ??
-      'a9acc520ea7d487baa58af01167d5659';
+      'a9acc520ea7d487baa58af01167d5659'; // This is an example key, replace it with your own!
 
   if (subscriptionKey == 'YOUR_SUBSCRIPTION_KEY' || subscriptionKey.isEmpty) {
     _logger.w(

@@ -9,7 +9,7 @@ void main() async {
   const baseUrl = 'https://sandbox.momodeveloper.mtn.com';
   // NOTE: You need a valid subscription key from the MTN Momo Developer Portal.
   // Replace this with your actual key to run the test.
-  const subscriptionKey = 'a9acc520ea7d487baa58af01167d5659';
+  const subscriptionKey = 'a9acc520ea7d487baa58af01167d5659'; // This is an example key, replace it with your own!
 
   if (subscriptionKey == 'YOUR_SUBSCRIPTION_KEY') {
     print(

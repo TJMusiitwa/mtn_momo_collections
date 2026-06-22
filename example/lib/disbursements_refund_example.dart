@@ -51,11 +51,11 @@ void main() async {
   print('==================================================');
 
   final env = _loadEnv();
-  final subscriptionKey =
-      Platform.environment['MTN_MOMO_DISB_SUBSCRIPTION_KEY'] ??
-          Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
-          env['DISBURSMENTS_KEY'] ??
-          'bbc813d659cf48fe8bf5b5043938ad85';
+  final subscriptionKey = Platform
+          .environment['MTN_MOMO_DISB_SUBSCRIPTION_KEY'] ??
+      Platform.environment['MTN_MOMO_SUBSCRIPTION_KEY'] ??
+      env['DISBURSMENTS_KEY'] ??
+      'bbc813d659cf48fe8bf5b5043938ad85'; // This is an example key replace it with your own
 
   var userId = Platform.environment['MTN_MOMO_DISB_USER_ID'] ??
       Platform.environment['MTN_MOMO_USER_ID'] ??

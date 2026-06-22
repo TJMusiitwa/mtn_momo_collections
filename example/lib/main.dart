@@ -114,7 +114,7 @@ class PlaygroundHomeScreen extends StatefulWidget {
 class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
   // Controller inputs
   final _subKeyController =
-      TextEditingController(text: 'a9acc520ea7d487baa58af01167d5659');
+      TextEditingController(text: 'a9acc520ea7d487baa58af01167d5659'); // This is an example key, replace it with your own!
   final _userIdController = TextEditingController();
   final _apiKeyController = TextEditingController();
   final _collectMsisdnController = TextEditingController(text: '256772123456');
