@@ -126,7 +126,7 @@ void main() async {
     }
   }
 
-  final momo = MomoCollections(
+  final momo = MtnMomo(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
     userId: userId,
@@ -157,7 +157,7 @@ void main() async {
 }
 
 Future<void> _simulateValidation(
-    MomoCollections momo, String msisdn, String label) async {
+    MtnMomo momo, String msisdn, String label) async {
   _logger.i(
       '\n--- Running Account Validation Simulation: $label (MSISDN: $msisdn) ---');
   try {
@@ -175,7 +175,7 @@ Future<void> _simulateValidation(
 }
 
 Future<void> _simulateCollect(
-    MomoCollections momo, String msisdn, String label) async {
+    MtnMomo momo, String msisdn, String label) async {
   _logger
       .i('\n--- Running Collection Simulation: $label (MSISDN: $msisdn) ---');
   final referenceId = const Uuid().v4();

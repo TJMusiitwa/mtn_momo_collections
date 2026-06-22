@@ -21,7 +21,7 @@ This SDK is engineered with a layered, modular architecture. Rather than writing
 ```mermaid
 graph TD
     subgraph core ["Core Package APIs"]
-        MMC[MomoCollections Wrapper] --> |High-Level Orchestration| MC[MtnMomoClient Coordinator]
+        MMC[MtnMomo Wrapper] --> |High-Level Orchestration| MC[MtnMomoClient Coordinator]
         MI[MomoInterceptor] --> |Auth & Header Injection| MMC
         TM[TokenManager] --> |Thread-Safe Token Caching| MI
     end
@@ -43,7 +43,7 @@ graph TD
 
 ### Highlights
 * **Unified Client Coordinator (`MtnMomoClient`)**: A single entry point providing access to generated clients: `CollectionClient`, `DisbursementsClient`, `RemittanceClient`, and `SandboxProvisioningClient`.
-* **Advanced High-Level Wrapper (`MomoCollections`)**: Handles tedious authentication plumbing automatically — including Remittances.
+* **Advanced High-Level Wrapper (`MtnMomo`)**: Handles tedious authentication plumbing automatically — including Remittances.
 * **Automated OAuth2 Token Lifecycle**: Built-in token caching, lifecycle validation, and lazy auto-refresh per product.
 * **Concurrent Token Deduplication**: Concurrent API requests seamlessly await a single ongoing token generation process, preventing race conditions or redundant token creation hits.
 * **Rich Native Exception Hierarchy**: Maps complex raw HTTP & MTN errors into distinct Dart Exceptions (`MtnMomoNetworkException`, `MtnMomoAuthException`, `MtnMomoTransactionException`, etc.).
@@ -72,13 +72,13 @@ dart pub get
 > [!IMPORTANT]
 > **Collections**, **Disbursements**, and **Remittances** are configured as separate products on the MTN MoMo Developer Portal and each uses distinct subscriptions, User IDs, API Keys, and target environment scopes.
 >
-> Under the hood, `MomoCollections` utilizes a local `TokenManager` cache. If you attempt to share a single `MomoCollections` instance across products, their access tokens will collide and overwrite each other in the shared cache, resulting in **`401 Unauthorized`** or **`403 Forbidden`** errors.
+> Under the hood, `MtnMomo` utilizes a local `TokenManager` cache. If you attempt to share a single `MtnMomo` instance across products, their access tokens will collide and overwrite each other in the shared cache, resulting in **`401 Unauthorized`** or **`403 Forbidden`** errors.
 >
-> **Recommendation**: Always instantiate **separate, dedicated instances** of `MomoCollections` per product:
+> **Recommendation**: Always instantiate **separate, dedicated instances** of `MtnMomo` per product:
 >
 > ```dart
 > // Dedicated Collections Instance
-> final collectionsMomo = MomoCollections(
+> final collectionsMomo = MtnMomo(
 >   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
 >   subscriptionKey: collectionsSubKey,
 >   userId: collectionsUserId,
@@ -86,7 +86,7 @@ dart pub get
 > );
 >
 > // Dedicated Disbursements Instance
-> final disbursementsMomo = MomoCollections(
+> final disbursementsMomo = MtnMomo(
 >   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
 >   subscriptionKey: disbursementsSubKey,
 >   userId: disbursementsUserId,
@@ -94,7 +94,7 @@ dart pub get
 > );
 >
 > // Dedicated Remittances Instance
-> final remittancesMomo = MomoCollections(
+> final remittancesMomo = MtnMomo(
 >   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
 >   subscriptionKey: remittancesSubKey,
 >   userId: remittancesUserId,
@@ -167,8 +167,8 @@ void main() async {
 
   if (apiKey == null) return;
 
-  // 3. Initialize the production-ready MomoCollections client
-  final momo = MomoCollections(
+  // 3. Initialize the production-ready MtnMomo client
+  final momo = MtnMomo(
     baseUrl: baseUrl,
     subscriptionKey: subscriptionKey,
     userId: userUuid,
@@ -197,7 +197,7 @@ Initiate collections payments from customer wallets to your merchant account.
 
 ```dart
 // Initialize the client
-final momo = MomoCollections(
+final momo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: 'YOUR_SUBSCRIPTION_KEY',
   userId: 'YOUR_PROVISIONED_USER_ID',
@@ -296,8 +296,8 @@ try {
 Send cross-border money transfers internationally with full payer identity support for compliance.
 
 ```dart
-// Use a dedicated MomoCollections instance for Remittances!
-final remittanceMomo = MomoCollections(
+// Use a dedicated MtnMomo instance for Remittances!
+final remittanceMomo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: 'YOUR_REMITTANCES_SUBSCRIPTION_KEY',
   userId: 'YOUR_PROVISIONED_USER_ID',

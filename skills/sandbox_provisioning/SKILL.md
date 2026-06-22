@@ -13,7 +13,7 @@ The sandbox environment requires a dynamic API user and API key for each session
 4. **POST `/v1_0/apiuser`** to create the user.
 5. **Wait for propagation** (recommended `Future.delayed(const Duration(seconds: 2))`).
 6. **POST `/v1_0/apiuser/{xReferenceId}/apikey`** to retrieve the API key.
-7. **Initialize `MomoCollections`** with the returned `userId` and `apiKey`.
+7. **Initialize `MtnMomo`** with the returned `userId` and `apiKey`.
 
 ## Example Code
 ```dart
@@ -21,7 +21,7 @@ import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
 
-Future<MomoCollections> createSandboxClient({
+Future<MtnMomo> createSandboxClient({
   required String subscriptionKey,
   String baseUrl = 'https://sandbox.momodeveloper.mtn.com',
 }) async {
@@ -52,7 +52,7 @@ Future<MomoCollections> createSandboxClient({
   );
 
   // 6. Initialize SDK client
-  return MomoCollections(
+  return MtnMomo(
     baseUrl: baseUrl,
     subscriptionKey: subscriptionKey,
     userId: userUuid,

@@ -50,14 +50,14 @@ void main() {
     });
   });
 
-  group('MomoCollections Integration', () {
+  group('MtnMomo Integration', () {
     const baseUrl = 'https://sandbox.momodeveloper.mtn.com';
     const subKey = 'test_sub_key';
     const userId = 'test_user_id';
     const apiKey = 'test_api_key';
 
     test('can be instantiated with default sandbox environment', () {
-      final momo = MomoCollections(
+      final momo = MtnMomo(
         baseUrl: baseUrl,
         subscriptionKey: subKey,
         userId: userId,
@@ -79,14 +79,14 @@ void main() {
       () async {
         final mockAdapter = MockHttpClientAdapter();
 
-        final momo = MomoCollections(
+        final momo = MtnMomo(
           baseUrl: baseUrl,
           subscriptionKey: subKey,
           userId: userId,
           apiKey: apiKey,
         );
 
-        // Force MomoCollections' internally created Dio to use our mock adapter
+        // Force MtnMomo' internally created Dio to use our mock adapter
         momo.dio.httpClientAdapter = mockAdapter;
 
         int tokenRequestCount = 0;

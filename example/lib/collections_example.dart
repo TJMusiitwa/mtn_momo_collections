@@ -37,7 +37,7 @@ Map<String, String> _loadEnv() {
 
 /// Standalone CLI Example: Collections
 ///
-/// Demonstrates how to use the high-level `MomoCollections` wrapper to:
+/// Demonstrates how to use the high-level `MtnMomo` wrapper to:
 /// 1. Retrieve account balance.
 /// 2. Validate customer account holder status (is registered and active).
 /// 3. Dispatch a Request to Pay (Push USSD) transaction.
@@ -141,7 +141,7 @@ void main() async {
   }
 
   // --- Initialization ---
-  final momo = MomoCollections(
+  final momo = MtnMomo(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
     userId: userId,

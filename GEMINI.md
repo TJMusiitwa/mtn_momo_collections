@@ -11,11 +11,11 @@ This document provides a highly technical, deep-dive reference of the internals 
 The codebase is split into three main logical layers:
 1. **Raw API Layer (Generated)**: Type-safe REST clients generated using `retrofit` and serialized via `dart_mappable`.
 2. **Plumbing & Resiliency Layer (Manual)**: Custom Interceptors (`MomoInterceptor`), Token Management (`TokenManager`), and Request Deduplication.
-3. **High-Level Coordinator & Wrapper Layer (Manual)**: Standard `MtnMomoClient` coordinator and unified wrapper `MomoCollections`.
+3. **High-Level Coordinator & Wrapper Layer (Manual)**: Standard `MtnMomoClient` coordinator and unified wrapper `MtnMomo`.
 
 ```mermaid
 graph TD
-    Client[Developer Code] -->|Interacts with| MC[MomoCollections Wrapper]
+    Client[Developer Code] -->|Interacts with| MC[MtnMomo Wrapper]
     MC -->|Exposes sub-clients| MMC[MtnMomoClient Coordinator]
     
     subgraph retrofit ["Retrofit Clients"]
@@ -47,7 +47,7 @@ The project relies on [swagger_parser](https://pub.dev/packages/swagger_parser) 
 * **Output Path**: Generated files reside inside `lib/src/generated/` to isolate them from manual SDK enhancements.
 * **JSON Serializer**: `dart_mappable` is used exclusively. Avoid using standard `json_serializable` as `dart_ mappable` provides superior polymorphism support, type safety, and clean builder methods.
 * **Root Client**: Set to `false` (we compose our own unified `MtnMomoClient` manually in `lib/src/generated/mtn_momo_client.dart`).
-* **Skipped Headers**: To enable a clean, developer-shielded experience when utilizing `MomoCollections` (where the interceptor injects dynamic auth and environment headers automatically), the `skipped_parameters` array is configured in `swagger_parser.yaml` to omit `Authorization` and `X-Target-Environment` from client method signatures. This leaves `X-Reference-Id` as a standard parameter so developers can provide custom transaction-tracking UUIDs.
+* **Skipped Headers**: To enable a clean, developer-shielded experience when utilizing `MtnMomo` (where the interceptor injects dynamic auth and environment headers automatically), the `skipped_parameters` array is configured in `swagger_parser.yaml` to omit `Authorization` and `X-Target-Environment` from client method signatures. This leaves `X-Reference-Id` as a standard parameter so developers can provide custom transaction-tracking UUIDs.
 
 ### Code Generation Pipeline
 To compile changes to schemas, run the following pipeline:
@@ -97,10 +97,10 @@ Future<String?> _fetchToken() async {
 
 ### 3. Product Token Isolation (Avoiding Cache Collisions)
 > [!WARNING]
-> Because `MomoCollections` utilizes a single shared `TokenManager` cache inside its interceptor, sharing a single `MomoCollections` instance to invoke Collections, Disbursements, and Remittances concurrently is strongly discouraged.
+> Because `MtnMomo` utilizes a single shared `TokenManager` cache inside its interceptor, sharing a single `MtnMomo` instance to invoke Collections, Disbursements, and Remittances concurrently is strongly discouraged.
 > Since each product has distinct credentials (subscription keys, user IDs, and API keys) and requires distinct OAuth2 tokens, sharing a client instance will cause access token cache collisions, resulting in HTTP 401 Unauthorized errors on subsequent requests.
 >
-> **Best Practice Recommendation**: Developers must always instantiate separate, dedicated instances of `MomoCollections` for Collections, Disbursements, and Remittances to isolate their token cache lifecycles.
+> **Best Practice Recommendation**: Developers must always instantiate separate, dedicated instances of `MtnMomo` for Collections, Disbursements, and Remittances to isolate their token cache lifecycles.
 
 ---
 

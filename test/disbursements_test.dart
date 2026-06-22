@@ -40,17 +40,17 @@ class MockHttpClientAdapter implements HttpClientAdapter {
 }
 
 void main() {
-  group('MomoCollections Disbursements API', () {
+  group('MtnMomo Disbursements API', () {
     const baseUrl = 'https://sandbox.momodeveloper.mtn.com';
     const subKey = 'test_sub_key';
     const userId = 'test_user_id';
     const apiKey = 'test_api_key';
 
-    late MomoCollections momo;
+    late MtnMomo momo;
     late MockHttpClientAdapter mockAdapter;
 
     setUp(() {
-      momo = MomoCollections(
+      momo = MtnMomo(
         baseUrl: baseUrl,
         subscriptionKey: subKey,
         userId: userId,

@@ -6,7 +6,7 @@ import 'package:mtn_momo_sdk/src/generated/export.dart';
 /// accounting for a 60-second clock-skew safety buffer. The token is
 /// considered invalid if it is absent or within 60 seconds of expiry.
 ///
-/// Typically instantiated internally by [MomoCollections] and injected into
+/// Typically instantiated internally by [MtnMomo] and injected into
 /// [MomoInterceptor] — consumers of the SDK do not normally interact with
 /// this class directly.
 class TokenManager {

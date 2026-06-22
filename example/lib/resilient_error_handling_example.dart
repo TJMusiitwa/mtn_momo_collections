@@ -133,7 +133,7 @@ void main() async {
   }
 
   // Initialize client with valid credentials
-  final momo = MomoCollections(
+  final momo = MtnMomo(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
     userId: userId,

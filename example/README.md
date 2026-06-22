@@ -24,7 +24,7 @@ It offers a gorgeous visual interface adhering strictly to MTN's official **Suns
 *   **Live Scrolling Terminal**: Displays WAF raw responses, token manager updates, and mapped exception logs in real-time.
 
 > [!TIP]
-> **Product Token Isolation Example**: Look at the source code in `lib/main.dart`. The playground initializes separate, dedicated instances of `MomoCollections` (`_collectionsMomo` and `_disbursementsMomo`) to demonstrate the recommended best practice of avoiding token cache overwrites between the different portal product scopes.
+> **Product Token Isolation Example**: Look at the source code in `lib/main.dart`. The playground initializes separate, dedicated instances of `MtnMomo` (`_collectionsMomo` and `_disbursementsMomo`) to demonstrate the recommended best practice of avoiding token cache overwrites between the different portal product scopes.
 
 To launch the Playground on a simulator or device:
 ```bash

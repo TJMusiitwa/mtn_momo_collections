@@ -37,7 +37,7 @@ Map<String, String> _loadEnv() {
 
 /// Standalone CLI Example: Remittances
 ///
-/// Demonstrates how to use the high-level `MomoCollections` wrapper to:
+/// Demonstrates how to use the high-level `MtnMomo` wrapper to:
 /// 1. Retrieve the remittances account balance.
 /// 2. Validate payee wallet status (is recipient active).
 /// 3. Initiate a standard remittance transfer.
@@ -154,9 +154,9 @@ void main() async {
   }
 
   // --- Initialization ---
-  // Important: Use a dedicated MomoCollections instance for Remittances!
+  // Important: Use a dedicated MtnMomo instance for Remittances!
   // Sharing an instance across products causes token cache collisions.
-  final momo = MomoCollections(
+  final momo = MtnMomo(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
     userId: userId,

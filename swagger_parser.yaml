@@ -6,7 +6,7 @@ swagger_parser:
   extras_parameter_by_default: false
   dio_options_parameter_by_default: false
   root_client: false
-  root_client_name: MTNMomoClient
+  root_client_name: MtnMomoClient
   export_file: false
   put_clients_in_folder: true
   merge_clients: true

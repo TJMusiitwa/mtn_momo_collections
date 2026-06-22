@@ -4,7 +4,7 @@ name: mtn-momo-collections
 description: Provides detailed guidance for integrating the Collections (USSD Push) API using the MTN MoMo SDK.
 ---
 ## Core Concepts
-- Use a dedicated `MomoCollections` instance for Collections (do not share with Disbursements).
+- Use a dedicated `MtnMomo` instance for Collections (do not share with Disbursements).
 - Follow the *Product Token Isolation* rule to avoid token collisions.
 - Provision a sandbox user and API key before making Calls.
 ## Typical Flow
@@ -14,7 +14,7 @@ description: Provides detailed guidance for integrating the Collections (USSD Pu
 4. **Poll the transaction status** using `momo.collection.requesttoPayTransactionStatus` until you receive a final status.
 ## Example Code
 ```dart
-final collectionsMomo = MomoCollections(
+final collectionsMomo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: '<your-subscription-key>',
   userId: '<sandbox-user-id>',

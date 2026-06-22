@@ -4,7 +4,7 @@ name: mtn-momo-disbursements
 description: Provides guidance for using the Disbursements (Transfer) API via the MTN MoMo SDK.
 ---
 ## Core Concepts
-- Use a dedicated `MomoCollections` instance for Disbursements (separate from Collections).
+- Use a dedicated `MtnMomo` instance for Disbursements (separate from Collections).
 - Follow *Product Token Isolation* to avoid token collisions.
 - Ensure sandbox user and API key are provisioned before transfers.
 
@@ -16,7 +16,7 @@ description: Provides guidance for using the Disbursements (Transfer) API via th
 
 ## Example Code
 ```dart
-final disbursementsMomo = MomoCollections(
+final disbursementsMomo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: '<your-subscription-key>',
   userId: '<sandbox-user-id>',

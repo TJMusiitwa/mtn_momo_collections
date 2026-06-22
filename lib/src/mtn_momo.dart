@@ -6,19 +6,19 @@ import 'package:mtn_momo_sdk/src/interceptors/momo_interceptor.dart';
 import 'package:mtn_momo_sdk/src/mappers/error_reason_custom_mapper.dart';
 import 'package:mtn_momo_sdk/src/token_manager.dart';
 
-/// High-level wrapper for the MTN Mobile Money (MoMo) API.
+/// High-level coordinator and wrapper for the MTN Mobile Money (MoMo) SDK.
 ///
 /// Handles OAuth2 token lifecycle automatically, including lazy fetching,
 /// caching, and thread-safe deduplication of concurrent token requests.
 ///
-/// > **Important**: Always use separate, dedicated `MomoCollections` instances
+/// > **Important**: Always use separate, dedicated `MtnMomo` instances
 /// > for Collections, Disbursements, and Remittances. Sharing a single instance
 /// > across products causes OAuth2 token cache collisions that result in
 /// > `401 Unauthorized` errors, because each product uses distinct credentials.
 ///
 /// Example:
 /// ```dart
-/// final momo = MomoCollections(
+/// final momo = MtnMomo(
 ///   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
 ///   subscriptionKey: 'YOUR_OCP_APIM_SUBSCRIPTION_KEY',
 ///   userId: 'YOUR_API_USER_ID',
@@ -27,7 +27,7 @@ import 'package:mtn_momo_sdk/src/token_manager.dart';
 ///
 /// final balance = await momo.collection.getAccountBalance();
 /// ```
-class MomoCollections {
+class MtnMomo {
   final String baseUrl;
   final String subscriptionKey;
   final String userId;
@@ -42,7 +42,7 @@ class MomoCollections {
   final TokenManager _tokenManager = TokenManager();
   final Logger _logger = Logger();
 
-  MomoCollections({
+  MtnMomo({
     required this.baseUrl,
     required this.subscriptionKey,
     required this.userId,
@@ -90,7 +90,7 @@ class MomoCollections {
   /// Use this to request payments (USSD push), poll transaction status,
   /// manage invoices, pre-approvals, and check the merchant wallet balance.
   ///
-  /// > **Important**: Always use a **dedicated** `MomoCollections` instance
+  /// > **Important**: Always use a **dedicated** `MtnMomo` instance
   /// > for Collections. Sharing a single instance across products will cause
   /// > OAuth2 token cache collisions, resulting in `401 Unauthorized` errors.
   CollectionClient get collection => _collectionClient;
@@ -100,7 +100,7 @@ class MomoCollections {
   /// Use this to transfer funds to a recipient's mobile wallet, poll transfer
   /// status, and check the disbursements merchant wallet balance.
   ///
-  /// > **Important**: Always use a **dedicated** `MomoCollections` instance
+  /// > **Important**: Always use a **dedicated** `MtnMomo` instance
   /// > for Disbursements to avoid token cache collisions with other products.
   DisbursementsClient get disbursements => _disbursementsClient;
 
@@ -110,7 +110,7 @@ class MomoCollections {
   /// remittance transfers and cash transfers with full payer identity support
   /// for compliance.
   ///
-  /// > **Important**: Always use a **dedicated** `MomoCollections` instance
+  /// > **Important**: Always use a **dedicated** `MtnMomo` instance
   /// > for Remittances. Sharing a single instance across Collections,
   /// > Disbursements, and Remittances will cause OAuth2 token cache collisions,
   /// > resulting in `401 Unauthorized` errors.
@@ -123,7 +123,7 @@ class MomoCollections {
   /// require an OAuth2 Bearer token; it uses the subscription key only.
   SandboxProvisioningClient get sandbox => _sandboxProvisioningClient;
 
-  /// The underlying [Dio] HTTP client used by this `MomoCollections` instance.
+  /// The underlying [Dio] HTTP client used by this `MtnMomo` instance.
   ///
   /// Exposed for advanced use cases such as adding additional interceptors,
   /// inspecting request/response logs, or testing with mock adapters.
@@ -162,3 +162,4 @@ class MomoCollections {
     return _tokenFetchFuture;
   }
 }
+

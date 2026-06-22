@@ -96,8 +96,8 @@ void main() async {
 
   if (apiKey == null) return;
 
-  print('3. Initializing MomoCollections');
-  final momo = MomoCollections(
+  print('3. Initializing MtnMomo');
+  final momo = MtnMomo(
     baseUrl: baseUrl,
     subscriptionKey: subscriptionKey,
     userId: userUuid,

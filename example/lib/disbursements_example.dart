@@ -37,7 +37,7 @@ Map<String, String> _loadEnv() {
 
 /// Standalone CLI Example: Disbursements
 ///
-/// Demonstrates how to use the high-level `MomoCollections` wrapper to:
+/// Demonstrates how to use the high-level `MtnMomo` wrapper to:
 /// 1. Retrieve merchant disbursements account balance.
 /// 2. Validate payee wallet status (is recipient active).
 /// 3. Trigger a disbursement transfer to a recipient's mobile wallet.
@@ -145,7 +145,7 @@ void main() async {
   }
 
   // --- Initialization ---
-  final momo = MomoCollections(
+  final momo = MtnMomo(
     baseUrl: 'https://sandbox.momodeveloper.mtn.com',
     subscriptionKey: subscriptionKey,
     userId: userId,

@@ -104,14 +104,14 @@ void main() {
     group('Collections Product Live Validation', () {
       late String userId;
       late String apiKey;
-      late MomoCollections momo;
+      late MtnMomo momo;
 
       setUpAll(() async {
         if (!hasCollections) return;
         final creds = await _provisionSandboxUser(collectionsKey);
         userId = creds['userId']!;
         apiKey = creds['apiKey']!;
-        momo = MomoCollections(
+        momo = MtnMomo(
           baseUrl: 'https://sandbox.momodeveloper.mtn.com',
           subscriptionKey: collectionsKey,
           userId: userId,
@@ -245,14 +245,14 @@ void main() {
     group('Disbursements Product Live Validation', () {
       late String userId;
       late String apiKey;
-      late MomoCollections momo;
+      late MtnMomo momo;
 
       setUpAll(() async {
         if (!hasDisbursements) return;
         final creds = await _provisionSandboxUser(disbursementsKey);
         userId = creds['userId']!;
         apiKey = creds['apiKey']!;
-        momo = MomoCollections(
+        momo = MtnMomo(
           baseUrl: 'https://sandbox.momodeveloper.mtn.com',
           subscriptionKey: disbursementsKey,
           userId: userId,
@@ -355,7 +355,7 @@ void main() {
     group('Remittances Product Live Validation', () {
       late String userId;
       late String apiKey;
-      late MomoCollections momo;
+      late MtnMomo momo;
 
       final remittancesKey =
           env['REMITTANCES_KEY'] ?? Platform.environment['REMITTANCES_KEY'];
@@ -367,7 +367,7 @@ void main() {
         final creds = await _provisionSandboxUser(remittancesKey);
         userId = creds['userId']!;
         apiKey = creds['apiKey']!;
-        momo = MomoCollections(
+        momo = MtnMomo(
           baseUrl: 'https://sandbox.momodeveloper.mtn.com',
           subscriptionKey: remittancesKey,
           userId: userId,

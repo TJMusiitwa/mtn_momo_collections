@@ -150,8 +150,8 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
   final ScrollController _terminalScrollController = ScrollController();
 
   // Unified Momo SDK wrappers for Product Token Isolation
-  MomoCollections? _collectionsMomo;
-  MomoCollections? _disbursementsMomo;
+  MtnMomo? _collectionsMomo;
+  MtnMomo? _disbursementsMomo;
 
   @override
   void initState() {
@@ -213,7 +213,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
       return false;
     }
 
-    _collectionsMomo = MomoCollections(
+    _collectionsMomo = MtnMomo(
       baseUrl: 'https://sandbox.momodeveloper.mtn.com',
       subscriptionKey: subKey,
       userId: uid,
@@ -221,7 +221,7 @@ class _PlaygroundHomeScreenState extends State<PlaygroundHomeScreen> {
       targetEnvironment: 'sandbox',
     );
 
-    _disbursementsMomo = MomoCollections(
+    _disbursementsMomo = MtnMomo(
       baseUrl: 'https://sandbox.momodeveloper.mtn.com',
       subscriptionKey: subKey,
       userId: uid,

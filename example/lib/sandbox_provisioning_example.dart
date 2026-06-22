@@ -117,7 +117,7 @@ void main() async {
     print('\n==================================================');
     print('          PROVISIONING COMPLETED!');
     print('==================================================');
-    print('Use these credentials in your MomoCollections client:');
+    print('Use these credentials in your MtnMomo client:');
     print('User ID (API User): $userUuid');
     print('API Key           : $apiKey');
     print('Target Environment: sandbox');
