@@ -102,9 +102,7 @@ abstract class RemittanceClient {
   /// This operation is used to claim a consent by the account holder for the requested scopes.
   @FormUrlEncoded()
   @POST('/oauth2/token/')
-  Future<Oauth2TokenResponse> createOauth2Token({
-    @Body() dynamic body,
-  });
+  Future<Oauth2TokenResponse> createOauth2Token({@Body() dynamic body});
 
   /// GetUserInfoWithConsent.
   ///
@@ -149,8 +147,11 @@ abstract class RemittanceClient {
   /// [accountHolderMsisdn] - Bearer Authentication Token generated using CreateAccessToken API Call.
   ///
   /// Incorrect name has been replaced. Original name: `671b099705fd58bc55c9bbca`.
-  @GET('/clone-671b0/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo')
-  Future<BasicUserInfoJsonResponse> getClone671b0V10AccountholderMsisdnAccountHolderMsisdnBasicuserinfo({
+  @GET(
+    '/clone-671b0/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo',
+  )
+  Future<BasicUserInfoJsonResponse>
+  getClone671b0V10AccountholderMsisdnAccountHolderMsisdnBasicuserinfo({
     @Path('accountHolderMSISDN') required String accountHolderMsisdn,
   });
 
@@ -162,7 +163,8 @@ abstract class RemittanceClient {
   ///
   /// Incorrect name has been replaced. Original name: `671b4b855d145f9b8f15e836`.
   @GET('/v1_0/accountholder/msisdn/999{accountHolderMSISDN}999/basicuserinfo')
-  Future<BasicUserInfoJsonResponse> getV10AccountholderMsisdn999AccountHolderMsisdn999Basicuserinfo({
+  Future<BasicUserInfoJsonResponse>
+  getV10AccountholderMsisdn999AccountHolderMsisdn999Basicuserinfo({
     @Path('accountHolderMSISDN') required String accountHolderMsisdn,
   });
 }

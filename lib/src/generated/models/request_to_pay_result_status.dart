@@ -8,21 +8,23 @@ part 'request_to_pay_result_status.mapper.dart';
 
 @MappableEnum(defaultValue: RequestToPayResultStatus.unknown)
 enum RequestToPayResultStatus {
-  @MappableValue('PENDING') 
+  @MappableValue('PENDING')
   pending,
 
-  @MappableValue('SUCCESSFUL') 
+  @MappableValue('SUCCESSFUL')
   successful,
 
-  @MappableValue('FAILED') 
+  @MappableValue('FAILED')
   failed,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<RequestToPayResultStatus> get $valuesDefined => values.where((value) => value != RequestToPayResultStatus.unknown).toList();
+  static List<RequestToPayResultStatus> get $valuesDefined => values
+      .where((value) => value != RequestToPayResultStatus.unknown)
+      .toList();
 }

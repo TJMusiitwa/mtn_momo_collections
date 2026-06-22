@@ -21,7 +21,8 @@ part 'disbursements_client.g.dart';
 
 @RestApi()
 abstract class DisbursementsClient {
-  factory DisbursementsClient(Dio dio, {String? baseUrl}) = _DisbursementsClient;
+  factory DisbursementsClient(Dio dio, {String? baseUrl}) =
+      _DisbursementsClient;
 
   /// GetAccountBalance.
   ///
@@ -59,10 +60,13 @@ abstract class DisbursementsClient {
   /// [accountHolderIdType] - Type of account holder identity passed in accountHolderId path param.Possible values:MSISDN Email AliasID (account ID).
   ///
   /// [accountHolderId] - string.
-  @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo')
+  @GET(
+    '/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo',
+  )
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
     @Path('accountHolderId') required String accountHolderId,
-    @Path('accountHolderIdType') required AccountHolderIdType accountHolderIdType,
+    @Path('accountHolderIdType')
+    required AccountHolderIdType accountHolderIdType,
   });
 
   /// bc-authorize.
@@ -168,9 +172,7 @@ abstract class DisbursementsClient {
   /// This operation is used to claim a consent by the account holder for the requested scopes.
   @FormUrlEncoded()
   @POST('/oauth2/token/')
-  Future<Oauth2TokenResponse> createOauth2Token({
-    @Body() dynamic body,
-  });
+  Future<Oauth2TokenResponse> createOauth2Token({@Body() dynamic body});
 
   /// GetUserInfoWithConsent.
   ///

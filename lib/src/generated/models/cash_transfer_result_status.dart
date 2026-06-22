@@ -24,8 +24,7 @@ enum CashTransferResultStatus {
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<CashTransferResultStatus> get $valuesDefined =>
-      values
-          .where((value) => value != CashTransferResultStatus.unknown)
-          .toList();
+  static List<CashTransferResultStatus> get $valuesDefined => values
+      .where((value) => value != CashTransferResultStatus.unknown)
+      .toList();
 }

@@ -8,14 +8,13 @@ part 'target_environment.mapper.dart';
 
 @MappableClass()
 class TargetEnvironment with TargetEnvironmentMappable {
-  const TargetEnvironment({
-    this.apiKey,
-  });
+  const TargetEnvironment({this.apiKey});
+
   /// The target environment
   final String? apiKey;
 
-
-  static TargetEnvironment fromJson(Map<String, dynamic> json) => TargetEnvironmentMapper.ensureInitialized().decodeMap<TargetEnvironment>(json);
-
+  static TargetEnvironment fromJson(Map<String, dynamic> json) =>
+      TargetEnvironmentMapper.ensureInitialized().decodeMap<TargetEnvironment>(
+        json,
+      );
 }
-

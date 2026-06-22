@@ -8,24 +8,25 @@ part 'account_holder_id_type2.mapper.dart';
 
 @MappableEnum(defaultValue: AccountHolderIdType2.unknown)
 enum AccountHolderIdType2 {
-  @MappableValue('msisdn') 
+  @MappableValue('msisdn')
   msisdn,
 
-  @MappableValue('email') 
+  @MappableValue('email')
   email,
 
-  @MappableValue('id') 
+  @MappableValue('id')
   id,
 
-  @MappableValue('alias') 
+  @MappableValue('alias')
   alias,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<AccountHolderIdType2> get $valuesDefined => values.where((value) => value != AccountHolderIdType2.unknown).toList();
+  static List<AccountHolderIdType2> get $valuesDefined =>
+      values.where((value) => value != AccountHolderIdType2.unknown).toList();
 }

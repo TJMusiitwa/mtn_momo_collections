@@ -6,6 +6,27 @@ import 'package:mtn_momo_collections/src/interceptors/momo_interceptor.dart';
 import 'package:mtn_momo_collections/src/mappers/error_reason_custom_mapper.dart';
 import 'package:mtn_momo_collections/src/token_manager.dart';
 
+/// High-level wrapper for the MTN Mobile Money (MoMo) API.
+///
+/// Handles OAuth2 token lifecycle automatically, including lazy fetching,
+/// caching, and thread-safe deduplication of concurrent token requests.
+///
+/// > **Important**: Always use separate, dedicated `MomoCollections` instances
+/// > for Collections, Disbursements, and Remittances. Sharing a single instance
+/// > across products causes OAuth2 token cache collisions that result in
+/// > `401 Unauthorized` errors, because each product uses distinct credentials.
+///
+/// Example:
+/// ```dart
+/// final momo = MomoCollections(
+///   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
+///   subscriptionKey: 'YOUR_OCP_APIM_SUBSCRIPTION_KEY',
+///   userId: 'YOUR_API_USER_ID',
+///   apiKey: 'YOUR_API_KEY',
+/// );
+///
+/// final balance = await momo.collection.getAccountBalance();
+/// ```
 class MomoCollections {
   final String baseUrl;
   final String subscriptionKey;
@@ -64,17 +85,48 @@ class MomoCollections {
     );
   }
 
+  /// Access point for the MTN Mobile Money Collections API.
+  ///
+  /// Use this to request payments (USSD push), poll transaction status,
+  /// manage invoices, pre-approvals, and check the merchant wallet balance.
+  ///
+  /// > **Important**: Always use a **dedicated** `MomoCollections` instance
+  /// > for Collections. Sharing a single instance across products will cause
+  /// > OAuth2 token cache collisions, resulting in `401 Unauthorized` errors.
+  CollectionClient get collection => _collectionClient;
+
+  /// Access point for the MTN Mobile Money Disbursements API.
+  ///
+  /// Use this to transfer funds to a recipient's mobile wallet, poll transfer
+  /// status, and check the disbursements merchant wallet balance.
+  ///
+  /// > **Important**: Always use a **dedicated** `MomoCollections` instance
+  /// > for Disbursements to avoid token cache collisions with other products.
+  DisbursementsClient get disbursements => _disbursementsClient;
+
   /// Access point for the MTN Mobile Money Remittances API.
   ///
-  /// > [!IMPORTANT]
-  /// > Always use a **dedicated** `MomoCollections` instance for Remittances.
-  /// > Sharing a single instance across Collections, Disbursements, and Remittances
-  /// > will cause OAuth2 token cache collisions, resulting in `401 Unauthorized` errors.
-  CollectionClient get collection => _collectionClient;
-  DisbursementsClient get disbursements => _disbursementsClient;
+  /// Use this to initiate cross-border money transfers, including standard
+  /// remittance transfers and cash transfers with full payer identity support
+  /// for compliance.
+  ///
+  /// > **Important**: Always use a **dedicated** `MomoCollections` instance
+  /// > for Remittances. Sharing a single instance across Collections,
+  /// > Disbursements, and Remittances will cause OAuth2 token cache collisions,
+  /// > resulting in `401 Unauthorized` errors.
   RemittanceClient get remittance => _remittanceClient;
 
+  /// Access point for the MTN MoMo Sandbox User Provisioning API.
+  ///
+  /// Use this to programmatically create sandbox API users and retrieve their
+  /// API keys before running sandbox integration tests. This client does not
+  /// require an OAuth2 Bearer token; it uses the subscription key only.
   SandboxProvisioningClient get sandbox => _sandboxProvisioningClient;
+
+  /// The underlying [Dio] HTTP client used by this `MomoCollections` instance.
+  ///
+  /// Exposed for advanced use cases such as adding additional interceptors,
+  /// inspecting request/response logs, or testing with mock adapters.
   Dio get dio => _dio;
 
   Future<String?>? _tokenFetchFuture;

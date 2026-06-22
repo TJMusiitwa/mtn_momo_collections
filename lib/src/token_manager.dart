@@ -1,5 +1,14 @@
 import 'package:mtn_momo_collections/src/generated/export.dart';
 
+/// Manages the OAuth2 access token lifecycle for the MTN MoMo API.
+///
+/// Caches the access token and tracks its expiration time, automatically
+/// accounting for a 60-second clock-skew safety buffer. The token is
+/// considered invalid if it is absent or within 60 seconds of expiry.
+///
+/// Typically instantiated internally by [MomoCollections] and injected into
+/// [MomoInterceptor] — consumers of the SDK do not normally interact with
+/// this class directly.
 class TokenManager {
   TokenPost200ApplicationJsonResponse? _token;
   DateTime? _expiry;

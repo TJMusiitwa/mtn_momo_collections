@@ -9,18 +9,19 @@ part 'bcauthorize_access_type.mapper.dart';
 /// Value either online, or offline.
 @MappableEnum(defaultValue: BcauthorizeAccessType.unknown)
 enum BcauthorizeAccessType {
-  @MappableValue('online') 
+  @MappableValue('online')
   online,
 
-  @MappableValue('offline') 
+  @MappableValue('offline')
   offline,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<BcauthorizeAccessType> get $valuesDefined => values.where((value) => value != BcauthorizeAccessType.unknown).toList();
+  static List<BcauthorizeAccessType> get $valuesDefined =>
+      values.where((value) => value != BcauthorizeAccessType.unknown).toList();
 }

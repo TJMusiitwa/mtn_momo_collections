@@ -21,17 +21,20 @@ class PreApprovalResult with PreApprovalResultMappable {
     this.reason,
   });
   final Party? payer;
+
   /// ISO4217 Currency
   final String? payerCurrency;
+
   /// The mesage that is shown to the approver.
   final String? payerMessage;
+
   /// The request validity time of the pre-approval
   final int? validityTime;
   final PreApprovalResultStatus? status;
   final ErrorReason? reason;
 
-
-  static PreApprovalResult fromJson(Map<String, dynamic> json) => PreApprovalResultMapper.ensureInitialized().decodeMap<PreApprovalResult>(json);
-
+  static PreApprovalResult fromJson(Map<String, dynamic> json) =>
+      PreApprovalResultMapper.ensureInitialized().decodeMap<PreApprovalResult>(
+        json,
+      );
 }
-

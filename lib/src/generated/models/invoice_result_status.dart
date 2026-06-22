@@ -8,24 +8,25 @@ part 'invoice_result_status.mapper.dart';
 
 @MappableEnum(defaultValue: InvoiceResultStatus.unknown)
 enum InvoiceResultStatus {
-  @MappableValue('CREATED') 
+  @MappableValue('CREATED')
   created,
 
-  @MappableValue('PENDING') 
+  @MappableValue('PENDING')
   pending,
 
-  @MappableValue('SUCCESSFUL') 
+  @MappableValue('SUCCESSFUL')
   successful,
 
-  @MappableValue('FAILED') 
+  @MappableValue('FAILED')
   failed,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<InvoiceResultStatus> get $valuesDefined => values.where((value) => value != InvoiceResultStatus.unknown).toList();
+  static List<InvoiceResultStatus> get $valuesDefined =>
+      values.where((value) => value != InvoiceResultStatus.unknown).toList();
 }

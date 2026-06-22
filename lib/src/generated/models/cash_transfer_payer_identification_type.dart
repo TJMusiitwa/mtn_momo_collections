@@ -9,42 +9,44 @@ part 'cash_transfer_payer_identification_type.mapper.dart';
 /// Identification type of the payer
 @MappableEnum(defaultValue: CashTransferPayerIdentificationType.unknown)
 enum CashTransferPayerIdentificationType {
-  @MappableValue('PASS') 
+  @MappableValue('PASS')
   pass,
 
-  @MappableValue('CPFA') 
+  @MappableValue('CPFA')
   cpfa,
 
-  @MappableValue('SRSSA') 
+  @MappableValue('SRSSA')
   srssa,
 
-  @MappableValue('NRIN') 
+  @MappableValue('NRIN')
   nrin,
 
-  @MappableValue('OTHR') 
+  @MappableValue('OTHR')
   othr,
 
-  @MappableValue('DRLC') 
+  @MappableValue('DRLC')
   drlc,
 
-  @MappableValue('SOCS') 
+  @MappableValue('SOCS')
   socs,
 
-  @MappableValue('AREG') 
+  @MappableValue('AREG')
   areg,
 
-  @MappableValue('IDCD') 
+  @MappableValue('IDCD')
   idcd,
 
-  @MappableValue('EMID') 
+  @MappableValue('EMID')
   emid,
 
-  @MappableValue('unknown') 
+  @MappableValue('unknown')
   unknown;
 
   @override
   String toString() => toValue().toString();
 
   /// Returns all defined enum values excluding the unknown value.
-  static List<CashTransferPayerIdentificationType> get $valuesDefined => values.where((value) => value != CashTransferPayerIdentificationType.unknown).toList();
+  static List<CashTransferPayerIdentificationType> get $valuesDefined => values
+      .where((value) => value != CashTransferPayerIdentificationType.unknown)
+      .toList();
 }

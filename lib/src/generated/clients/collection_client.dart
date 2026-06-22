@@ -102,9 +102,12 @@ abstract class CollectionClient {
   /// ID (account ID).
   ///
   /// [accountHolderId] - ID of the account holder.
-  @GET('/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo')
+  @GET(
+    '/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/basicuserinfo',
+  )
   Future<BasicUserInfoJsonResponse> getBasicUserinfo({
-    @Path('accountHolderIdType') required AccountHolderIdType accountHolderIdType,
+    @Path('accountHolderIdType')
+    required AccountHolderIdType accountHolderIdType,
     @Path('accountHolderId') required String accountHolderId,
   });
 
@@ -267,9 +270,7 @@ abstract class CollectionClient {
   /// This operation is used to claim a consent by the account holder for the requested scopes.
   @FormUrlEncoded()
   @POST('/oauth2/token/')
-  Future<Oauth2TokenResponse> createOauth2Token({
-    @Body() dynamic body,
-  });
+  Future<Oauth2TokenResponse> createOauth2Token({@Body() dynamic body});
 
   /// GetUserInfoWithConsent.
   ///
@@ -305,7 +306,8 @@ abstract class CollectionClient {
   @GET('/v1_0/preapprovals/{accountHolderIdType}/{accountHolderId}')
   Future<List<PreApprovalDetails>> getApprovedPreApprovals({
     @Path('accountHolderId') required String accountHolderId,
-    @Path('accountHolderIdType') required AccountHolderIdType2 accountHolderIdType,
+    @Path('accountHolderIdType')
+    required AccountHolderIdType2 accountHolderIdType,
   });
 
   /// CancelPreApproval.

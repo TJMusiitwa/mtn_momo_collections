@@ -10,15 +10,10 @@ part 'error_reason.mapper.dart';
 
 @MappableClass()
 class ErrorReason with ErrorReasonMappable {
-  const ErrorReason({
-    this.code,
-    this.message,
-  });
+  const ErrorReason({this.code, this.message});
   final ErrorReasonCode? code;
   final String? message;
 
-
-  static ErrorReason fromJson(Map<String, dynamic> json) => ErrorReasonMapper.ensureInitialized().decodeMap<ErrorReason>(json);
-
+  static ErrorReason fromJson(Map<String, dynamic> json) =>
+      ErrorReasonMapper.ensureInitialized().decodeMap<ErrorReason>(json);
 }
-
