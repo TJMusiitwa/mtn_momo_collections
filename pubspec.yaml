@@ -1,5 +1,5 @@
 name: mtn_momo_sdk
-description: "An unofficial package for integrating with MTN Mobile Money Collections API, enabling the payment of goods and services using MTN Mobile Money."
+description: "An unofficial package for integrating with MTN Mobile Money Collections & Disbursements & Remittances API, enabling the payment of goods and services using MTN Mobile Money."
 version: 0.0.1
 issue_tracker: https://github.com/TJMusiitwa/mtn_momo_collections/issues
 repository: https://github.com/TJMusiitwa/mtn_momo_collections
