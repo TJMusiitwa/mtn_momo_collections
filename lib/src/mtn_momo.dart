@@ -1,6 +1,7 @@
+import 'dart:developer' as developer;
+
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
 import 'package:mtn_momo_sdk/src/generated/export.dart';
 import 'package:mtn_momo_sdk/src/interceptors/momo_interceptor.dart';
 import 'package:mtn_momo_sdk/src/mappers/error_reason_custom_mapper.dart';
@@ -40,7 +41,6 @@ class MtnMomo {
   late final RemittanceClient _remittanceClient;
   late final SandboxProvisioningClient _sandboxProvisioningClient;
   final TokenManager _tokenManager = TokenManager();
-  final Logger _logger = Logger();
 
   MtnMomo({
     required this.baseUrl,
@@ -152,7 +152,7 @@ class MtnMomo {
         return response.accessToken;
       } catch (e) {
         // If token fetch fails, we can't do much. The interceptor will reject the original request.
-        _logger.e('Error fetching token', error: e);
+        developer.log('Error fetching token', error: e, name: 'MtnMomo');
         return null;
       } finally {
         _tokenFetchFuture = null;

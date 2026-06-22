@@ -14,7 +14,6 @@ environment:
 dependencies:
   dart_mappable: ^4.8.0
   dio: ^5.9.0
-  logger: ^2.6.2
   retrofit: ^4.9.2
   uuid: ^4.5.3
 
@@ -22,6 +21,7 @@ dev_dependencies:
   build_runner: ^2.15.0
   dart_mappable_builder: ^4.8.0
   lints: ^6.1.0  
+  logger: ^2.6.2
   retrofit_generator: ^10.2.6
   swagger_parser: ^1.43.1
   test: ^1.31.1
