@@ -13,6 +13,9 @@ The codebase is split into three main logical layers:
 2. **Plumbing & Resiliency Layer (Manual)**: Custom Interceptors (`MomoInterceptor`), Token Management (`TokenManager`), and Request Deduplication.
 3. **High-Level Coordinator & Wrapper Layer (Manual)**: Standard `MtnMomoClient` coordinator and unified wrapper `MtnMomo`.
 
+<details>
+  <summary>📐 View Architecture Diagram</summary>
+
 ```mermaid
 graph TD
     Client[Developer Code] -->|Interacts with| MC[MtnMomo Wrapper]
@@ -36,6 +39,9 @@ graph TD
         MEx -->|Produces| MtnEx[MtnMomoException Hierarchy]
     end
 ```
+
+</details>
+
 
 ---
 

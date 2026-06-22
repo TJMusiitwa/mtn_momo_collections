@@ -18,6 +18,9 @@ An elegant, type-safe, and robust Dart & Flutter SDK for integrating with the **
 
 This SDK is engineered with a layered, modular architecture. Rather than writing fragile manual HTTP wrappers, the entire API layer is generated from MTN's OpenAPI specifications, ensuring full coverage, strict compliance, and future-proof extensibility.
 
+<details>
+  <summary>📐 View Architecture Diagram</summary>
+
 ```mermaid
 graph TD
     subgraph core ["Core Package APIs"]
@@ -40,6 +43,9 @@ graph TD
 
     CC & DC & RC & SC -.-> |HTTP Requests via Dio| MTN[MTN MoMo Gateway]
 ```
+
+</details>
+
 
 ### Highlights
 * **Unified Client Coordinator (`MtnMomoClient`)**: A single entry point providing access to generated clients: `CollectionClient`, `DisbursementsClient`, `RemittanceClient`, and `SandboxProvisioningClient`.
