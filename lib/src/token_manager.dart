@@ -9,7 +9,7 @@ import 'package:mtn_momo_sdk/src/generated/export.dart';
 /// Typically instantiated internally by [MtnMomo] and injected into
 /// [MomoInterceptor] — consumers of the SDK do not normally interact with
 /// this class directly.
-class TokenManager {
+final class TokenManager {
   TokenPost200ApplicationJsonResponse? _token;
   DateTime? _expiry;
 

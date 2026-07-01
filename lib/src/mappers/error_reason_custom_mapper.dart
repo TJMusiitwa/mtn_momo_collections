@@ -2,42 +2,49 @@ import 'package:dart_mappable/dart_mappable.dart';
 import 'package:mtn_momo_sdk/src/generated/models/error_reason.dart';
 import 'package:mtn_momo_sdk/src/generated/models/error_reason_code.dart';
 
-class ErrorReasonCustomMapper extends SimpleMapper<ErrorReason> {
+final class ErrorReasonCustomMapper extends SimpleMapper<ErrorReason> {
   const ErrorReasonCustomMapper();
 
   @override
-  ErrorReason decode(dynamic value) {
-    if (value is String) {
-      final codeValue = ErrorReasonCode.values.firstWhere((e) {
-        final enumStr = e.name.toUpperCase();
-        return enumStr == value.toUpperCase() ||
-            (e == ErrorReasonCode.resourceNotFound &&
-                value.toUpperCase() == 'RESOURCE_NOT_FOUND') ||
-            (e == ErrorReasonCode.resourceAlreadyExist &&
-                value.toUpperCase() == 'RESOURCE_ALREADY_EXIST');
-      }, orElse: () => ErrorReasonCode.unknown);
+  ErrorReason decode(dynamic value) => switch (value) {
+    final String str => _decodeString(str),
+    final Map map => _decodeMap(map),
+    _ => throw MapperException.unexpectedType(
+      value.runtimeType,
+      'String or Map',
+    ),
+  };
 
-      return ErrorReason(code: codeValue, message: value);
-    } else if (value is Map) {
-      final mapData = Map<String, dynamic>.from(value);
-      final rawCode = mapData['code']?.toString();
-      final message = mapData['message']?.toString();
+  ErrorReason _decodeString(String str) {
+    final codeValue = ErrorReasonCode.values.firstWhere((e) {
+      final enumStr = e.name.toUpperCase();
+      final upperStr = str.toUpperCase();
+      return enumStr == upperStr ||
+          (e == ErrorReasonCode.resourceNotFound &&
+              upperStr == 'RESOURCE_NOT_FOUND') ||
+          (e == ErrorReasonCode.resourceAlreadyExist &&
+              upperStr == 'RESOURCE_ALREADY_EXIST');
+    }, orElse: () => ErrorReasonCode.unknown);
 
-      final codeValue = rawCode != null
-          ? ErrorReasonCode.values.firstWhere(
-              (e) =>
-                  e.name.toUpperCase() == rawCode.toUpperCase() ||
-                  (e == ErrorReasonCode.resourceNotFound &&
-                      rawCode.toUpperCase() == 'RESOURCE_NOT_FOUND') ||
-                  (e == ErrorReasonCode.resourceAlreadyExist &&
-                      rawCode.toUpperCase() == 'RESOURCE_ALREADY_EXIST'),
-              orElse: () => ErrorReasonCode.unknown,
-            )
-          : null;
+    return ErrorReason(code: codeValue, message: str);
+  }
 
-      return ErrorReason(code: codeValue, message: message);
-    }
-    throw MapperException.unexpectedType(value.runtimeType, 'String or Map');
+  ErrorReason _decodeMap(Map map) {
+    final rawCode = map['code']?.toString();
+    final message = map['message']?.toString();
+
+    final codeValue = rawCode != null
+        ? ErrorReasonCode.values.firstWhere((e) {
+            final upperRaw = rawCode.toUpperCase();
+            return e.name.toUpperCase() == upperRaw ||
+                (e == ErrorReasonCode.resourceNotFound &&
+                    upperRaw == 'RESOURCE_NOT_FOUND') ||
+                (e == ErrorReasonCode.resourceAlreadyExist &&
+                    upperRaw == 'RESOURCE_ALREADY_EXIST');
+          }, orElse: () => ErrorReasonCode.unknown)
+        : null;
+
+    return ErrorReason(code: codeValue, message: message);
   }
 
   @override

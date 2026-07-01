@@ -28,7 +28,7 @@ import 'package:mtn_momo_sdk/src/token_manager.dart';
 ///
 /// final balance = await momo.collection.getAccountBalance();
 /// ```
-class MtnMomo {
+final class MtnMomo {
   final String baseUrl;
   final String subscriptionKey;
   final String userId;
@@ -138,16 +138,13 @@ class MtnMomo {
 
     _tokenFetchFuture = () async {
       try {
-        final isDisbursement = options.baseUrl.contains('/disbursement');
-        final isRemittance = options.baseUrl.contains('/remittance');
-        final TokenPost200ApplicationJsonResponse response;
-        if (isRemittance) {
-          response = await _remittanceClient.createAccessToken();
-        } else if (isDisbursement) {
-          response = await _disbursementsClient.createAccessToken();
-        } else {
-          response = await _collectionClient.createAccessToken();
-        }
+        final response = await switch (options.baseUrl) {
+          String url when url.contains('/remittance') =>
+            _remittanceClient.createAccessToken(),
+          String url when url.contains('/disbursement') =>
+            _disbursementsClient.createAccessToken(),
+          _ => _collectionClient.createAccessToken(),
+        };
         _tokenManager.setToken(response);
         return response.accessToken;
       } catch (e) {
@@ -162,4 +159,3 @@ class MtnMomo {
     return _tokenFetchFuture;
   }
 }
-

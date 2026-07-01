@@ -6,7 +6,7 @@ import 'clients/remittance_client.dart';
 import 'clients/sandbox_provisioning_client.dart';
 
 /// MTN Momo Client coordinator for all API products.
-class MtnMomoClient {
+final class MtnMomoClient {
   MtnMomoClient(Dio dio, {String? baseUrl})
     : _dio = dio,
       _baseUrl = baseUrl ?? 'https://sandbox.momodeveloper.mtn.com';

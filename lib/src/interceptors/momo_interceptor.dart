@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../exceptions.dart';
 import '../token_manager.dart';
 
-class MomoInterceptor extends Interceptor {
+final class MomoInterceptor extends Interceptor {
   final String subscriptionKey;
   final String targetEnvironment;
   final String userId;
@@ -30,18 +30,21 @@ class MomoInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     // Convert custom request body objects to Map/JSON using dart_mappable
-    if (options.data != null &&
-        options.data is! Map &&
-        options.data is! List &&
-        options.data is! String &&
-        options.data is! FormData) {
-      try {
-        options.data = (options.data as dynamic).toMap();
-      } catch (_) {
+    final data = options.data;
+    if (data != null) {
+      final shouldConvert = switch (data) {
+        Map() || List() || String() || FormData() => false,
+        _ => true,
+      };
+      if (shouldConvert) {
         try {
-          options.data = (options.data as dynamic).toJson();
+          options.data = (data as dynamic).toMap();
         } catch (_) {
-          // Keep as is if no serialization method exists
+          try {
+            options.data = (data as dynamic).toJson();
+          } catch (_) {
+            // Keep as is if no serialization method exists
+          }
         }
       }
     }
