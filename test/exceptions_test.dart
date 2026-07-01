@@ -110,5 +110,20 @@ void main() {
         equals(MtnMomoErrorCode.notAllowedTargetEnvironment),
       );
     });
+
+    test('maps unexpected status code to MtnMomoUnexpectedException', () {
+      final dioError = DioException(
+        requestOptions: requestOptions,
+        response: Response(
+          requestOptions: requestOptions,
+          statusCode: 502,
+          data: {'message': 'Proxy error'},
+        ),
+      );
+
+      final result = mapDioException(dioError);
+      expect(result, isA<MtnMomoUnexpectedException>());
+      expect(result.message, equals('Proxy error'));
+    });
   });
 }
