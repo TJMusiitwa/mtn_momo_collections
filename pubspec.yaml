@@ -1,6 +1,6 @@
 name: mtn_momo_sdk
 description: "An unofficial package for integrating with MTN Mobile Money Collections & Disbursements & Remittances API, enabling the payment of goods and services using MTN Mobile Money."
-version: 0.0.1
+version: 0.0.2
 issue_tracker: https://github.com/TJMusiitwa/mtn_momo_collections/issues
 repository: https://github.com/TJMusiitwa/mtn_momo_collections
 topics: 
@@ -13,15 +13,15 @@ environment:
 
 dependencies:
   dart_mappable: ^4.8.0
-  dio: ^5.9.0
+  dio: ^5.10.0
   retrofit: ^4.9.2
   uuid: ^4.5.3
 
 dev_dependencies:
   build_runner: ^2.15.0
-  dart_mappable_builder: ^4.8.0
+  dart_mappable_builder: ^4.9.0
   lints: ^6.1.0  
-  logger: ^2.6.2
-  retrofit_generator: ^10.2.6
-  swagger_parser: ^1.43.1
-  test: ^1.31.1
+  logger: ^2.7.0
+  retrofit_generator: ^10.2.7
+  swagger_parser: ^1.44.0
+  test: ^1.31.2
