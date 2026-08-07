@@ -262,17 +262,7 @@ MtnMomoException mapDioException(DioException error) {
 
   final status = response.statusCode;
   final data = response.data;
-
-  // Try parsing structural error reason if present
-  final ErrorReason? errorReason = data is Map
-      ? (() {
-          try {
-            return ErrorReason.fromJson(Map<String, dynamic>.from(data));
-          } catch (_) {
-            return null;
-          }
-        })()
-      : null;
+  final errorReason = _parseErrorReason(data);
 
   // Pattern match data to extract rawCode and rawMessage if present
   final (rawCode, rawMessage) = switch (data) {
@@ -280,132 +270,142 @@ MtnMomoException mapDioException(DioException error) {
     _ => (null, null),
   };
 
-  switch (status) {
-    // 1. Handle HTTP 401 Unauthorized (Auth and Subscription issues)
-    case 401:
-      String message =
-          'Access Denied: Invalid credentials or subscription key.';
-      String? details;
-
-      if (data is Map) {
-        try {
-          final mapData = Map<String, dynamic>.from(data);
-          final token401 = TokenPost401ApplicationJsonResponse.fromJson(
-            mapData,
-          );
-          if (token401.error != null) {
-            details = token401.error;
-          }
-        } catch (_) {}
-      }
-
-      if (errorReason != null) {
-        message = errorReason.message ?? message;
-        details = errorReason.code?.name ?? details;
-      }
-
-      return MtnMomoAuthException(
-        requestOptions: error.requestOptions,
-        response: error.response,
-        type: error.type,
-        error: error.error,
-        stackTrace: error.stackTrace,
-        message: message,
-        details: details,
-      );
-
-    // 2. Handle HTTP 403 Forbidden (e.g. IP block)
-    case 403:
-      final message =
+  return switch (status) {
+    401 => _buildAuthException(error, data, errorReason),
+    403 => MtnMomoForbiddenException(
+      requestOptions: error.requestOptions,
+      response: error.response,
+      type: error.type,
+      error: error.error,
+      stackTrace: error.stackTrace,
+      message:
           errorReason?.message ??
-          'Forbidden: Access to this API resource is denied (check IP whitelist).';
-      return MtnMomoForbiddenException(
-        requestOptions: error.requestOptions,
-        response: error.response,
-        type: error.type,
-        error: error.error,
-        stackTrace: error.stackTrace,
-        message: message,
-      );
+          'Forbidden: Access to this API resource is denied (check IP whitelist).',
+    ),
+    404 => MtnMomoNotFoundException(
+      requestOptions: error.requestOptions,
+      response: error.response,
+      type: error.type,
+      error: error.error,
+      stackTrace: error.stackTrace,
+      message: errorReason?.message ?? 'Resource not found.',
+    ),
+    409 => MtnMomoConflictException(
+      requestOptions: error.requestOptions,
+      response: error.response,
+      type: error.type,
+      error: error.error,
+      stackTrace: error.stackTrace,
+      message: errorReason?.message ?? 'Conflict: Resource already exists.',
+    ),
+    500 || 503 => _buildServerErrorException(error, rawCode, errorReason),
+    _ => _buildDefaultException(
+      error,
+      status,
+      rawCode,
+      rawMessage,
+      errorReason,
+    ),
+  };
+}
 
-    // 3. Handle HTTP 404 Not Found
-    case 404:
-      final message = errorReason?.message ?? 'Resource not found.';
-      return MtnMomoNotFoundException(
-        requestOptions: error.requestOptions,
-        response: error.response,
-        type: error.type,
-        error: error.error,
-        stackTrace: error.stackTrace,
-        message: message,
-      );
-
-    // 4. Handle HTTP 409 Conflict (Duplicate resource reference)
-    case 409:
-      final message =
-          errorReason?.message ?? 'Conflict: Resource already exists.';
-      return MtnMomoConflictException(
-        requestOptions: error.requestOptions,
-        response: error.response,
-        type: error.type,
-        error: error.error,
-        stackTrace: error.stackTrace,
-        message: message,
-      );
-
-    // 5. Handle HTTP 500 / 503 Server Errors
-    case 500 || 503:
-      final message = errorReason?.message ?? 'MTN MoMo Server Error.';
-      // If the server returns a specific code, let's treat it as a transaction error
-      if (rawCode != null) {
-        final code = MtnMomoErrorCode.fromCode(rawCode);
-        return MtnMomoTransactionException(
-          requestOptions: error.requestOptions,
-          response: error.response,
-          type: error.type,
-          error: error.error,
-          stackTrace: error.stackTrace,
-          message: message,
-          errorCode: code,
-        );
-      }
-      return MtnMomoServerException(
-        requestOptions: error.requestOptions,
-        response: error.response,
-        type: error.type,
-        error: error.error,
-        stackTrace: error.stackTrace,
-        message: message,
-      );
-
-    default:
-      // 6. Sift for generic structured transaction errors
-      if (rawCode != null) {
-        final code = MtnMomoErrorCode.fromCode(rawCode);
-        return MtnMomoTransactionException(
-          requestOptions: error.requestOptions,
-          response: error.response,
-          type: error.type,
-          error: error.error,
-          stackTrace: error.stackTrace,
-          message:
-              rawMessage ??
-              errorReason?.message ??
-              'Transaction error occurred.',
-          errorCode: code,
-        );
-      }
-
-      // Fallback generic exception
-      return MtnMomoUnexpectedException(
-        requestOptions: error.requestOptions,
-        response: error.response,
-        type: error.type,
-        error: error.error,
-        stackTrace: error.stackTrace,
-        message:
-            errorReason?.message ??
-            'An unexpected API error occurred (Status: $status).',
-      );
+ErrorReason? _parseErrorReason(dynamic data) {
+  if (data is! Map) return null;
+  try {
+    return ErrorReason.fromJson(Map<String, dynamic>.from(data));
+  } catch (_) {
+    return null;
   }
+}
+
+MtnMomoAuthException _buildAuthException(
+  DioException error,
+  dynamic data,
+  ErrorReason? errorReason,
+) {
+  String message = 'Access Denied: Invalid credentials or subscription key.';
+  String? details;
+
+  if (data is Map) {
+    try {
+      final token401 = TokenPost401ApplicationJsonResponse.fromJson(
+        Map<String, dynamic>.from(data),
+      );
+      details = token401.error;
+    } catch (_) {}
+  }
+
+  if (errorReason != null) {
+    message = errorReason.message ?? message;
+    details = errorReason.code?.name ?? details;
+  }
+
+  return MtnMomoAuthException(
+    requestOptions: error.requestOptions,
+    response: error.response,
+    type: error.type,
+    error: error.error,
+    stackTrace: error.stackTrace,
+    message: message,
+    details: details,
+  );
+}
+
+MtnMomoException _buildServerErrorException(
+  DioException error,
+  String? rawCode,
+  ErrorReason? errorReason,
+) {
+  final message = errorReason?.message ?? 'MTN MoMo Server Error.';
+  if (rawCode != null) {
+    return MtnMomoTransactionException(
+      requestOptions: error.requestOptions,
+      response: error.response,
+      type: error.type,
+      error: error.error,
+      stackTrace: error.stackTrace,
+      message: message,
+      errorCode: MtnMomoErrorCode.fromCode(rawCode),
+    );
+  }
+  return MtnMomoServerException(
+    requestOptions: error.requestOptions,
+    response: error.response,
+    type: error.type,
+    error: error.error,
+    stackTrace: error.stackTrace,
+    message: message,
+  );
+}
+
+MtnMomoException _buildDefaultException(
+  DioException error,
+  int? status,
+  String? rawCode,
+  String? rawMessage,
+  ErrorReason? errorReason,
+) {
+  if (rawCode != null) {
+    return MtnMomoTransactionException(
+      requestOptions: error.requestOptions,
+      response: error.response,
+      type: error.type,
+      error: error.error,
+      stackTrace: error.stackTrace,
+      message:
+          rawMessage ?? errorReason?.message ?? 'Transaction error occurred.',
+      errorCode: MtnMomoErrorCode.fromCode(rawCode),
+    );
+  }
+
+  return MtnMomoUnexpectedException(
+    requestOptions: error.requestOptions,
+    response: error.response,
+    type: error.type,
+    error: error.error,
+    stackTrace: error.stackTrace,
+    message:
+        errorReason?.message ??
+        'An unexpected API error occurred (Status: $status).',
+  );
 }

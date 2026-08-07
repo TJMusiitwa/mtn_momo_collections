@@ -1,3 +1,10 @@
+## 0.0.3
+
+* Refactored core SDK methods and test suites to reduce cognitive complexity:
+  * Decomposed `MomoInterceptor.onRequest` into modular helper methods (`_normalizeData`, `_injectHeaders`, `_handleTokenEndpoints`, `_ensureToken`), reducing its cognitive complexity score from 24 to < 15.
+  * Refactored `mapDioException` using Dart 3 switch expressions and status-specific error builders (`_buildAuthException`, `_buildServerErrorException`, `_buildDefaultException`, `_parseErrorReason`), reducing its cognitive complexity score from 21 to < 15.
+  * Modularized `sandbox_usecases_test.dart` into discrete test group functions (`_testCollectionsGroup`, `_testDisbursementsGroup`, `_testRemittancesGroup`, `_testCashTransferGroup`), bringing cognitive complexity down from 182 to < 40.
+
 ## 0.0.2
 
 * Upgraded dependency versions including `dio` to `^5.10.0`, `logger` to `^2.7.0`, `test` to `^1.31.2`, and code generator packages (`swagger_parser` to `^1.44.0`, `dart_mappable_builder` to `^4.9.0`, `retrofit_generator` to `^10.2.7`).
