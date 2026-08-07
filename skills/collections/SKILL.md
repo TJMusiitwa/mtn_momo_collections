@@ -1,19 +1,38 @@
-# MTN MoMo SDK Collections Skill
 ---
 name: mtn-momo-collections
-description: Provides detailed guidance for integrating the Collections (USSD Push) API using the MTN MoMo SDK.
+description: Collections API (requestToPay, payment collection, transaction status polling) integration for MTN MoMo SDK. Triggers when initiating payments, requesting money from subscribers, or checking collection transaction status.
 ---
-## Core Concepts
-- Use a dedicated `MtnMomo` instance for Collections (do not share with Disbursements).
-- Follow the *Product Token Isolation* rule to avoid token collisions.
-- Provision a sandbox user and API key before making Calls.
-## Typical Flow
-1. **Create a unique `xReferenceId`** (UUID v4) for the transaction.
-2. **Build a `RequestToPay` object** with amount, currency, payer, etc.
-3. **Call `momo.collection.requesttoPay`** with the reference id and body.
-4. **Poll the transaction status** using `momo.collection.requesttoPayTransactionStatus` until you receive a final status.
-## Example Code
+
+# MTN MoMo SDK Collections Skill
+
+Integrates USSD Push payment collection using the MTN Mobile Money Collections API.
+
+## Core Architecture
+
+- **Dedicated Instance**: Instantiate a distinct `MtnMomo` client for Collections to maintain an isolated token cache in `TokenManager` and avoid authentication conflicts with Disbursements or Remittances.
+- **Automated Plumbing**: `MomoInterceptor` automatically manages OAuth2 token fetching, `Ocp-Apim-Subscription-Key`, and `X-Target-Environment` header injection for all outbound requests.
+
+## Execution Steps
+
+### Step 1: Reference Identification
+Generate a unique UUID v4 string to serve as `xReferenceId` for request tracking.
+- **Completion Criterion**: `referenceUuid` is a valid, unique UUID v4 string.
+
+### Step 2: Payload Construction & Dispatch
+Construct a `RequestToPay` model and call `momo.collection.requesttoPay`.
+- **Completion Criterion**: Request succeeds with HTTP 202 status (no exception thrown), signifying the payment prompt was queued for the subscriber.
+
+### Step 3: Status Polling
+Poll payment status using `momo.collection.requesttoPayTransactionStatus(referenceId: referenceUuid)` until a terminal state is returned.
+- **Completion Criterion**: `status.status` evaluates to `SUCCESSFUL`, `FAILED`, or `REJECTED`, or an explicit `MtnMomoTransactionException` is caught.
+
+## Code Reference
+
 ```dart
+import 'package:uuid/uuid.dart';
+import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
+
+// 1. Dedicated Client Setup
 final collectionsMomo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: '<your-subscription-key>',
@@ -22,6 +41,7 @@ final collectionsMomo = MtnMomo(
   targetEnvironment: 'sandbox',
 );
 
+// 2. Transaction Dispatch
 final referenceUuid = const Uuid().v4();
 final request = RequestToPay(
   amount: '5000',
@@ -31,21 +51,40 @@ final request = RequestToPay(
   payerMessage: 'Subscription renewal',
   payeeNote: 'Thank you',
 );
-await collectionsMomo.collection.requesttoPay(xReferenceId: referenceUuid, body: request);
-// Poll status
-final status = await collectionsMomo.collection.requesttoPayTransactionStatus(referenceId: referenceUuid);
-print('Status: ${status.status}');
+
+await collectionsMomo.collection.requesttoPay(
+  xReferenceId: referenceUuid,
+  body: request,
+);
+
+// 3. Status Polling
+final status = await collectionsMomo.collection.requesttoPayTransactionStatus(
+  referenceId: referenceUuid,
+);
 ```
-## Error Handling
-Wrap calls in specific catch blocks:
+
+## Exception Handling
+
+Wrap collection calls in explicit exception blocks to handle business logic and network failures:
+
 ```dart
 try {
-  // request to pay
+  await collectionsMomo.collection.requesttoPay(xReferenceId: referenceUuid, body: request);
 } on MtnMomoTransactionException catch (e) {
-  // Access e.errorCode for business errors
-} on MtnMomoAuthException { /* invalid credentials */ }
+  // Parsed business failure (e.g. MtnMomoErrorCode.payerLimitReached, MtnMomoErrorCode.notEnoughFunds)
+  switch (e.errorCode) {
+    case MtnMomoErrorCode.notEnoughFunds:
+      // Handle insufficient subscriber balance
+      break;
+    case MtnMomoErrorCode.approvalRejected:
+      // Handle subscriber USSD rejection
+      break;
+    default:
+      break;
+  }
+} on MtnMomoAuthException {
+  // Handle invalid subscription key or API credentials
+} on MtnMomoNetworkException {
+  // Handle connection timeouts or socket failures
+}
 ```
-## Notes
-- The SDK automatically injects the OAuth2 token; no manual header handling needed.
-- The `requesttoPay` endpoint requires the `X-Reference-Id` header; the SDK adds it if omitted.
----

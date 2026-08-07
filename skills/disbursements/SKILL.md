@@ -1,21 +1,42 @@
-# MTN MoMo SDK Disbursements Skill
 ---
 name: mtn-momo-disbursements
-description: Provides guidance for using the Disbursements (Transfer) API via the MTN MoMo SDK.
+description: Disbursements API (transfer, payouts, refunds, transfer status polling) integration for MTN MoMo SDK. Triggers when executing payouts, sending funds, issuing refunds, or checking transfer status.
 ---
-## Core Concepts
-- Use a dedicated `MtnMomo` instance for Disbursements (separate from Collections).
-- Follow *Product Token Isolation* to avoid token collisions.
-- Ensure sandbox user and API key are provisioned before transfers.
 
-## Typical Flow
-1. **Create a unique `xReferenceId`** (UUID v4) for the transfer.
-2. **Build a `Transfer` object** with amount, currency, payee, and optional notes.
-3. **Call `momo.disbursements.transfer`** with the reference id and body.
-4. **Poll the transfer status** using `momo.disbursements.getTransferStatus` until completion.
+# MTN MoMo SDK Disbursements Skill
 
-## Example Code
+Integrates B2C payout transfers and refunds using the MTN Mobile Money Disbursements API.
+
+## Core Architecture
+
+- **Dedicated Instance**: Instantiate a distinct `MtnMomo` client for Disbursements to maintain an isolated token cache in `TokenManager` and avoid authentication conflicts with Collections or Remittances.
+- **Automated Plumbing**: `MomoInterceptor` automatically manages OAuth2 token fetching, `Ocp-Apim-Subscription-Key`, and `X-Target-Environment` header injection for all outbound requests.
+
+## Execution Steps
+
+### Step 1: Reference Identification
+Generate a unique UUID v4 string to serve as `xReferenceId` for transfer tracking.
+- **Completion Criterion**: `transferUuid` is a valid, unique UUID v4 string.
+
+### Step 2: Transfer Payload Construction & Dispatch
+Construct a `Transfer` model and call `momo.disbursements.transfer`.
+- **Completion Criterion**: Request succeeds with HTTP 202 status (no exception thrown), indicating the transfer request was queued.
+
+### Step 3: Status Polling
+Poll transfer status using `momo.disbursements.getTransferStatus(referenceId: transferUuid)` until a terminal state is reached.
+- **Completion Criterion**: `status.status` evaluates to `SUCCESSFUL` or `FAILED`, or an explicit `MtnMomoTransactionException` is caught.
+
+### Step 4: Refund Execution (Optional)
+Construct a `RefundTransfer` payload referencing the original transfer ID and invoke `momo.disbursements.refund`.
+- **Completion Criterion**: Refund request completes with HTTP 202 status (no exception thrown).
+
+## Code Reference
+
 ```dart
+import 'package:uuid/uuid.dart';
+import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
+
+// 1. Dedicated Client Setup
 final disbursementsMomo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: '<your-subscription-key>',
@@ -24,6 +45,7 @@ final disbursementsMomo = MtnMomo(
   targetEnvironment: 'sandbox',
 );
 
+// 2. Transfer Dispatch
 final transferUuid = const Uuid().v4();
 final transfer = Transfer(
   amount: '12000',
@@ -33,35 +55,51 @@ final transfer = Transfer(
   payerMessage: 'Monthly Salary',
   payeeNote: 'Salary for August',
 );
+
 await disbursementsMomo.disbursements.transfer(
   xReferenceId: transferUuid,
   body: transfer,
 );
-// Poll status
-final status = await disbursementsMomo.disbursements.getTransferStatus(referenceId: transferUuid);
-print('Transfer status: ${status.status}');
-```
-## Refunds (Optional)
-```dart
+
+// 3. Status Polling
+final status = await disbursementsMomo.disbursements.getTransferStatus(
+  referenceId: transferUuid,
+);
+
+// 4. Optional Refund Dispatch
+final refundUuid = const Uuid().v4();
 await disbursementsMomo.disbursements.refund(
   xReferenceId: refundUuid,
-  body: RefundTransfer(transferId: originalTransferId, amount: '12000', currency: 'EUR'),
+  body: RefundTransfer(
+    transferId: transferUuid,
+    amount: '12000',
+    currency: 'EUR',
+  ),
 );
 ```
-## Error Handling
+
+## Exception Handling
+
+Wrap disbursement calls in explicit exception blocks to handle business logic and credential failures:
+
 ```dart
 try {
-  await disbursementsMomo.disbursements.transfer(...);
+  await disbursementsMomo.disbursements.transfer(xReferenceId: transferUuid, body: transfer);
 } on MtnMomoTransactionException catch (e) {
-  // Business errors like payeeNotFound, insufficient funds, etc.
-  if (e.errorCode == MtnMomoErrorCode.payeeNotFound) {
-    // handle missing payee
+  // Parsed business failure (e.g. MtnMomoErrorCode.payeeNotFound, MtnMomoErrorCode.notEnoughFunds)
+  switch (e.errorCode) {
+    case MtnMomoErrorCode.payeeNotFound:
+      // Handle invalid or unregistered payee MSISDN
+      break;
+    case MtnMomoErrorCode.notEnoughFunds:
+      // Handle insufficient merchant account balance
+      break;
+    default:
+      break;
   }
 } on MtnMomoAuthException {
-  // Invalid credentials
+  // Handle invalid subscription key or API credentials
+} on MtnMomoNetworkException {
+  // Handle connection timeouts or DNS resolution failures
 }
 ```
-## Notes
-- The SDK automatically injects OAuth2 token; no manual header handling.
-- The `xReferenceId` header is required; the SDK adds it if omitted.
----
