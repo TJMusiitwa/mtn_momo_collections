@@ -1,3 +1,11 @@
+## 0.0.4
+
+* Reworked package skills for agent consumption based on writing-for-agents principles:
+  * Rewrote `collections`, `disbursements`, and `sandbox_provisioning` skills to remove duplicated architecture text, fix API mismatches (Disbursements refund model and method names), and expand coverage to the full client API surface.
+  * Added `remittances` skill covering standard transfers and cross-border cash transfers with payer identity.
+  * Added shared `skills/_shared/error_handling.md` reference consolidating the exception hierarchy and error code table into a single source of truth.
+  * Added `AGENTS.md` as a top-level context pointer to all skills and key repo conventions.
+
 ## 0.0.3
 
 * Refactored core SDK methods and test suites to reduce cognitive complexity:

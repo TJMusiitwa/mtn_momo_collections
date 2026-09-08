@@ -1,34 +1,35 @@
 ---
 name: mtn-momo-disbursements
-description: Disbursements API (transfer, payouts, refunds, transfer status polling) integration for MTN MoMo SDK. Triggers when executing payouts, sending funds, issuing refunds, or checking transfer status.
+description: MTN MoMo Disbursements (transfer, deposit, refund, status polling, account validation, balance). Triggers when sending payouts to mobile wallets, depositing funds, issuing refunds, or checking transfer status.
 ---
 
-# MTN MoMo SDK Disbursements Skill
+# MTN MoMo Disbursements
 
-Integrates B2C payout transfers and refunds using the MTN Mobile Money Disbursements API.
+Pay out money from your merchant account into a recipient's mobile wallet, deposit funds, and issue refunds.
 
-## Core Architecture
-
-- **Dedicated Instance**: Instantiate a distinct `MtnMomo` client for Disbursements to maintain an isolated token cache in `TokenManager` and avoid authentication conflicts with Collections or Remittances.
-- **Automated Plumbing**: `MomoInterceptor` automatically manages OAuth2 token fetching, `Ocp-Apim-Subscription-Key`, and `X-Target-Environment` header injection for all outbound requests.
+Use a dedicated `MtnMomo` instance for Disbursements. Sharing one instance across products causes OAuth2 token cache collisions (401 errors). See `GEMINI.md` for the full architecture rationale.
 
 ## Execution Steps
 
-### Step 1: Reference Identification
-Generate a unique UUID v4 string to serve as `xReferenceId` for transfer tracking.
-- **Completion Criterion**: `transferUuid` is a valid, unique UUID v4 string.
+### Step 1: Validate Payee Account (optional but recommended)
+Call `momo.disbursements.validateAccountHolderStatus` to confirm the recipient MSISDN is registered and active before transferring.
+- **Completion Criterion**: call returns without exception, confirming the account holder is active.
 
-### Step 2: Transfer Payload Construction & Dispatch
-Construct a `Transfer` model and call `momo.disbursements.transfer`.
-- **Completion Criterion**: Request succeeds with HTTP 202 status (no exception thrown), indicating the transfer request was queued.
+### Step 2: Transfer
+Generate a UUID v4 for `xReferenceId`, construct a `Transfer` model, and call `momo.disbursements.transfer`.
+- **Completion Criterion**: call returns without exception (HTTP 202 accepted), confirming the transfer was queued.
 
-### Step 3: Status Polling
-Poll transfer status using `momo.disbursements.getTransferStatus(referenceId: transferUuid)` until a terminal state is reached.
-- **Completion Criterion**: `status.status` evaluates to `SUCCESSFUL` or `FAILED`, or an explicit `MtnMomoTransactionException` is caught.
+### Step 3: Poll Transfer Status
+Call `momo.disbursements.getTransferStatus(referenceId:)` until a terminal state is returned.
+- **Completion Criterion**: `status.status` is `SUCCESSFUL` or `FAILED`, or a `MtnMomoTransactionException` is caught.
 
-### Step 4: Refund Execution (Optional)
-Construct a `RefundTransfer` payload referencing the original transfer ID and invoke `momo.disbursements.refund`.
-- **Completion Criterion**: Refund request completes with HTTP 202 status (no exception thrown).
+### Step 4: Deposit (optional branch)
+Call `momo.disbursements.depositV1` or `depositV2` with a `Transfer` body, then poll with `getDepositStatus`.
+- **Completion Criterion**: deposit call returns without exception and `getDepositStatus` returns a terminal state.
+
+### Step 5: Refund (optional branch)
+Call `momo.disbursements.refundV1` or `refundV2` with a `Refund` body referencing the original transaction's `referenceIdToRefund`, then poll with `getRefundStatus`.
+- **Completion Criterion**: refund call returns without exception and `getRefundStatus` returns a terminal state.
 
 ## Code Reference
 
@@ -36,8 +37,7 @@ Construct a `RefundTransfer` payload referencing the original transfer ID and in
 import 'package:uuid/uuid.dart';
 import 'package:mtn_momo_sdk/mtn_momo_sdk.dart';
 
-// 1. Dedicated Client Setup
-final disbursementsMomo = MtnMomo(
+final momo = MtnMomo(
   baseUrl: 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: '<your-subscription-key>',
   userId: '<sandbox-user-id>',
@@ -45,61 +45,50 @@ final disbursementsMomo = MtnMomo(
   targetEnvironment: 'sandbox',
 );
 
-// 2. Transfer Dispatch
-final transferUuid = const Uuid().v4();
-final transfer = Transfer(
-  amount: '12000',
-  currency: 'EUR',
-  externalId: 'DISB_SAL_001',
-  payee: const Party(partyIdType: PartyPartyIdType.msisdn, partyId: '256712345679'),
-  payerMessage: 'Monthly Salary',
-  payeeNote: 'Salary for August',
+// 1. Validate payee
+await momo.disbursements.validateAccountHolderStatus(
+  accountHolderId: '256712345679',
+  accountHolderIdType: 'msisdn',
 );
 
-await disbursementsMomo.disbursements.transfer(
-  xReferenceId: transferUuid,
-  body: transfer,
-);
-
-// 3. Status Polling
-final status = await disbursementsMomo.disbursements.getTransferStatus(
-  referenceId: transferUuid,
-);
-
-// 4. Optional Refund Dispatch
-final refundUuid = const Uuid().v4();
-await disbursementsMomo.disbursements.refund(
-  xReferenceId: refundUuid,
-  body: RefundTransfer(
-    transferId: transferUuid,
+// 2. Transfer
+final ref = const Uuid().v4();
+await momo.disbursements.transfer(
+  xReferenceId: ref,
+  body: Transfer(
     amount: '12000',
     currency: 'EUR',
+    externalId: 'DISB_SAL_001',
+    payee: const Party(partyIdType: PartyPartyIdType.msisdn, partyId: '256712345679'),
+    payerMessage: 'Monthly Salary',
+    payeeNote: 'Salary for August',
   ),
 );
+
+// 3. Poll transfer status
+final status = await momo.disbursements.getTransferStatus(referenceId: ref);
+
+// 4. Refund (optional)
+final refundRef = const Uuid().v4();
+await momo.disbursements.refundV1(
+  xReferenceId: refundRef,
+  body: Refund(
+    amount: '12000',
+    currency: 'EUR',
+    referenceIdToRefund: ref,
+  ),
+);
+final refundStatus = await momo.disbursements.getRefundStatus(referenceId: refundRef);
 ```
 
-## Exception Handling
+## Other Available Operations
 
-Wrap disbursement calls in explicit exception blocks to handle business logic and credential failures:
+| Method | Purpose |
+| :--- | :--- |
+| `getAccountBalance` | Check merchant disbursements wallet balance |
+| `getAccountBalanceInSpecificCurrency` | Balance in a specific ISO4217 currency |
+| `depositV1` / `depositV2` / `getDepositStatus` | Deposit funds to a payee account |
 
-```dart
-try {
-  await disbursementsMomo.disbursements.transfer(xReferenceId: transferUuid, body: transfer);
-} on MtnMomoTransactionException catch (e) {
-  // Parsed business failure (e.g. MtnMomoErrorCode.payeeNotFound, MtnMomoErrorCode.notEnoughFunds)
-  switch (e.errorCode) {
-    case MtnMomoErrorCode.payeeNotFound:
-      // Handle invalid or unregistered payee MSISDN
-      break;
-    case MtnMomoErrorCode.notEnoughFunds:
-      // Handle insufficient merchant account balance
-      break;
-    default:
-      break;
-  }
-} on MtnMomoAuthException {
-  // Handle invalid subscription key or API credentials
-} on MtnMomoNetworkException {
-  // Handle connection timeouts or DNS resolution failures
-}
-```
+## Error Handling
+
+See `skills/_shared/error_handling.md` for the full exception hierarchy, error code table, and catch-flow template.

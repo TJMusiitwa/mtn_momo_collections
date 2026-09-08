@@ -1,42 +1,35 @@
 ---
 name: mtn-momo-sandbox-provisioning
-description: Sandbox API user creation and API key provisioning for testing MTN MoMo SDK. Triggers when setting up test environments, registering sandbox user credentials, or generating sandbox API keys.
+description: MTN MoMo Sandbox API user creation and API key provisioning. Triggers when setting up test environments, registering sandbox user credentials, or generating sandbox API keys.
 ---
 
-# MTN MoMo SDK Sandbox Provisioning Skill
+# MTN MoMo Sandbox Provisioning
 
-Programmatically provisions sandbox API Users and generates API Keys required for authentication in the MTN Mobile Money Sandbox environment.
+Programmatically provision sandbox API Users and generate API Keys required for authentication. The sandbox requires dynamically provisioned credentials before any Collections, Disbursements, or Remittances client can authenticate.
 
-## Core Architecture
-
-- **Dynamic Credentials**: The MTN MoMo Sandbox requires dynamically provisioned API Users and API Keys before Collections, Disbursements, or Remittances clients can authenticate.
-- **Direct Provisioning Client**: Use `SandboxProvisioningClient` with a raw Dio instance containing your `Ocp-Apim-Subscription-Key`.
+Uses `SandboxProvisioningClient` with a raw `Dio` instance (subscription key only, no OAuth2 token needed). See `GEMINI.md` for architecture details.
 
 ## Execution Steps
 
 ### Step 1: Base HTTP Client Setup
-Initialize a `Dio` instance configured with the `Ocp-Apim-Subscription-Key` and base URL.
-- **Completion Criterion**: `Dio` instance created with required subscription key header.
+Initialize a `Dio` instance with the `Ocp-Apim-Subscription-Key` header and sandbox base URL.
+- **Completion Criterion**: `Dio` instance created with the subscription key header configured.
 
-### Step 2: User Reference Generation
-Generate a UUID v4 string to serve as `xReferenceId` for the new sandbox API user.
-- **Completion Criterion**: `userUuid` is a valid UUID v4 string.
+### Step 2: API User Registration
+Generate a UUID v4 for `xReferenceId`, instantiate `SandboxProvisioningClient`, and call `postV10Apiuser`.
+- **Completion Criterion**: call returns without exception (HTTP 201 Created).
 
-### Step 3: API User Registration
-Instantiate `SandboxProvisioningClient` and call `postV10Apiuser`.
-- **Completion Criterion**: HTTP 201 Created response returned without exception.
+### Step 3: Propagation Delay
+Execute a brief `Future.delayed` (2 seconds) to let the sandbox infrastructure propagate the new user record.
+- **Completion Criterion**: delay completes.
 
-### Step 4: Infrastructure Propagation Delay
-Execute a brief delay (`Future.delayed(const Duration(seconds: 2))`).
-- **Completion Criterion**: Delay completes, ensuring sandbox infrastructure propagates the newly created user record.
-
-### Step 5: API Key Generation
-Call `postV10ApiuserApikey(xReferenceId: userUuid)` to obtain the API key.
+### Step 4: API Key Generation
+Call `postV10ApiuserApikey(xReferenceId:)` with the same UUID from Step 2.
 - **Completion Criterion**: `apiKeyResult.apiKey` returns a non-empty string.
 
-### Step 6: SDK Client Instantiation
-Instantiate `MtnMomo` with the provisioned `userUuid` and `apiKey`.
-- **Completion Criterion**: Operational `MtnMomo` instance ready for Collections, Disbursements, or Remittances calls.
+### Step 5: SDK Client Instantiation
+Instantiate `MtnMomo` with the provisioned `userUuid` as `userId` and the generated `apiKey`.
+- **Completion Criterion**: `MtnMomo` instance is ready for Collections, Disbursements, or Remittances calls.
 
 ## Code Reference
 
@@ -49,7 +42,7 @@ Future<MtnMomo> createSandboxClient({
   required String subscriptionKey,
   String baseUrl = 'https://sandbox.momodeveloper.mtn.com',
 }) async {
-  // Step 1: Raw Dio client with subscription key
+  // 1. Raw Dio client with subscription key
   final dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     headers: {
@@ -58,7 +51,7 @@ Future<MtnMomo> createSandboxClient({
     },
   ));
 
-  // Step 2 & 3: Provision Sandbox API User
+  // 2. Provision Sandbox API User
   final provisioner = SandboxProvisioningClient(dio);
   final userUuid = const Uuid().v4();
 
@@ -67,15 +60,15 @@ Future<MtnMomo> createSandboxClient({
     apiUser: const ApiUser(providerCallbackHost: 'example.com'),
   );
 
-  // Step 4: Propagation delay
+  // 3. Propagation delay
   await Future.delayed(const Duration(seconds: 2));
 
-  // Step 5: Generate API Key
+  // 4. Generate API Key
   final apiKeyResult = await provisioner.postV10ApiuserApikey(
     xReferenceId: userUuid,
   );
 
-  // Step 6: Initialize SDK Client
+  // 5. Initialize SDK Client
   return MtnMomo(
     baseUrl: baseUrl,
     subscriptionKey: subscriptionKey,
@@ -86,18 +79,6 @@ Future<MtnMomo> createSandboxClient({
 }
 ```
 
-## Exception Handling
+## Error Handling
 
-Wrap provisioning logic in explicit `MtnMomoException` catch blocks:
-
-```dart
-try {
-  final momoClient = await createSandboxClient(subscriptionKey: 'your-sub-key');
-} on MtnMomoAuthException {
-  // Invalid subscription key provided
-} on MtnMomoNetworkException {
-  // Network connectivity failure during user/key provisioning
-} on MtnMomoException catch (e) {
-  // General provisioning error
-}
-```
+See `skills/_shared/error_handling.md` for the full exception hierarchy, error code table, and catch-flow template.
