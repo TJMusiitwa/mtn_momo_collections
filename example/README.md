@@ -26,6 +26,9 @@ It offers a gorgeous visual interface adhering strictly to MTN's official **Suns
 > [!TIP]
 > **Product Token Isolation Example**: Look at the source code in `lib/main.dart`. The playground initializes separate, dedicated instances of `MtnMomo` (`_collectionsMomo` and `_disbursementsMomo`) to demonstrate the recommended best practice of avoiding token cache overwrites between the different portal product scopes.
 
+The Playground requires Flutter 3.47.8 or newer and Dart 3.13.7 or newer.
+It uses the standalone `material_ui` package for Material components.
+
 To launch the Playground on a simulator or device:
 ```bash
 flutter run

@@ -1,3 +1,11 @@
+## 0.0.5
+
+* Updated dependency constraints to the latest compatible releases, including `dart_mappable` 4.10.0, `dio` 5.11.1, `retrofit` 4.10.0, and the code generation and testing tools. `build_runner` remains on 2.16.2 for compatibility with `dart_mappable_builder`.
+* Updated the minimum Dart SDK to 3.13.7, matching the installed stable toolchain.
+* Migrated the Flutter playground to the standalone `material_ui` 1.8.0 package, refreshed its dependencies and lockfile, and required Flutter 3.47.8 or newer.
+* Regenerated Retrofit clients with the updated generator.
+* Added playground rendering and tab-navigation tests for light and dark themes, and documented the example's SDK requirements.
+
 ## 0.0.4
 
 * Reworked package skills for agent consumption based on writing-for-agents principles:
