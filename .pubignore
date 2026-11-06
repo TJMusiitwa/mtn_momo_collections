@@ -1,0 +1,14 @@
+# Repository and contributor instructions
+AGENTS.md
+GEMINI.md
+momodeveloper.mtn.md
+
+# Development configuration and generated-client source definitions
+analysis_options.yaml
+dartdoc_options.yaml
+swagger_parser.yaml
+*.iml
+schemes/
+
+# Tests
+test/

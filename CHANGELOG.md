@@ -1,3 +1,7 @@
+## 0.0.6
+
+* Added `.pubignore` rules to omit repository-only instructions, development configuration, OpenAPI source schemas, IDE files, and tests from the published package while retaining the package's `skills/` directory.
+
 ## 0.0.5
 
 * Updated dependency constraints to the latest compatible releases, including `dart_mappable` 4.10.0, `dio` 5.11.1, `retrofit` 4.10.0, and the code generation and testing tools. `build_runner` remains on 2.16.2 for compatibility with `dart_mappable_builder`.
